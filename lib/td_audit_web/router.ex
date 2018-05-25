@@ -8,6 +8,6 @@ defmodule TdAuditWeb.Router do
   scope "/api", TdAuditWeb do
     pipe_through :api
     resources "/events", EventController, except: [:new, :edit]
-    post "/audit", AuditController, :create
+    post "/audits", AuditController, :create
   end
 end
