@@ -1,4 +1,4 @@
-defmodule TdAuditQueue do
+defmodule TdAudit.Queue do
   def enqueue(queue, worker, params) do
     Exq.enqueue(Exq, queue, worker, [params])
   end
