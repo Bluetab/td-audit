@@ -41,7 +41,9 @@ defmodule TdAudit.Mixfile do
       {:cowboy, "~> 1.0"},
       {:exq, "~> 0.11.0"},
       {:exq_ui, "~> 0.9.0"},
-      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false}
+      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
+      {:edeliver, "~> 1.5.0"},
+      {:distillery, "~> 1.0.0", warn_missing: false},
     ]
   end
 
