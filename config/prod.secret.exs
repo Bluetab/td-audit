@@ -17,7 +17,8 @@ config :td_audit, TdAudit.Repo,
   username: "postgres",
   password: "postgres",
   database: "td_audit_prod",
-  pool_size: 15
+  hostname: "localhost",
+  pool_size: 10
 
 # Configure Exq
 config :exq,
