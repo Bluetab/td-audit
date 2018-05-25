@@ -1,4 +1,6 @@
 defmodule TdAudit.SendEventWorker do
+  @moduledoc false
+
   alias TdAudit.Audit
 
   def perform(event_params) do

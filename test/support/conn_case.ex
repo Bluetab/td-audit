@@ -14,6 +14,10 @@ defmodule TdAuditWeb.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+  alias TdAudit.Repo
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Phoenix.ConnTest
+  alias TdAuditWeb.Endpoint
 
   using do
     quote do
@@ -22,17 +26,16 @@ defmodule TdAuditWeb.ConnCase do
       import TdAuditWeb.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint TdAuditWeb.Endpoint
+      @endpoint Endpoint
     end
   end
 
-
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(TdAudit.Repo)
+    :ok = Sandbox.checkout(Repo)
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(TdAudit.Repo, {:shared, self()})
+      Sandbox.mode(Repo, {:shared, self()})
     end
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    {:ok, conn: ConnTest.build_conn()}
   end
 
 end

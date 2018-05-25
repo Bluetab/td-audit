@@ -1,7 +1,8 @@
 defmodule TdAudit.Audit.Event do
+  @moduledoc false
+
   use Ecto.Schema
   import Ecto.Changeset
-
 
   schema "events" do
     field :event, :string

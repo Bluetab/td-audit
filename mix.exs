@@ -40,7 +40,8 @@ defmodule TdAudit.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:exq, "~> 0.11.0"},
-      {:exq_ui, "~> 0.9.0"}
+      {:exq_ui, "~> 0.9.0"},
+      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false}
     ]
   end
 
