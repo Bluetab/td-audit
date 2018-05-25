@@ -45,3 +45,5 @@ config :td_audit, TdAudit.Repo,
   database: "td_audit_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :td_audit, queue: TdAuditQueue

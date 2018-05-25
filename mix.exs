@@ -20,7 +20,7 @@ defmodule TdAudit.Mixfile do
   def application do
     [
       mod: {TdAudit.Application, []},
-      extra_applications: [:logger, :runtime_tools, :exq_ui]
+      extra_applications: [:logger, :runtime_tools, :exq, :exq_ui]
     ]
   end
 

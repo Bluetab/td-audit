@@ -8,6 +8,24 @@ defmodule TdAuditWeb.AuditControllerTest do
     test "renders event when data is valid", %{conn: conn} do
       conn = post conn, audit_path(conn, :create), audit: @create_attrs
       assert response(conn, 204)
+      conn = get conn, event_path(conn, :index)
+      event_id =
+        conn
+        |> json_response(200)
+        |> Map.get("data")
+        |> List.first
+        |> Map.get("id")
+
+      conn = get conn, event_path(conn, :show, event_id)
+      assert json_response(conn, 200)["data"] ==
+        %{"event" => "some event",
+          "id" => event_id,
+          "payload" => %{},
+          "resource_id" => 42,
+          "resource_type" => "some resource_type",
+          "service" => "some service",
+          "ts" => "2010-04-17T14:00:00.000000Z",
+          "user_id" => 42}
     end
 
     test "renders errors when data is invalid", %{conn: conn} do

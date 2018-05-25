@@ -17,3 +17,5 @@ config :td_audit, TdAudit.Repo,
   database: "td_audit_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :td_audit, queue: TdAudit.QueueMock
