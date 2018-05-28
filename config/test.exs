@@ -19,3 +19,8 @@ config :td_audit, TdAudit.Repo,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :td_audit, queue: TdAudit.QueueMock
+
+config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.MockTdAuthService,
+  auth_host: "localhost",
+  auth_port: "4001",
+  auth_domain: ""

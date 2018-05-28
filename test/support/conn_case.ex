@@ -18,6 +18,9 @@ defmodule TdAuditWeb.ConnCase do
   alias Ecto.Adapters.SQL.Sandbox
   alias Phoenix.ConnTest
   alias TdAuditWeb.Endpoint
+  import TdAuditWeb.Authentication, only: :functions
+
+  @admin_user_name "app-admin"
 
   using do
     quote do
@@ -36,6 +39,17 @@ defmodule TdAuditWeb.ConnCase do
       Sandbox.mode(Repo, {:shared, self()})
     end
     {:ok, conn: ConnTest.build_conn()}
+
+    cond do
+      tags[:admin_authenticated] ->
+        user = find_or_create_user(@admin_user_name, is_admin: true)
+        create_user_auth_conn(user)
+      tags[:authenticated_user] ->
+        user = find_or_create_user(tags[:authenticated_user], is_admin: true)
+        create_user_auth_conn(user)
+       true ->
+         {:ok, conn: ConnTest.build_conn()}
+    end
   end
 
 end

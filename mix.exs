@@ -20,7 +20,7 @@ defmodule TdAudit.Mixfile do
   def application do
     [
       mod: {TdAudit.Application, []},
-      extra_applications: [:logger, :runtime_tools, :exq, :exq_ui]
+      extra_applications: [:logger, :runtime_tools, :exq_ui]
     ]
   end
 
@@ -44,6 +44,8 @@ defmodule TdAudit.Mixfile do
       {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
       {:edeliver, "~> 1.5.0"},
       {:distillery, "~> 1.0.0", warn_missing: false},
+      {:guardian, "~> 1.0"},
+      {:httpoison, "~> 1.0"},
     ]
   end
 

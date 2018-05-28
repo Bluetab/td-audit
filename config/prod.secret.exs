@@ -39,3 +39,14 @@ config :exq_ui,
   server: true
 
 config :td_audit, queue: TdAudit.Queue
+
+config :td_audit, TdAudit.Auth.Guardian,
+  allowed_algos: ["HS512"], # optional
+  issuer: "tdauth",
+  ttl: { 1, :hours },
+  secret_key: "SuperSecretTruedat"
+
+config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
+  auth_host: "localhost",
+  auth_port: "4001",
+  auth_domain: ""

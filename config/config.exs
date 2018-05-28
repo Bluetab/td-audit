@@ -40,6 +40,17 @@ config :exq_ui,
   web_namespace: "",
   server: true
 
+config :td_audit, TdAudit.Auth.Guardian,
+  allowed_algos: ["HS512"], # optional
+  issuer: "tdauth",
+  ttl: { 1, :hours },
+  secret_key: "SuperSecretTruedat"
+
+config :td_audit, :auth_service,
+protocol: "http",
+users_path: "/api/users/",
+sessions_path: "/api/sessions/"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

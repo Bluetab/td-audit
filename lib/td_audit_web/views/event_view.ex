@@ -18,6 +18,7 @@ defmodule TdAuditWeb.EventView do
       event: event.event,
       payload: event.payload,
       user_id: event.user_id,
+      user_name: event.user_name,
       ts: event.ts}
   end
 end
