@@ -21,6 +21,18 @@ defmodule TdAudit.Audit do
     Repo.all(Event)
   end
 
+  def filter(params) do
+    dynamic = true
+    Enum.reduce(Map.keys(params), dynamic, fn (x, acc) ->
+       dynamic([p], field(p, ^String.to_atom(x)) == ^params[x] and ^acc)
+    end)
+  end
+  def list_events_by_filter(params) do
+    dynamic = filter(params)
+    Repo.all(from p in Event,
+        where: ^dynamic
+      )
+  end
   @doc """
   Gets a single event.
 

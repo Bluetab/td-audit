@@ -30,7 +30,7 @@ defmodule TdAuditWeb.AuditControllerTest do
         |> Map.get("data")
         |> List.first
         |> Map.get("id")
-
+      
       conn = recycle_and_put_headers(conn)
 
       conn = get conn, event_path(conn, :show, event_id)

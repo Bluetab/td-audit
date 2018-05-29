@@ -7,6 +7,8 @@ defmodule TdAudit.AuditTest do
     alias TdAudit.Audit.Event
 
     @valid_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00.000000Z", user_id: 42, user_name: "some name"}
+    @valid_attrs_new_type_same_id %{event: "some event with new type", payload: %{}, resource_id: 43, resource_type: "some new resource_type", service: "some updated service", ts: "2011-05-18 15:01:01.000000Z", user_id: 43, user_name: "some updated name"}
+    @valid_attrs_new_type_diff_id %{event: "some event with new type", payload: %{}, resource_id: 42, resource_type: "some new resource_type", service: "some service", ts: "2010-04-17 14:00:00.000000Z", user_id: 42, user_name: "some name"}
     @update_attrs %{event: "some updated event", payload: %{}, resource_id: 43, resource_type: "some updated resource_type", service: "some updated service", ts: "2011-05-18 15:01:01.000000Z", user_id: 43, user_name: "some updated name"}
     @invalid_attrs %{event: nil, payload: nil, resource_id: nil, resource_type: nil, service: nil, ts: nil, user_id: nil, user_name: nil}
 
@@ -15,13 +17,32 @@ defmodule TdAudit.AuditTest do
         attrs
         |> Enum.into(@valid_attrs)
         |> Audit.create_event()
-
       event
     end
 
     test "list_events/0 returns all events" do
       event = event_fixture()
       assert Audit.list_events() == [event]
+    end
+
+    test "list_events/1 returns all events filtered by resource_id" do
+      event_1 = event_fixture(@valid_attrs)
+      event_fixture(@update_attrs)
+      assert Audit.list_events_by_filter(%{"resource_id" => 42}) == [event_1]
+    end
+
+    test "list_events/1 returns all events filtered by resource_type" do
+      event_fixture(@valid_attrs)
+      event_2 = event_fixture(@update_attrs)
+      assert Audit.list_events_by_filter(%{"resource_type" => "some updated resource_type"}) == [event_2]
+    end
+
+    test "list_events/1 returns all events filtered by resource_type and resource_id" do
+      event_fixture(@update_attrs)
+      event_fixture(@valid_attrs_new_type_diff_id)
+      event_3 = event_fixture(@valid_attrs_new_type_same_id)
+      assert Audit.list_events_by_filter(%{"resource_id" => 43,
+        "resource_type" => "some new resource_type"}) == [event_3]
     end
 
     test "get_event!/1 returns the event with given id" do

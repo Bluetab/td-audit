@@ -6,8 +6,13 @@ defmodule TdAuditWeb.EventController do
 
   action_fallback TdAuditWeb.FallbackController
 
-  def index(conn, _params) do
-    events = Audit.list_events()
+  def index(conn, params) do
+    events =
+      case Map.has_key?(params, "resource_id")
+        or Map.has_key?(params, "resource_type") do
+        true -> Audit.list_events_by_filter(params)
+        false -> Audit.list_events()
+      end
     render(conn, "index.json", events: events)
   end
 
