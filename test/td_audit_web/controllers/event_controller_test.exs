@@ -33,6 +33,12 @@ defmodule TdAuditWeb.EventControllerTest do
       conn = get conn, event_path(conn, :index)
       assert json_response(conn, 200)["data"] == []
     end
+
+    @tag authenticated_user: @admin_user_name
+    test "lists all events filtered", %{conn: conn} do
+      conn = get conn, event_path(conn, :index, "resource_id": 42, "resource_type": "some resource_type")
+      assert json_response(conn, 200)["data"] == []
+    end
   end
 
   describe "create event" do

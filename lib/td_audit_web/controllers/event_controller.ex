@@ -4,14 +4,15 @@ defmodule TdAuditWeb.EventController do
   alias TdAudit.Audit
   alias TdAudit.Audit.Event
 
+  @filters_availables ["resource_id", "resource_type"]
+
   action_fallback TdAuditWeb.FallbackController
 
   def index(conn, params) do
     events =
-      case Map.has_key?(params, "resource_id")
-        or Map.has_key?(params, "resource_type") do
-        true -> Audit.list_events_by_filter(params)
-        false -> Audit.list_events()
+      case Map.take(params, @filters_availables) do
+        empty when empty == %{} -> Audit.list_events()
+        params_filtered -> Audit.list_events_by_filter(params_filtered)
       end
     render(conn, "index.json", events: events)
   end
