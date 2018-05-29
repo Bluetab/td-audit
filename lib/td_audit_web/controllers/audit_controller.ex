@@ -1,5 +1,6 @@
 defmodule TdAuditWeb.AuditController do
   use TdAuditWeb, :controller
+  require Logger
 
   alias TdAudit.Audit.Event
 
@@ -13,6 +14,7 @@ defmodule TdAuditWeb.AuditController do
         conn
         |> enqueue(audit_params)
       false ->
+        Logger.info "audit controller invalid params: #{inspect(audit_params)}"
         conn
         |> put_status(:unprocessable_entity)
         |> send_resp(:unprocessable_entity, Poison.encode!(%{"errors": "Invalid params"}))
@@ -26,6 +28,7 @@ defmodule TdAuditWeb.AuditController do
         |> put_status(:created)
         |> send_resp(:created, Poison.encode!(%{"job_id": jid}))
       {:error, error} ->
+        Logger.info "audit controller queue fails: #{inspect(audit_params)}"
         conn
         |> put_status(:unprocessable_entity)
         |> send_resp(:unprocessable_entity, Poison.encode!(%{"errors": error}))
