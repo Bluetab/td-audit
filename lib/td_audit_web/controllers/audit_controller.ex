@@ -14,7 +14,8 @@ defmodule TdAuditWeb.AuditController do
         conn
         |> enqueue(audit_params)
       false ->
-        Logger.info "audit controller invalid params: #{inspect(audit_params)}"
+        Logger.info  "audit controller invalid params: #{inspect(audit_params)}"
+        Logger.info  "autdit controller changeset: #{inspect(changeset)}" 
         conn
         |> put_status(:unprocessable_entity)
         |> send_resp(:unprocessable_entity, Poison.encode!(%{"errors": "Invalid params"}))
