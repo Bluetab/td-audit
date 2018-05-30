@@ -47,7 +47,8 @@ defmodule TdAudit.Mixfile do
       {:distillery, "~> 1.0.0", warn_missing: false},
       {:guardian, "~> 1.0"},
       {:httpoison, "~> 1.0"},
-      {:phoenix_swagger, "~> 0.7.0"}
+      {:phoenix_swagger, "~> 0.7.0"},
+      {:ex_json_schema, "~> 0.5"}
     ]
   end
 

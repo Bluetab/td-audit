@@ -1,5 +1,6 @@
 defmodule TdAuditWeb.EventControllerTest do
   use TdAuditWeb.ConnCase
+  use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
   import TdAuditWeb.Authentication, only: :functions
 
@@ -29,27 +30,31 @@ defmodule TdAuditWeb.EventControllerTest do
 
   describe "index" do
     @tag authenticated_user: @admin_user_name
-    test "lists all events", %{conn: conn} do
+    test "lists all events", %{conn: conn, swagger_schema: schema} do
       conn = get conn, event_path(conn, :index)
+      validate_resp_schema(conn, schema, "EventsResponse")
       assert json_response(conn, 200)["data"] == []
     end
 
     @tag authenticated_user: @admin_user_name
-    test "lists all events filtered", %{conn: conn} do
+    test "lists all events filtered", %{conn: conn, swagger_schema: schema} do
       conn = get conn, event_path(conn, :index, "resource_id": 42, "resource_type": "some resource_type")
+      validate_resp_schema(conn, schema, "EventsResponse")
       assert json_response(conn, 200)["data"] == []
     end
   end
 
   describe "create event" do
     @tag authenticated_user: @admin_user_name
-    test "renders event when data is valid", %{conn: conn} do
+    test "renders event when data is valid", %{conn: conn, swagger_schema: schema} do
       conn = post conn, event_path(conn, :create), event: @create_attrs
+      validate_resp_schema(conn, schema, "EventResponse")
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle_and_put_headers(conn)
 
       conn = get conn, event_path(conn, :show, id)
+      validate_resp_schema(conn, schema, "EventResponse")
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
         "event" => "some event",
@@ -73,13 +78,15 @@ defmodule TdAuditWeb.EventControllerTest do
     setup [:create_event]
 
     @tag authenticated_user: @admin_user_name
-    test "renders event when data is valid", %{conn: conn, event: %Event{id: id} = event} do
+    test "renders event when data is valid", %{conn: conn, event: %Event{id: id} = event, swagger_schema: schema} do
       conn = put conn, event_path(conn, :update, event), event: @update_attrs
+      validate_resp_schema(conn, schema, "EventResponse")
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = recycle_and_put_headers(conn)
 
       conn = get conn, event_path(conn, :show, id)
+      validate_resp_schema(conn, schema, "EventResponse")
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
         "event" => "some updated event",
@@ -103,7 +110,7 @@ defmodule TdAuditWeb.EventControllerTest do
     setup [:create_event]
 
     @tag authenticated_user: @admin_user_name
-    test "deletes chosen event", %{conn: conn, event: event} do
+    test "deletes chosen event", %{conn: conn, event: event, swagger_schema: schema} do
       conn = delete conn, event_path(conn, :delete, event)
       assert response(conn, 204)
 
@@ -111,6 +118,7 @@ defmodule TdAuditWeb.EventControllerTest do
 
       assert_error_sent 404, fn ->
         get conn, event_path(conn, :show, event)
+        validate_resp_schema(conn, schema, "EventResponse")
       end
     end
   end
