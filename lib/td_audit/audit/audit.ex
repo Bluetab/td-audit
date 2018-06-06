@@ -31,12 +31,13 @@ defmodule TdAudit.Audit do
        end
     end)
   end
-  
+
   def list_events_by_filter(params) do
     fields = Event.__schema__(:fields)
     dynamic = filter(params, fields)
     Repo.all(from p in Event,
-        where: ^dynamic
+        where: ^dynamic,
+        order_by: [desc: :ts]
       )
   end
   @doc """
