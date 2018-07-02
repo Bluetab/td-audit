@@ -20,6 +20,13 @@ config :td_audit, TdAudit.Repo,
   hostname: "localhost",
   pool_size: 10
 
+#Configure elasticsearch
+config :td_audit, :elasticsearch,
+  search_service: TdAudit.Search,
+  es_host: "localhost",
+  es_port: 9200,
+  type_name: "doc"
+
 # Configure Exq
 config :exq,
   host: "127.0.0.1",

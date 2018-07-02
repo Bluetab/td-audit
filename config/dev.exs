@@ -51,5 +51,10 @@ config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthS
   auth_port: "4001",
   auth_domain: ""
 
+config :td_audit, :elasticsearch,
+  search_service: TdAudit.Search,
+  es_host: "localhost",
+  es_port: 9200,
+  type_name: "doc"
 
 config :td_audit, queue: TdAudit.Queue
