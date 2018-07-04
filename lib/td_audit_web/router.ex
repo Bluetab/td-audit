@@ -18,6 +18,8 @@ defmodule TdAuditWeb.Router do
 
   scope "/api", TdAuditWeb do
     pipe_through :api
+    get  "/ping", PingController, :ping
+    post "/echo", EchoController, :echo
     post "/audits", AuditController, :create
   end
 
