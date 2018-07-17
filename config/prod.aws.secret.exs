@@ -30,7 +30,7 @@ config :td_audit, :elasticsearch,
 # Configure Exq
 config :exq,
   url: "${REDIS_URL}",
-  namespace: "${REDIS_NAMESPACE}"
+  namespace: "${REDIS_NAMESPACE}",
   concurrency: 1000,
   queues: ["timeline"],
   max_retries: 25,
