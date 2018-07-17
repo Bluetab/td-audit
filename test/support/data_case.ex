@@ -14,9 +14,9 @@ defmodule TdAudit.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
   alias Ecto.Changeset
   alias TdAudit.Repo
-  alias Ecto.Adapters.SQL.Sandbox
 
   using do
     quote do

@@ -3,8 +3,8 @@ defmodule TdAudit.Application do
 
   use Application
 
-  alias TdAuditWeb.Endpoint
   alias TdAudit.Repo
+  alias TdAuditWeb.Endpoint
 
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications

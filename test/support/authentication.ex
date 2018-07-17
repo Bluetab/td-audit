@@ -4,8 +4,8 @@ defmodule TdAuditWeb.Authentication do
   add auth headers to requests
   """
   alias Phoenix.ConnTest
-  alias TdAudit.Auth.Guardian
   alias TdAudit.Accounts.User
+  alias TdAudit.Auth.Guardian
   import Plug.Conn
 
   @td_auth_api Application.get_env(:td_audit, :auth_service)[:api_service]

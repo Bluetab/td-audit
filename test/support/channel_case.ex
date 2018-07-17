@@ -15,8 +15,8 @@ defmodule TdAuditWeb.ChannelCase do
 
   use ExUnit.CaseTemplate
 
-  alias TdAudit.Repo
   alias Ecto.Adapters.SQL.Sandbox
+  alias TdAudit.Repo
 
   using do
     quote do

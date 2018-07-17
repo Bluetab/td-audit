@@ -5,8 +5,8 @@ defmodule TdAudit.Mixfile do
   def project do
     [
       app: :td_audit,
-      version: "0.0.1",
-      elixir: "~> 1.4",
+      version: "0.0.2",
+      elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       start_permanent: Mix.env == :prod,
@@ -34,19 +34,19 @@ defmodule TdAudit.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.3.0"},
-      {:phoenix_pubsub, "~> 1.0"},
+      {:phoenix, "~> 1.3.3"},
+      {:phoenix_pubsub, "~> 1.0.2"},
       {:phoenix_ecto, "~> 3.2"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:exq, "~> 0.11.0"},
       {:exq_ui, "~> 0.9.0"},
-      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
+      {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
       {:edeliver, "~> 1.5.0"},
       {:distillery, "~> 1.0.0", warn_missing: false},
-      {:guardian, "~> 1.0"},
-      {:httpoison, "~> 1.0"},
+      {:guardian, "~> 1.1.0"},
+      {:httpoison, "~> 1.2.0"},
       {:phoenix_swagger, "~> 0.7.0"},
       {:ex_json_schema, "~> 0.5"}
     ]
