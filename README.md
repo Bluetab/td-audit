@@ -8,7 +8,7 @@ To start your Phoenix server:
 
 Now you can visit [`localhost:4007`](http://localhost:4007) from your browser.
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+Ready to run in production?  Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
 
 ## Learn more
 
