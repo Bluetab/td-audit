@@ -14,13 +14,13 @@ alias TdAudit.BusinessConcept.Search
     update_business_concept_versions(payload, ["business_concept_id"], retrieve_script_map(field).decrement_int_field)
   end
 
-  def update_search_on_event(%{"event" => "add_concept_field", "payload" => _, "resource_id" => resource_id}) do
+  def update_search_on_event(%{"event" => "add_resource_field", "payload" => _, "resource_id" => resource_id}) do
     # Field to increment in elastic bc
     field = "link_count"
     Search.update_business_concept_by_script(%{business_concept_id: resource_id}, retrieve_script_map(field).increment_int_field)
   end
 
-  def update_search_on_event(%{"event" => "delete_concept_field", "payload" => _, "resource_id" => resource_id}) do
+  def update_search_on_event(%{"event" => "delete_resource_field", "payload" => _, "resource_id" => resource_id}) do
     # Field to decrement in elastic bc
     field = "link_count"
     Search.update_business_concept_by_script(%{business_concept_id: resource_id}, retrieve_script_map(field).decrement_int_field)
