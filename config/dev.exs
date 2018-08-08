@@ -58,3 +58,5 @@ config :td_audit, :elasticsearch,
   type_name: "doc"
 
 config :td_audit, queue: TdAudit.Queue
+
+config :td_perms, redis_uri: "redis://localhost"

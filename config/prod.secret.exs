@@ -57,3 +57,5 @@ config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthS
   auth_host: "localhost",
   auth_port: "4001",
   auth_domain: ""
+
+config :td_perms, redis_uri: "redis://localhost"

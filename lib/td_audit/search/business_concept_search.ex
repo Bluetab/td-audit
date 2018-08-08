@@ -50,7 +50,6 @@ defmodule TdAudit.BusinessConcept.Search do
     %{simple_query_string: %{query: query}}
     |> bool_query
   end
-
   defp create_query(_params) do
     %{match_all: %{}}
     |> bool_query

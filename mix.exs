@@ -48,7 +48,8 @@ defmodule TdAudit.Mixfile do
       {:guardian, "~> 1.1.0"},
       {:httpoison, "~> 1.2.0"},
       {:phoenix_swagger, "~> 0.7.0"},
-      {:ex_json_schema, "~> 0.5"}
+      {:ex_json_schema, "~> 0.5"},
+      {:td_perms, git: "https://github.com/Bluetab/td-perms.git", tag: "v0.3.3"}
     ]
   end
 
