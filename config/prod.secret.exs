@@ -14,24 +14,23 @@ config :td_audit, TdAuditWeb.Endpoint,
 # Configure your database
 config :td_audit, TdAudit.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "td_audit_prod",
-  hostname: "localhost",
+  username: "${DB_USER}",
+  password: "${DB_PASSWORD}",
+  database: "${DB_NAME}",
+  hostname: "${DB_HOST}",
   pool_size: 10
 
 #Configure elasticsearch
 config :td_audit, :elasticsearch,
   search_service: TdAudit.Search,
-  es_host: "localhost",
-  es_port: 9200,
+  es_host: "${ES_HOST}",
+  es_port: "${ES_PORT}",
   type_name: "doc"
 
 # Configure Exq
 config :exq,
-  host: "127.0.0.1",
-  port: 6379,
-  namespace: "exq",
+  url: "${REDIS_URL}",
+  namespace: "${REDIS_NAMESPACE}",
   concurrency: 1000,
   queues: ["timeline"],
   max_retries: 25,
@@ -51,11 +50,11 @@ config :td_audit, TdAudit.Auth.Guardian,
   allowed_algos: ["HS512"], # optional
   issuer: "tdauth",
   ttl: { 1, :hours },
-  secret_key: "SuperSecretTruedat"
+  secret_key: "${GUARDIAN_SECRET_KEY}"
 
 config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
-  auth_host: "localhost",
-  auth_port: "4001",
+  auth_host: "${API_AUTH_HOST}",
+  auth_port: "${API_AUTH_PORT}",
   auth_domain: ""
 
-config :td_perms, redis_uri: "redis://localhost"
+  config :td_perms, redis_uri: "${REDIS_URL}"
