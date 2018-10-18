@@ -4,9 +4,9 @@ defmodule TdAudit.Subscriptions do
   """
 
   import Ecto.Query, warn: false
-  alias TdAudit.Subscriptions.Subscription
   alias TdAudit.Repo
   alias TdAudit.QuerySupport
+  alias TdAudit.Subscriptions.Subscription
 
   @doc """
   Returns the list of subscriptions.
