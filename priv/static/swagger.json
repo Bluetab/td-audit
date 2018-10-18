@@ -16,6 +16,58 @@
     "http"
   ],
   "paths": {
+    "/subscriptions": {
+      "post": {
+        "tags": [
+          "Subscription"
+        ],
+        "summary": "",
+        "responses": {
+          "400": {
+            "description": "Client Error"
+          },
+          "201": {
+            "schema": {
+              "$ref": "#/definitions/SubscriptionResponse"
+            },
+            "description": "OK"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/SubscriptionCreate"
+            },
+            "required": false,
+            "name": "subscription",
+            "in": "body",
+            "description": "Subscription create attrs"
+          }
+        ],
+        "operationId": "TdAuditWeb.SubscriptionController.create",
+        "description": "Creates a Subscription"
+      },
+      "get": {
+        "tags": [
+          "Subscription"
+        ],
+        "summary": "",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/SubscriptionsResponse"
+            },
+            "description": "OK"
+          }
+        },
+        "parameters": [],
+        "operationId": "TdAuditWeb.SubscriptionController.index",
+        "description": "List of subscriptions"
+      }
+    },
     "/events/{id}": {
       "put": {
         "tags": [
@@ -176,6 +228,102 @@
   },
   "host": "localhost:4007",
   "definitions": {
+    "SubscriptionsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Subscriptions"
+        }
+      }
+    },
+    "Subscriptions": {
+      "type": "array",
+      "title": "Subscriptions",
+      "items": {
+        "$ref": "#/definitions/Subscription"
+      },
+      "description": "A collection of subscriptions"
+    },
+    "SubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Subscription"
+        }
+      }
+    },
+    "SubscriptionCreate": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "object",
+          "required": [
+            "user_email",
+            "resource_type",
+            "resource_id",
+            "event",
+            "id"
+          ],
+          "properties": {
+            "user_email": {
+              "type": "string",
+              "description": "Email of the subscriptor"
+            },
+            "resource_type": {
+              "type": "string",
+              "description": "Type of the resource triggering the event"
+            },
+            "resource_id": {
+              "type": "integer",
+              "description": "ID of the resource triggering the event"
+            },
+            "periodicity": {
+              "type": "string",
+              "description": "Periodicity of the subscription"
+            },
+            "id": {
+              "type": "integer",
+              "description": "Unique identifier"
+            },
+            "event": {
+              "type": "string",
+              "description": "Event to subscribe"
+            }
+          }
+        }
+      }
+    },
+    "Subscription": {
+      "type": "object",
+      "title": "Subscription",
+      "properties": {
+        "user_email": {
+          "type": "string",
+          "description": "Email of the subscriptor"
+        },
+        "resource_type": {
+          "type": "string",
+          "description": "Type of the resource triggering the event"
+        },
+        "resource_id": {
+          "type": "integer",
+          "description": "ID of the resource triggering the event"
+        },
+        "periodicity": {
+          "type": "string",
+          "description": "Periodicity of the subscription"
+        },
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier"
+        },
+        "event": {
+          "type": "string",
+          "description": "Event to subscribe"
+        }
+      },
+      "description": "A subscription of an user to a notification"
+    },
     "EventsResponse": {
       "type": "object",
       "properties": {

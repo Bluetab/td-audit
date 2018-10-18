@@ -78,7 +78,67 @@ defmodule TdAuditWeb.SwaggerDefinitions do
         properties do
           data Schema.ref(:Events)
         end
+      end
+    }
+  end
+
+  def subscription_swagger_definitions do
+    %{
+      SubscriptionsResponse: swagger_schema do
+        properties do
+          data Schema.ref(:Subscriptions)
+        end
       end,
+      Subscriptions: swagger_schema do
+        title "Subscriptions"
+        description "A collection of subscriptions"
+        type :array
+        items Schema.ref(:Subscription)
+      end,
+      Subscription: swagger_schema do
+        title "Subscription"
+        description "A subscription of an user to a notification"
+        properties do
+          id :integer, "Unique identifier"
+          event :string, "Event to subscribe"
+          resource_id :integer, "ID of the resource triggering the event"
+          resource_type :string, "Type of the resource triggering the event"
+          user_email :string, "Email of the subscriptor"
+          periodicity :string, "Periodicity of the subscription"
+        end
+      end,
+      SubscriptionCreate: swagger_schema do
+        properties do
+          subscription (Schema.new do
+            properties do
+              id :integer, "Unique identifier", required: true
+              event :string, "Event to subscribe", required: true
+              resource_id :integer, "ID of the resource triggering the event", required: true
+              resource_type :string, "Type of the resource triggering the event", required: true
+              user_email :string, "Email of the subscriptor", required: true
+              periodicity :string, "Periodicity of the subscription"
+            end
+          end)
+        end
+      end,
+      SubscriptionResponse: swagger_schema do
+        properties do
+          data Schema.ref(:Subscription)
+        end
+      end,
+      SubscriptionUpdate: swagger_schema do
+        properties do
+          subscription (Schema.new do
+            properties do
+              event :string, "Event to subscribe", required: true
+              resource_id :integer, "ID of the resource triggering the event", required: true
+              resource_type :string, "Type of the resource triggering the event", required: true
+              user_email :string, "Email of the subscriptor", required: true
+              periodicity :string, "Periodicity of the subscription"
+            end
+          end)
+      end
+    end
     }
   end
 end
