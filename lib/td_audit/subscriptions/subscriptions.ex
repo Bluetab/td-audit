@@ -34,8 +34,7 @@ defmodule TdAudit.Subscriptions do
     fields = Subscription.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
     Repo.all(from p in Subscription,
-        where: ^dynamic,
-        order_by: [desc: :ts]
+        where: ^dynamic
       )
   end
 
