@@ -5,8 +5,8 @@ defmodule TdAudit.Audit do
 
   import Ecto.Query, warn: false
   alias TdAudit.Audit.Event
-  alias TdAudit.Repo
   alias TdAudit.QuerySupport
+  alias TdAudit.Repo
 
   @doc """
   Returns the list of events.
