@@ -4,9 +4,9 @@ defmodule TdAudit.Audit do
   """
 
   import Ecto.Query, warn: false
-  alias TdAudit.Repo
-
   alias TdAudit.Audit.Event
+  alias TdAudit.Repo
+  alias TdAudit.QuerySupport
 
   @doc """
   Returns the list of events.
@@ -21,20 +21,9 @@ defmodule TdAudit.Audit do
     Repo.all(Event)
   end
 
-  def filter(params, fields) do
-    dynamic = true
-    Enum.reduce(Map.keys(params), dynamic, fn (x, acc) ->
-       key_as_atom = String.to_atom(x)
-       case Enum.member?(fields, key_as_atom) do
-         true -> dynamic([p], field(p, ^key_as_atom) == ^params[x] and ^acc)
-         false -> acc
-       end
-    end)
-  end
-
   def list_events_by_filter(params) do
     fields = Event.__schema__(:fields)
-    dynamic = filter(params, fields)
+    dynamic = QuerySupport.filter(params, fields)
     Repo.all(from p in Event,
         where: ^dynamic,
         order_by: [desc: :ts]
