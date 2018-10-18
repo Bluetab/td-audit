@@ -3,17 +3,17 @@ defmodule TdAudit.CommonSearch do
 alias TdAudit.BusinessConcept.Search
 alias TdPerms.BusinessConceptCache
 
-  def update_search_on_event(%{"event" => "create_quality_control", "payload" => payload, "resource_id" => _}) do
+  def update_search_on_event(%{"event" => "create_rule", "payload" => payload, "resource_id" => _}) do
     # Field to increment in elastic bc
-    field = "q_rule_count"
+    field = "rule_count"
     resource_id = Map.get(payload, "business_concept_id")
     BusinessConceptCache.increment(resource_id, field)
     Search.update_business_concept_by_script(%{business_concept_id: resource_id}, retrieve_script_map(field).increment_int_field)
   end
 
-  def update_search_on_event(%{"event" => "delete_quality_control", "payload" => payload, "resource_id" => _}) do
+  def update_search_on_event(%{"event" => "delete_rule", "payload" => payload, "resource_id" => _}) do
     # Field to decrement in elastic bc
-    field = "q_rule_count"
+    field = "rule_count"
     resource_id = Map.get(payload, "business_concept_id")
     BusinessConceptCache.decrement(resource_id, field)
     Search.update_business_concept_by_script(%{business_concept_id: resource_id}, retrieve_script_map(field).decrement_int_field)
