@@ -20,12 +20,12 @@ defmodule TdAudit.SubscriptionsTest do
       subscription
     end
 
-    test "list_subscriptions/0 returns all events" do
+    test "list_subscriptions/0 returns all subscriptions" do
       subscription = subscription_fixture()
       assert Subscriptions.list_subscriptions() == [subscription]
     end
 
-    test "list_subscriptions/1 returns all events filtered by resource_id" do
+    test "list_subscriptions/1 returns all subscriptions filtered by resource_id" do
       target_resource_id = 44
       subscription_fixture()
       subscription = subscription_fixture(%{resource_id: target_resource_id})
