@@ -1,4 +1,7 @@
 defmodule TdAuditWeb.EventControllerTest do
+  @moduledoc """
+  Event testing module
+  """
   use TdAuditWeb.ConnCase
   use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
