@@ -1,4 +1,7 @@
 defmodule TdAudit.AuditTest do
+  @moduledoc """
+  Audit testing module
+  """
   use TdAudit.DataCase
 
   alias TdAudit.Audit
@@ -29,6 +32,14 @@ defmodule TdAudit.AuditTest do
       event_1 = event_fixture(@valid_attrs)
       event_fixture(@update_attrs)
       assert Audit.list_events_by_filter(%{"resource_id" => 42}) == [event_1]
+    end
+
+    test "list_events/1 returns all events filtered by a payload attribute" do
+      event_fixture()
+      event_1 = event_fixture(%{payload: %{"subscriber" => "mymail@foo.com"}})
+      event_2 = event_fixture(%{payload: %{"subscriber" => "mymail@foo.com"}})
+      event_fixture(%{payload: %{"subscriber" => "notmymail@foo.com"}})
+      assert Audit.list_events_by_filter(%{"payload": %{"subscriber": "mymail@foo.com"}}) == [event_1, event_2]
     end
 
     test "list_events/1 returns all events filtered by resource_type" do
