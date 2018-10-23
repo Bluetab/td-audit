@@ -21,18 +21,18 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
     :ok
   end
 
-  defp process_event_fixture() do
+  defp process_event_fixture do
     create_users_in_cache()
     create_list_of_events_for_process()
   end
 
-  defp create_users_in_cache() do
+  defp create_users_in_cache do
     @user_list
     |> Enum.map(&Map.take(&1, ["id", "email"]))
     |> Enum.map(&UserCacheMock.put_user_in_cache(&1))
   end
 
-  defp create_list_of_events_for_process() do
+  defp create_list_of_events_for_process do
     user_1 = @user_1 |> Map.take(["id", "user_name"])
     user_2 = @user_2 |> Map.take(["id", "user_name"])
     user_3 = @user_3 |> Map.take(["id", "user_name"])
