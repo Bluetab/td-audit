@@ -118,4 +118,20 @@ defmodule TdAudit.Subscriptions do
   def change_subscription(%Subscription{} = subscription) do
     Subscription.changeset(subscription, %{})
   end
+
+  @doc """
+  Deletes a group of subscriptions filtered by a group of params.
+
+  ## Examples
+
+      iex> delete_all_subscriptions(params)
+
+  """
+  def delete_all_subscriptions(params) do
+    fields = Subscription.__schema__(:fields)
+    dynamic = QuerySupport.filter(params, fields)
+
+    query = from(p in Subscription, where: ^dynamic)
+    query |> Repo.delete_all()
+  end
 end
