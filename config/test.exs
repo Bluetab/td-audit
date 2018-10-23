@@ -31,4 +31,6 @@ config :td_audit, :elasticsearch,
   es_port: 9200,
   type_name: "doc"
 
+config :td_audit, user_cache: TdPerms.UserCacheMock
+
 config :td_perms, redis_uri: "redis://localhost"
