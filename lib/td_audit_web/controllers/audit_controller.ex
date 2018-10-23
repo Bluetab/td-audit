@@ -3,7 +3,6 @@ defmodule TdAuditWeb.AuditController do
   require Logger
 
   alias TdAudit.Audit.Event
-  alias TdAudit.CommonSearch
 
   @td_queue Application.get_env(:td_audit, :queue)
 
@@ -25,7 +24,6 @@ defmodule TdAuditWeb.AuditController do
   defp enqueue(conn, audit_params) do
     case @td_queue.enqueue("timeline", TdAudit.SendEventWorker, audit_params) do
       {:ok, jid} ->
-        CommonSearch.update_search_on_event(audit_params)
         conn
         |> put_status(:created)
         |> send_resp(:created, Poison.encode!(%{"job_id": jid}))
