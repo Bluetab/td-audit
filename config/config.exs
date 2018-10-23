@@ -51,12 +51,18 @@ config :td_audit, :auth_service,
   users_path: "/api/users/",
   sessions_path: "/api/sessions/"
 
+config :td_audit, custom_events: [
+  %{name: "create_concept_draft", event_subscribers: ["data_owner"]}
+]
+
 config :td_audit, :phoenix_swagger,
        swagger_files: %{
          "priv/static/swagger.json" => [router: TdAuditWeb.Router]
        }
 
 config :td_audit, permission_resolver: TdPerms.Permissions
+
+config :td_audit, user_cache: TdPerms.UserCache
 
 config :td_perms, permissions: [
   :is_admin,
