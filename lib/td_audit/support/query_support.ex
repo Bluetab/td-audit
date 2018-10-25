@@ -16,6 +16,10 @@ defmodule TdAudit.QuerySupport do
     end)
   end
 
+  defp filter_by_type(:ts = atom_key, %{value: value, filter: :gt}, acc) do
+    dynamic([p], field(p, ^atom_key) > ^value and ^acc)
+  end
+
   defp filter_by_type(atom_key, param_value, acc) when is_map(param_value) do
     dynamic([p], fragment("(?) @> ?::jsonb", field(p, ^atom_key), ^param_value) and ^acc)
   end
