@@ -105,6 +105,7 @@ defmodule TdAuditWeb.SwaggerDefinitions do
           resource_type :string, "Type of the resource triggering the event"
           user_email :string, "Email of the subscriptor"
           periodicity :string, "Periodicity of the subscription"
+          last_consumed_event :string, "Timestamps"
         end
       end,
       SubscriptionCreate: swagger_schema do

@@ -17,7 +17,8 @@ defmodule TdAuditWeb.SubscriptionView do
       resource_type: subscription.resource_type,
       event: subscription.event,
       user_email: subscription.user_email,
-      periodicity: subscription.periodicity
+      periodicity: subscription.periodicity,
+      last_consumed_event: subscription.last_consumed_event
     }
   end
 end
