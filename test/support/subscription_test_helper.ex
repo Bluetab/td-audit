@@ -10,7 +10,8 @@ defmodule TdAudit.SubscriptionTestHelper do
     resource_id: 42,
     resource_type: "some resource_type",
     user_email: "mymail@foo.com",
-    periodicity: "daily"
+    periodicity: "daily",
+    last_consumed_event: "2018-01-23T21:50:07.000000Z"
   }
 
   @invalid_attrs %{
@@ -44,7 +45,16 @@ defmodule TdAudit.SubscriptionTestHelper do
     subscription
     |> Map.from_struct()
     |> Map.drop([:__meta__, :updated_at, :inserted_at])
-    |> Enum.reduce(%{}, fn ({key, val}, acc) -> Map.put(acc, Atom.to_string(key), val) end)
+    |> Enum.reduce(%{}, fn {key, val}, acc -> Map.put(acc, Atom.to_string(key), val) end)
+    |> date_time_field_to_string()
+  end
+
+  defp date_time_field_to_string(subscription) do
+    Map.put(
+      subscription,
+      "last_consumed_event",
+      DateTime.to_iso8601(Map.get(subscription, "last_consumed_event"))
+    )
   end
 
   def retrieve_valid_attrs, do: @valid_attrs

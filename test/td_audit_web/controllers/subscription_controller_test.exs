@@ -63,7 +63,8 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
         "resource_id" => Map.get(retrieve_valid_attrs(), :resource_id),
         "resource_type" => Map.get(retrieve_valid_attrs(), :resource_type),
         "user_email" => Map.get(retrieve_valid_attrs(), :user_email),
-        "periodicity" => Map.get(retrieve_valid_attrs(), :periodicity)
+        "periodicity" => Map.get(retrieve_valid_attrs(), :periodicity),
+        "last_consumed_event" => Map.get(retrieve_valid_attrs(), :last_consumed_event)
       }
     end
 
@@ -86,13 +87,16 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
       conn = get conn, subscription_path(conn, :show, id)
       validate_resp_schema(conn, schema, "SubscriptionResponse")
+
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
         "event" => Map.get(retrieve_valid_attrs(), :event),
         "resource_id" => Map.get(retrieve_valid_attrs(), :resource_id),
         "resource_type" => Map.get(retrieve_valid_attrs(), :resource_type),
         "periodicity" =>  Map.get(@update_attrs, :periodicity),
-        "user_email" => Map.get(@update_attrs, :user_email)}
+        "user_email" => Map.get(@update_attrs, :user_email),
+        "last_consumed_event" => Map.get(retrieve_valid_attrs(), :last_consumed_event)
+      }
     end
 
     @tag authenticated_user: @admin_user_name
