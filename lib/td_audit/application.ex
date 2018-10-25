@@ -11,6 +11,11 @@ defmodule TdAudit.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
+    notifications_worker = %{
+      id: TdAudit.NotificationLoader,
+      start: {TdAudit.NotificationLoader, :start_link, []}
+    }
+
     # Define workers and child supervisors to be supervised
     children = [
       # Start the Ecto repository
@@ -20,6 +25,13 @@ defmodule TdAudit.Application do
       # Start your own worker by calling: TdAudit.Worker.start_link(arg1, arg2, arg3)
       # worker(TdAudit.Worker, [arg1, arg2, arg3]),
       supervisor(Exq, []),
+      %{
+        id: TdAudit.CustomSupervisor,
+        start:
+          {TdAudit.CustomSupervisor, :start_link,
+           [%{children: [notifications_worker], strategy: :one_for_one}]},
+        type: :supervisor
+      }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
