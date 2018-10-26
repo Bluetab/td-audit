@@ -31,6 +31,11 @@ config :td_audit, :elasticsearch,
   es_port: 9200,
   type_name: "doc"
 
+config :td_audit, email_account: "email@foo.bar"
+
+config :td_audit, TdAudit.Smtp.Mailer,
+  adapter: Bamboo.TestAdapter
+
 config :td_audit, user_cache: TdPerms.UserCacheMock
 
 config :td_audit, business_concept_cache: TdPerms.BusinessConceptCacheMock

@@ -27,6 +27,19 @@ config :td_audit, :elasticsearch,
   es_port: "${ES_PORT}",
   type_name: "doc"
 
+#Configure smtp client
+config :td_audit, email_account: "${SMTP_USERNAME}"
+
+config :td_audit, TdAudit.Smtp.Mailer,
+  adapter: Bamboo.SMTPAdapter,
+  server: "${SMTP_SERVER}",
+  port: "${SMTP_PORT}",
+  username: "${SMTP_USERNAME}",
+  password: "${SMTP_PASSWORD}",
+  tls: :always,
+  ssl: false,
+  retries: 3
+
 # Configure Exq
 config :exq,
   url: "${REDIS_URL}",
@@ -57,4 +70,4 @@ config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthS
   auth_port: "${API_AUTH_PORT}",
   auth_domain: ""
 
-  config :td_perms, redis_uri: "${REDIS_URL}"
+config :td_perms, redis_uri: "${REDIS_URL}"
