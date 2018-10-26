@@ -21,7 +21,7 @@ defmodule TdAudit.Mixfile do
   def application do
     [
       mod: {TdAudit.Application, []},
-      extra_applications: [:logger, :runtime_tools, :exq_ui]
+      extra_applications: [:logger, :bamboo, :bamboo_smtp, :runtime_tools, :exq_ui]
     ]
   end
 
