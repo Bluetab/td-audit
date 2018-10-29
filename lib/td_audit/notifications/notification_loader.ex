@@ -28,14 +28,12 @@ defmodule TdAudit.NotificationLoader do
 
  @impl true
  def handle_info(:work, state) do
-  IO.puts "handle_info"
   NotificationDispatcher.dispatch_notification({:dispatch_on_comment_creation, "create_comment"})
   schedule_work()
   {:reply, :ok, state}
  end
 
  defp schedule_work do
-  IO.puts "schedule_work"
   Process.send_after(self(), :work, @notification_load_frequency)
  end
 end

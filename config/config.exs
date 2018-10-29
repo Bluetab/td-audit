@@ -56,7 +56,7 @@ config :td_audit, custom_events: [
 ]
 
 config :td_audit, notification_loader_on_startup: false
-config :td_audit, notification_load_frequency: 6_000
+config :td_audit, notification_load_frequency: 60_000
 
 config :td_audit, :phoenix_swagger,
        swagger_files: %{
