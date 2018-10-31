@@ -15,14 +15,35 @@ defmodule TdAudit.NotificationDispatcher do
   def dispatch_notification({:dispatch_on_comment_creation, event}) do
     subscription_filters = %{"event" => event, "resource_type" => "business_concept"}
 
-    subscription_filters
-      |> Subscriptions.list_subscriptions_by_filter()
-      |> Enum.map(&parse_subscription_format(&1))
-      |> Enum.reduce([], &retrieve_events_to_notificate(&1, &2))
-      |> Enum.group_by(&(&1.id))
-      |> Enum.map(&group_events_and_subscribers(&1))
+    events_with_subscribers =
+      subscription_filters
+        |> Subscriptions.list_subscriptions_by_filter()
+        |> Enum.map(&parse_subscription_format(&1))
+        |> Enum.reduce([], &retrieve_events_to_notificate(&1, &2))
+        |> Enum.group_by(&(&1.id))
+        |> Enum.map(&group_events_and_subscribers(&1))
+
+    events_with_subscribers |> update_last_consumed_events()
+
+    events_with_subscribers
       |> Enum.map(&compose_notification(&1, :comment_creation))
       |> Enum.map(&send_notification(&1, :email_on_comment))
+  end
+
+  defp update_last_consumed_events(events_with_subscribers) do
+    events_with_subscribers
+      |> Enum.map(&update_subscriber_last_consumed_event(&1))
+  end
+
+  defp update_subscriber_last_consumed_event(
+    %{payload: payload, subscribers: subscribers, ts: ts}
+    ) do
+      filter_params =
+        payload
+          |> Map.take(["resource_id", "resource_type"])
+          |> Map.put("subscribers", subscribers)
+
+      Subscriptions.update_last_consumed_events(filter_params, ts)
   end
 
   defp parse_subscription_format(subscription) do

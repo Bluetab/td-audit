@@ -149,6 +149,7 @@ defmodule TdAudit.NotificationDispatcherTest do
   defp subscriptions_fixture do
     list_of_subscriptions()
     |> Enum.map(&Subscriptions.create_subscription(&1))
+    |> Enum.map(fn {:ok, value} -> value end)
   end
 
   defp prepare_cache do
@@ -157,13 +158,12 @@ defmodule TdAudit.NotificationDispatcherTest do
   end
 
   defp dispatch_notification_fixture do
-    events_fixture()
-    subscriptions_fixture()
+    {events_fixture(), subscriptions_fixture()}
   end
 
   test "dispatch_notification/0" do
     prepare_cache()
-    dispatch_notification_fixture()
+    {_events_list, subs_list} = dispatch_notification_fixture()
     to_format_resource_id_1 = [nil: "mymail1@foo.bar", nil: "mymail2@foo.bar"]
     to_format_resource_id_2 = [nil: "mymail3@foo.bar"]
     list_sent_notifications =
@@ -174,5 +174,10 @@ defmodule TdAudit.NotificationDispatcherTest do
     assert length(list_sent_notifications) == 2
     Enum.any?(list_sent_notifications, fn el -> Map.fetch!(el, :to) == to_format_resource_id_1 end)
     Enum.any?(list_sent_notifications, fn el -> Map.fetch!(el, :to) == to_format_resource_id_2 end)
+    existing_subs = Subscriptions.list_subscriptions()
+    Enum.all?(existing_subs, fn sb ->
+      prior_sub = Enum.find(subs_list, &(sb.id == &1.id))
+      prior_sub.last_consumed_event < sb.last_consumed_event
+    end)
   end
 end

@@ -90,6 +90,23 @@ defmodule TdAudit.Subscriptions do
     |> Repo.update()
   end
 
+  def update_last_consumed_events(
+      %{
+          "resource_id" => resource_id,
+          "resource_type" => resource_type,
+          "subscribers" => subscribers
+        },
+      last_consumed_event
+     ) do
+        from(from p in Subscription,
+            update: [set: [last_consumed_event: ^last_consumed_event]],
+            where: p.resource_id  == ^resource_id
+                and p.resource_type  == ^resource_type
+                and p.user_email in ^subscribers)
+
+        |> Repo.update_all([])
+     end
+
   @doc """
   Deletes a Subscription.
 
