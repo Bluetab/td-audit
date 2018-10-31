@@ -98,13 +98,13 @@ defmodule TdAudit.Subscriptions do
         },
       last_consumed_event
      ) do
-        from(from p in Subscription,
+        query = from(from p in Subscription,
             update: [set: [last_consumed_event: ^last_consumed_event]],
             where: p.resource_id  == ^resource_id
                 and p.resource_type  == ^resource_type
                 and p.user_email in ^subscribers)
 
-        |> Repo.update_all([])
+        query |> Repo.update_all([])
      end
 
   @doc """
