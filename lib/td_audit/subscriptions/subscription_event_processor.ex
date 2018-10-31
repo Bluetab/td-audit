@@ -46,7 +46,7 @@ defmodule TdAudit.SubscriptionEventProcessor do
 
     involved_roles
       |> Enum.map(&Map.get(content, &1))
-      |> Enum.filter(&(&1 != nil && is_map(&1)))
+      |> Enum.filter(&(&1 != nil && is_map(&1) && &1 != %{}))
       |> Enum.map(&@user_cache.get_user(Map.get(&1, "id")))
       |> Enum.map(&Map.get(&1, "email"))
       |> Enum.map(&Map.put(%{}, "user_email", &1))
