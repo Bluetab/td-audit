@@ -28,7 +28,7 @@ config :td_audit, :elasticsearch,
   type_name: "doc"
 
 #Configure smtp client
-config :td_audit, email_account: "${SMTP_USERNAME}"
+config :td_audit, email_account: "${SMTP_SENDER}"
 
 config :td_audit, TdAudit.Smtp.Mailer,
   adapter: Bamboo.SMTPAdapter,
