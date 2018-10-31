@@ -7,7 +7,7 @@ end
 
 defmodule TdAudit.EmailBuilder do
   @moduledoc """
-  Builds and email
+  Builds an email
   """
   import Bamboo.Email
   @email_account Application.get_env(:td_audit, :email_account)
@@ -19,5 +19,4 @@ defmodule TdAudit.EmailBuilder do
     |> subject(subject)
     |> html_body(body)
   end
-
 end
