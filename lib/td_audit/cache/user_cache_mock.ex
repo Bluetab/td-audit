@@ -19,4 +19,10 @@ defmodule TdPerms.UserCacheMock do
   def put_user_in_cache(user) do
     Agent.update(:MockUserCache, &[user | &1])
   end
+
+  def get_user_email(full_name) do
+    Agent.get(:MockUserCache, & &1)
+    |> Enum.find(&(Map.get(&1, "full_name") == full_name))
+    |> Map.get("email")
+  end
 end

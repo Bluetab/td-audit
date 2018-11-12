@@ -10,9 +10,9 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   import TdAudit.SubscriptionTestHelper
   alias TdPerms.UserCacheMock
 
-  @user_1 %{"id" => 1, "user_name" => "my_user_name", "email" => "my_user_email@foo.bar"}
-  @user_2 %{"id" => 2, "user_name" => "my_user_name_2", "email" => "my_user_email_2@foo.bar"}
-  @user_3 %{"id" => 3, "user_name" => "my_user_name_3", "email" => "my_user_email_3@foo.bar"}
+  @user_1 %{"id" => 1, "user_name" => "my_user_name", "full_name" => "full_name", "email" => "my_user_email@foo.bar"}
+  @user_2 %{"id" => 2, "user_name" => "my_user_name_2", "full_name" => "full_name_2", "email" => "my_user_email_2@foo.bar"}
+  @user_3 %{"id" => 3, "user_name" => "my_user_name_3", "full_name" => "full_name_3", "email" => "my_user_email_3@foo.bar"}
 
   @user_list [@user_1, @user_2, @user_3]
 
@@ -28,14 +28,14 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
   defp create_users_in_cache do
     @user_list
-    |> Enum.map(&Map.take(&1, ["id", "email"]))
+    |> Enum.map(&Map.take(&1, ["id", "email", "full_name"]))
     |> Enum.map(&UserCacheMock.put_user_in_cache(&1))
   end
 
   defp create_list_of_events_for_process do
-    user_1 = @user_1 |> Map.take(["id", "user_name"])
-    user_2 = @user_2 |> Map.take(["id", "user_name"])
-    user_3 = @user_3 |> Map.take(["id", "user_name"])
+    user_1 = @user_1 |> Map.get("full_name")
+    user_2 = @user_2 |> Map.get("full_name")
+    user_3 = @user_3 |> Map.get("full_name")
 
     event_1 = %{
       "event" => "create_concept_draft",

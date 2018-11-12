@@ -131,7 +131,7 @@ defmodule TdAudit.NotificationDispatcherTest do
 
   defp create_users_in_cache do
     @user_list
-    |> Enum.map(&Map.take(&1, ["id", "email", "user_name"]))
+    |> Enum.map(&Map.take(&1, ["id", "email", "user_name", "full_name"]))
     |> Enum.map(&UserCacheMock.put_user_in_cache(&1))
   end
 

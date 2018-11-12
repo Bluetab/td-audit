@@ -32,7 +32,7 @@ defmodule TdAudit.SubscriptionEventProcessor do
   end
 
   defp create_subscription_for_role(%{
-         "payload" => %{"content" => content},
+         "payload" => %{"content" => content} = payload,
          "resource_id" => resource_id,
          "resource_type" => resource_type
        },
@@ -46,9 +46,9 @@ defmodule TdAudit.SubscriptionEventProcessor do
 
     involved_roles
       |> Enum.map(&Map.get(content, &1))
-      |> Enum.filter(&(&1 != nil && is_map(&1) && &1 != %{}))
-      |> Enum.map(&@user_cache.get_user(Map.get(&1, "id")))
-      |> Enum.map(&Map.get(&1, "email"))
+      |> Enum.filter(&(&1 != nil && is_binary(&1)))
+      |> Enum.map(&@user_cache.get_user_email(&1))
+      |> Enum.filter(&(&1 != nil && is_binary(&1)))
       |> Enum.map(&Map.put(%{}, "user_email", &1))
       |> Enum.map(&Map.merge(&1, non_user_params))
       |> Enum.map(&Subscriptions.create_subscription(&1))
