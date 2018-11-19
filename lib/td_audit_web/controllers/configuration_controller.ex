@@ -1,4 +1,7 @@
 defmodule TdAuditWeb.ConfigurationController do
+  @moduledoc """
+  Controller for the configuration of the notifications system
+  """
   use TdAuditWeb, :controller
 
   alias TdAudit.NotificationsSystem

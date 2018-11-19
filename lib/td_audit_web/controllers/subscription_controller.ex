@@ -1,4 +1,7 @@
 defmodule TdAuditWeb.SubscriptionController do
+  @moduledoc """
+  Controller for the subscritions of the system
+  """
   use TdAuditWeb, :controller
   use PhoenixSwagger
 
