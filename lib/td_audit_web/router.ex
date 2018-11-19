@@ -27,6 +27,7 @@ defmodule TdAuditWeb.Router do
     pipe_through [:api, :api_secure]
     resources "/events", EventController, except: [:new, :edit]
     resources "/subscriptions", SubscriptionController, except: [:new, :edit]
+    resources "/notifications_system/configuration", ConfigurationController, except: [:new, :edit]
   end
 
   def swagger_info do
