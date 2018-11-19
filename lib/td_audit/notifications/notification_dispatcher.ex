@@ -22,6 +22,7 @@ defmodule TdAudit.NotificationDispatcher do
         |> Enum.reduce([], &retrieve_events_to_notificate(&1, &2))
         |> Enum.group_by(&(&1.id))
         |> Enum.map(&group_events_and_subscribers(&1))
+        |> Enum.sort(&(Map.get(&1, :ts) <= Map.get(&2, :ts)))
 
     events_with_subscribers |> update_last_consumed_events()
 

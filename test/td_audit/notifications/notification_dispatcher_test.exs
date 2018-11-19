@@ -33,7 +33,7 @@ defmodule TdAudit.NotificationDispatcherTest do
         event: "create_comment",
         resource_id: 1,
         resource_type: "comment",
-        ts: "2018-01-24 23:50:07Z",
+        ts: "2018-01-24 23:53:07Z",
         payload: %{
           "content" => "My awesome comment 1",
           "resource_id" => 1,
@@ -48,7 +48,7 @@ defmodule TdAudit.NotificationDispatcherTest do
         event: "create_comment",
         resource_id: 2,
         resource_type: "comment",
-        ts: "2018-01-24 23:50:07Z",
+        ts: "2018-01-24 23:52:07Z",
         payload: %{
           "content" => "My awesome comment 2",
           "resource_id" => 2,
@@ -78,7 +78,7 @@ defmodule TdAudit.NotificationDispatcherTest do
         service: "bg",
         resource_id: 4,
         resource_type: "comment",
-        ts: "2018-01-24 23:50:07Z",
+        ts: "2018-01-24 23:51:07Z",
         payload: %{
           "content" => "My awesome comment 4",
           "resource_id" => 4,
