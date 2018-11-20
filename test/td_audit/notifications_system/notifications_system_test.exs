@@ -33,6 +33,14 @@ defmodule TdAudit.NotificationsSystemTest do
           }
         }
 
+    @event_subscription_valid_empty %{
+      event: "create_concept_draft",
+      configuration: %{
+        "generate_subscription" => %{},
+        "generate_notification" => %{}
+      }
+    }
+
      @event_subscription_invalid_conf %{
         event: "create_concept_draft",
         configuration: %{
@@ -79,6 +87,11 @@ defmodule TdAudit.NotificationsSystemTest do
 
     test "create_configuration/1 with valid configuration map creates a configuration" do
       assert {:ok, %Configuration{} = configuration} = NotificationsSystem.create_configuration(@event_subscription_valid)
+      assert configuration.event == "create_concept_draft"
+    end
+
+    test "create_configuration/1 with empty configuration map creates a configuration" do
+      assert {:ok, %Configuration{} = configuration} = NotificationsSystem.create_configuration(@event_subscription_valid_empty)
       assert configuration.event == "create_concept_draft"
     end
 
