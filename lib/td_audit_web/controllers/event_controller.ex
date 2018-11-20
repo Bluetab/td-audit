@@ -19,6 +19,7 @@ defmodule TdAuditWeb.EventController do
     description "List Events"
     response 200, "OK", Schema.ref(:EventsResponse)
   end
+
   def index(conn, params) do
     events =
       case Map.take(params, @filters_availables) do
@@ -38,6 +39,7 @@ defmodule TdAuditWeb.EventController do
     response 201, "OK", Schema.ref(:EventResponse)
     response 400, "Client Error"
   end
+
   def create(conn, %{"event" => event_params}) do
     with {:ok, %Event{} = event} <- Audit.create_event(event_params) do
       conn
@@ -57,6 +59,7 @@ defmodule TdAuditWeb.EventController do
     response 200, "OK", Schema.ref(:EventResponse)
     response 400, "Client Error"
   end
+
   def show(conn, %{"id" => id}) do
     event = Audit.get_event!(id)
     render(conn, "show.json", event: event)
@@ -73,6 +76,7 @@ defmodule TdAuditWeb.EventController do
     response 201, "OK", Schema.ref(:EventResponse)
     response 400, "Client Error"
   end
+
   def update(conn, %{"id" => id, "event" => event_params}) do
     event = Audit.get_event!(id)
 
