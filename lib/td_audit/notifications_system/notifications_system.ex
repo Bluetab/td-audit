@@ -4,6 +4,7 @@ defmodule TdAudit.NotificationsSystem do
   """
 
   import Ecto.Query, warn: false
+  alias TdAudit.QuerySupport
   alias TdAudit.Repo
 
   alias TdAudit.NotificationsSystem.Configuration
@@ -36,6 +37,28 @@ defmodule TdAudit.NotificationsSystem do
 
   """
   def get_configuration!(id), do: Repo.get!(Configuration, id)
+
+  @doc """
+  Gets a single configuration given a set of params.
+
+  Raises `Ecto.NoResultsError` if the Configuration does not exist.
+
+  ## Examples
+
+      iex> get_configuration!(123)
+      %Configuration{}
+
+      iex> get_configuration!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_configuration_by_filter!(params) do
+    fields = Configuration.__schema__(:fields)
+    dynamic = QuerySupport.filter(params, fields)
+
+    Repo.one!(from p in Configuration,
+        where: ^dynamic)
+  end
 
   @doc """
   Creates a configuration.

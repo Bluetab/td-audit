@@ -3,8 +3,8 @@ defmodule TdAudit.Repo.Migrations.AddNotificationsConfiguration do
 
   def change do
     create table(:notifications_system_configuration) do
-      add :event, :string
-      add :configuration, :map
+      add :event, :string, null: false
+      add :configuration, :map, null: false
 
       timestamps()
     end

@@ -6,9 +6,48 @@ defmodule TdAudit.NotificationsSystemTest do
   describe "notifications_system_configuration" do
     alias TdAudit.NotificationsSystem.Configuration
 
-    @valid_attrs %{configuration: %{}, event: "some event"}
-    @update_attrs %{configuration: %{}, event: "some updated event"}
+    @valid_attrs %{
+      configuration: %{},
+      event: "some event"
+    }
+
+    @update_attrs %{
+      configuration: %{},
+      event: "some updated event"
+    }
+
     @invalid_attrs %{configuration: nil, event: nil}
+
+    @event_subscription_valid %{
+          event: "create_concept_draft",
+          configuration: %{
+            "generate_subscription" => %{
+              "roles" => ["data_owner"]
+            },
+            "generate_notification" => %{
+              "active" => true
+            }
+          }
+        }
+
+     @event_subscription_invalid_conf %{
+        event: "create_concept_draft",
+        configuration: %{
+          "invalid_key" => %{}
+        }
+      }
+
+      @event_subscription_invalid_conf_params %{
+        event: "create_concept_draft",
+        configuration: %{
+          "generate_subscription" => %{
+            "roles" => ["data_owner"]
+          },
+          "generate_notification" => %{
+            "not_valid" => true
+          }
+        }
+      }
 
     def configuration_fixture(attrs \\ %{}) do
       {:ok, configuration} =
@@ -35,8 +74,35 @@ defmodule TdAudit.NotificationsSystemTest do
       assert configuration.event == "some event"
     end
 
+    test "create_configuration/1 with valid configuration map creates a configuration" do
+      assert {:ok, %Configuration{} = configuration} = NotificationsSystem.create_configuration(@event_subscription_valid)
+      assert configuration.event == "create_concept_draft"
+    end
+
     test "create_configuration/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = NotificationsSystem.create_configuration(@invalid_attrs)
+    end
+
+    test "create_configuration/1 with invalid attributes in configuration returns error changeset" do
+      assert {:error, %Ecto.Changeset{valid?: valid, errors: errors}}
+         = NotificationsSystem.create_configuration(@event_subscription_invalid_conf)
+
+      [{key, {message, _}}] = errors
+
+      assert valid == false
+      assert key == :configuration
+      assert message == "invalid.param.invalid_key"
+    end
+
+    test "create_configuration/1 with invalid attributes in configuration params returns error changeset" do
+      assert {:error, %Ecto.Changeset{valid?: valid, errors: errors}}
+         = NotificationsSystem.create_configuration(@event_subscription_invalid_conf_params)
+
+      [{key, {message, _}}] = errors
+
+      assert valid == false
+      assert key == :configuration
+      assert message == "invalid.param.generate_notification.not_valid"
     end
 
     test "update_configuration/2 with valid data updates the configuration" do
@@ -62,6 +128,11 @@ defmodule TdAudit.NotificationsSystemTest do
     test "change_configuration/1 returns a configuration changeset" do
       configuration = configuration_fixture()
       assert %Ecto.Changeset{} = NotificationsSystem.change_configuration(configuration)
+    end
+
+    test "get_configuration_by_filter!/1 returns a configuration valid atributes" do
+      configuration = configuration_fixture(@event_subscription_valid)
+      assert NotificationsSystem.get_configuration_by_filter!(%{"event": "create_concept_draft"}) == configuration
     end
   end
 end
