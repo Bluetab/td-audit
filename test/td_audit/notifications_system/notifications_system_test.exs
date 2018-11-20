@@ -146,9 +146,9 @@ defmodule TdAudit.NotificationsSystemTest do
       assert %Ecto.Changeset{} = NotificationsSystem.change_configuration(configuration)
     end
 
-    test "get_configuration_by_filter!/1 returns a configuration valid atributes" do
+    test "get_configuration_by_filter/1 returns a configuration valid atributes" do
       configuration = configuration_fixture(@event_subscription_valid)
-      assert NotificationsSystem.get_configuration_by_filter!(%{"event": "create_concept_draft"}) == configuration
+      assert NotificationsSystem.get_configuration_by_filter(%{"event": "create_concept_draft"}) == configuration
     end
   end
 end

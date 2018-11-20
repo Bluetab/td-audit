@@ -2,25 +2,18 @@ defmodule TdAudit.SubscriptionEventProcessor do
   @moduledoc false
   require Logger
   alias TdAudit.NotificationsSystem
+  alias TdAudit.NotificationsSystem.Configuration
   alias TdAudit.Subscriptions
 
   @user_cache Application.get_env(:td_audit, :user_cache)
 
   def process_event(%{"event" => "create_concept_draft"} = event_params) do
-    involved_roles =
+    configuration =
       Map.new()
-      |> Map.put("event", "create_concept_draft")
-      |> NotificationsSystem.get_configuration_by_filter!()
-      |> Map.fetch!(:configuration)
-      |> Map.fetch!("generate_subscription")
-      |> Map.fetch!("roles")
+        |> Map.put("event", "create_concept_draft")
+        |> NotificationsSystem.get_configuration_by_filter()
 
-    involved_params = event_params |> Map.take(["payload", "resource_id", "resource_type"])
-
-    create_subscription_for_role(
-      involved_params,
-      involved_roles
-    )
+    process_event_from_configuration(configuration, event_params)
   end
 
   def process_event(%{"event" => "delete_concept_draft"}  = event_params) do
@@ -36,7 +29,32 @@ defmodule TdAudit.SubscriptionEventProcessor do
     )
   end
 
-  defp create_subscription_for_role(%{
+  defp process_event_from_configuration(nil, _event_params) do
+    Logger.info(
+      "No subscription configuration found for event create_concept_draft"
+    )
+  end
+
+  defp process_event_from_configuration(configuration, event_params) do
+    involved_roles =
+      configuration
+        |> involved_roles_from_configuration()
+
+    involved_params = event_params |> Map.take(["payload", "resource_id", "resource_type"])
+
+    create_subscription_for_roles(
+      involved_params,
+      involved_roles
+    )
+  end
+
+  defp involved_roles_from_configuration(%Configuration{configuration: configuration}) do
+      configuration
+      |> Map.fetch!("generate_subscription")
+      |> Map.fetch!("roles")
+  end
+
+  defp create_subscription_for_roles(%{
          "payload" => %{"content" => content} = payload,
          "resource_id" => resource_id,
          "resource_type" => resource_type

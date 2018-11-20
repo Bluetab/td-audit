@@ -52,11 +52,11 @@ defmodule TdAudit.NotificationsSystem do
       ** (Ecto.NoResultsError)
 
   """
-  def get_configuration_by_filter!(params) do
+  def get_configuration_by_filter(params) do
     fields = Configuration.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
 
-    Repo.one!(from p in Configuration,
+    Repo.one(from p in Configuration,
         where: ^dynamic)
   end
 
