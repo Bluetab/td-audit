@@ -125,7 +125,15 @@ defmodule TdAudit.NotificationDispatcherTest do
         last_consumed_event: "2018-01-23 21:50:07Z"
       }
 
-      [subscription_1, subscription_2, subscription_3, subscription_4]
+      subscription_5 = %{
+        event: "create_comment",
+        user_email: "mymail3@foo.bar",
+        resource_id: 3,
+        resource_type: "business_concept",
+        last_consumed_event: nil
+      }
+
+      [subscription_1, subscription_2, subscription_3, subscription_4, subscription_5]
     end
   end
 
