@@ -5,6 +5,7 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   """
   use ExUnit.Case, async: false
   use TdAudit.DataCase
+  alias TdAudit.NotificationsSystem
   alias TdAudit.SubscriptionEventProcessor
   alias TdAudit.Subscriptions
   import TdAudit.SubscriptionTestHelper
@@ -16,14 +17,32 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
   @user_list [@user_1, @user_2, @user_3]
 
+  @conf_create_attrs %{
+    event: "create_concept_draft",
+    configuration: %{
+      "generate_subscription" => %{
+        "roles" => ["data_owner"]
+      }
+    }
+  }
+
   setup_all do
     start_supervised(UserCacheMock)
     :ok
   end
 
   defp process_event_fixture do
+    create_configuration()
     create_users_in_cache()
     create_list_of_events_for_process()
+  end
+
+  defp create_configuration do
+    {:ok, configuration} =
+      @conf_create_attrs
+      |> NotificationsSystem.create_configuration()
+
+    configuration
   end
 
   defp create_users_in_cache do

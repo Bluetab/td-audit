@@ -1,19 +1,24 @@
 defmodule TdAudit.SubscriptionEventProcessor do
   @moduledoc false
   require Logger
+  alias TdAudit.NotificationsSystem
   alias TdAudit.Subscriptions
 
-  @custom_events Application.get_env(:td_audit, :custom_events)
   @user_cache Application.get_env(:td_audit, :user_cache)
 
   def process_event(%{"event" => "create_concept_draft"} = event_params) do
     involved_roles =
-      @custom_events
-      |> Enum.find(&(Map.fetch!(&1, :name) == "create_concept_draft"))
-      |> Map.fetch!(:event_subscribers)
+      Map.new()
+      |> Map.put("event", "create_concept_draft")
+      |> NotificationsSystem.get_configuration_by_filter!()
+      |> Map.fetch!(:configuration)
+      |> Map.fetch!("generate_subscription")
+      |> Map.fetch!("roles")
+
+    involved_params = event_params |> Map.take(["payload", "resource_id", "resource_type"])
 
     create_subscription_for_role(
-      Map.take(event_params, ["payload", "resource_id", "resource_type"]),
+      involved_params,
       involved_roles
     )
   end
