@@ -1,7 +1,10 @@
 defmodule TdAudit.NotificationsSystem.Configuration do
+  @moduledoc """
+  Entity representing a configuration rule of the notifications
+  System
+  """
   use Ecto.Schema
   import Ecto.Changeset
-
 
   schema "notifications_system_configuration" do
     field :configuration, :map
