@@ -142,4 +142,88 @@ defmodule TdAuditWeb.SwaggerDefinitions do
     end
     }
   end
+
+  def configuration_swagger_definitions do
+    %{
+      ConfigurationsResponse: swagger_schema do
+        properties do
+          data Schema.ref(:Configurations)
+        end
+      end,
+      Configurations: swagger_schema do
+        title "Configurations"
+        description "A collection of configurations"
+        type :array
+        items Schema.ref(:Configuration)
+      end,
+      Configuration: swagger_schema do
+        title "Configuration"
+        description "A configuration for our notifications system"
+        properties do
+          id :integer, "Unique identifier"
+          event :string, "Event to generate a configuration"
+          configuration :object, "Specifics of the configuration"
+        end
+
+        example(%{
+          event: "create_concept_draft",
+          configuration: %{
+            "generate_subscription": %{
+              "roles": ["data_owner"]
+            },
+            "generate_notification": %{
+              "active": false
+            }
+          }
+        })
+
+      end,
+      ConfigurationCreate: swagger_schema do
+        properties do
+          configuration (Schema.new do
+            properties do
+              event :string, "Event to create a configuration", required: true
+              configuration :object, "Specifics of the configuration", required: true
+            end
+          end)
+        end
+
+        example(%{
+          event: "create_concept_draft",
+          configuration: %{
+            "generate_subscription": %{
+              "roles": ["data_owner"]
+            },
+            "generate_notification": %{
+              "active": false
+            }
+          }
+        })
+      end,
+      ConfigurationResponse: swagger_schema do
+        properties do
+          data Schema.ref(:Configuration)
+        end
+      end,
+      ConfigurationUpdate: swagger_schema do
+        properties do
+          configuration (Schema.new do
+            properties do
+              event :string, "Event to create a configuration", required: true
+              configuration :object, "Specifics of the configuration", required: true
+            end
+          end)
+      end
+
+      example(%{
+        event: "create_concept_draft",
+        configuration: %{
+          "generate_subscription": %{
+            "roles": ["data_officer"]
+          }
+        }
+      })
+    end
+    }
+  end
 end

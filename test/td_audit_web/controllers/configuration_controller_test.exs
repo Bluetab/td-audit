@@ -3,6 +3,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   Test configuration controller
   """
   use TdAuditWeb.ConnCase
+  use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
   alias TdAudit.NotificationsSystem
   alias TdAudit.NotificationsSystem.Configuration
@@ -31,21 +32,24 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
 
   describe "index" do
     @tag authenticated_user: @admin_user_name
-    test "lists all notifications_system_configuration", %{conn: conn} do
+    test "lists all notifications_system_configuration", %{conn: conn, swagger_schema: schema} do
       conn = get conn, configuration_path(conn, :index)
+      validate_resp_schema(conn, schema, "ConfigurationsResponse")
       assert json_response(conn, 200)["data"] == []
     end
   end
 
   describe "create configuration" do
     @tag authenticated_user: @admin_user_name
-    test "renders configuration when data is valid", %{conn: conn} do
+    test "renders configuration when data is valid", %{conn: conn, swagger_schema: schema} do
       conn = post conn, configuration_path(conn, :create), configuration: @create_attrs
+      validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle_and_put_headers(conn)
 
       conn = get conn, configuration_path(conn, :show, id)
+      validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
         "configuration" => %{},
@@ -63,13 +67,15 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
     setup [:create_configuration]
 
     @tag authenticated_user: @admin_user_name
-    test "renders configuration when data is valid", %{conn: conn, configuration: %Configuration{id: id} = configuration} do
+    test "renders configuration when data is valid", %{conn: conn, configuration: %Configuration{id: id} = configuration, swagger_schema: schema} do
       conn = put conn, configuration_path(conn, :update, configuration), configuration: @update_attrs
+      validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = recycle_and_put_headers(conn)
 
       conn = get conn, configuration_path(conn, :show, id)
+      validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
         "configuration" => %{},
@@ -87,7 +93,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
     setup [:create_configuration]
 
     @tag authenticated_user: @admin_user_name
-    test "deletes chosen configuration", %{conn: conn, configuration: configuration} do
+    test "deletes chosen configuration", %{conn: conn, configuration: configuration, swagger_schema: schema} do
       conn = delete conn, configuration_path(conn, :delete, configuration)
       assert response(conn, 204)
 
@@ -95,6 +101,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
 
       assert_error_sent 404, fn ->
         get conn, configuration_path(conn, :show, configuration)
+        validate_resp_schema(conn, schema, "ConfigurationResponse")
       end
     end
   end

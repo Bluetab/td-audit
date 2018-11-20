@@ -171,6 +171,159 @@
         "description": "Delete Subscription"
       }
     },
+    "/notifications_system/configurations/{id}": {
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "",
+        "responses": {
+          "400": {
+            "description": "Client Error"
+          },
+          "201": {
+            "schema": {
+              "$ref": "#/definitions/ConfigurationResponse"
+            },
+            "description": "OK"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "integer",
+            "required": true,
+            "name": "id",
+            "in": "path",
+            "description": "Configuration ID"
+          },
+          {
+            "schema": {
+              "$ref": "#/definitions/ConfigurationUpdate"
+            },
+            "required": false,
+            "name": "event",
+            "in": "body",
+            "description": "Configuration update attrs"
+          }
+        ],
+        "operationId": "TdAuditWeb.ConfigurationController.update",
+        "description": "Update a Configuration from a given"
+      },
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "",
+        "responses": {
+          "400": {
+            "description": "Client Error"
+          },
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/ConfigurationResponse"
+            },
+            "description": "OK"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "integer",
+            "required": true,
+            "name": "id",
+            "in": "path",
+            "description": "Configuration ID"
+          }
+        ],
+        "operationId": "TdAuditWeb.ConfigurationController.show",
+        "description": "Show a Configuration from a give id"
+      },
+      "delete": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "",
+        "responses": {
+          "400": {
+            "description": "Client Error"
+          },
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "integer",
+            "required": true,
+            "name": "id",
+            "in": "path",
+            "description": "Configuration ID"
+          }
+        ],
+        "operationId": "TdAuditWeb.ConfigurationController.delete",
+        "description": "Delete a Configuration from a given ID"
+      }
+    },
+    "/notifications_system/configurations": {
+      "post": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "",
+        "responses": {
+          "400": {
+            "description": "Client Error"
+          },
+          "201": {
+            "schema": {
+              "$ref": "#/definitions/ConfigurationResponse"
+            },
+            "description": "OK"
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/ConfigurationCreate"
+            },
+            "required": false,
+            "name": "configuration",
+            "in": "body",
+            "description": "Configuration create attrs"
+          }
+        ],
+        "operationId": "TdAuditWeb.ConfigurationController.create",
+        "description": "Creates a Configuration for the notifications system"
+      },
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/ConfigurationsResponse"
+            },
+            "description": "OK"
+          }
+        },
+        "parameters": [],
+        "operationId": "TdAuditWeb.ConfigurationController.index",
+        "description": "List of configurations in our notification system"
+      }
+    },
     "/events/{id}": {
       "put": {
         "tags": [
@@ -655,6 +808,129 @@
         "event": "some event"
       },
       "description": "An Event"
+    },
+    "ConfigurationsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Configurations"
+        }
+      }
+    },
+    "Configurations": {
+      "type": "array",
+      "title": "Configurations",
+      "items": {
+        "$ref": "#/definitions/Configuration"
+      },
+      "description": "A collection of configurations"
+    },
+    "ConfigurationUpdate": {
+      "type": "object",
+      "properties": {
+        "configuration": {
+          "type": "object",
+          "required": [
+            "configuration",
+            "event"
+          ],
+          "properties": {
+            "event": {
+              "type": "string",
+              "description": "Event to create a configuration"
+            },
+            "configuration": {
+              "type": "object",
+              "description": "Specifics of the configuration"
+            }
+          }
+        }
+      },
+      "example": {
+        "event": "create_concept_draft",
+        "configuration": {
+          "generate_subscription": {
+            "roles": [
+              "data_officer"
+            ]
+          }
+        }
+      }
+    },
+    "ConfigurationResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Configuration"
+        }
+      }
+    },
+    "ConfigurationCreate": {
+      "type": "object",
+      "properties": {
+        "configuration": {
+          "type": "object",
+          "required": [
+            "configuration",
+            "event"
+          ],
+          "properties": {
+            "event": {
+              "type": "string",
+              "description": "Event to create a configuration"
+            },
+            "configuration": {
+              "type": "object",
+              "description": "Specifics of the configuration"
+            }
+          }
+        }
+      },
+      "example": {
+        "event": "create_concept_draft",
+        "configuration": {
+          "generate_subscription": {
+            "roles": [
+              "data_owner"
+            ]
+          },
+          "generate_notification": {
+            "active": false
+          }
+        }
+      }
+    },
+    "Configuration": {
+      "type": "object",
+      "title": "Configuration",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier"
+        },
+        "event": {
+          "type": "string",
+          "description": "Event to generate a configuration"
+        },
+        "configuration": {
+          "type": "object",
+          "description": "Specifics of the configuration"
+        }
+      },
+      "example": {
+        "event": "create_concept_draft",
+        "configuration": {
+          "generate_subscription": {
+            "roles": [
+              "data_owner"
+            ]
+          },
+          "generate_notification": {
+            "active": false
+          }
+        }
+      },
+      "description": "A configuration for our notifications system"
     }
   },
   "basePath": "/api"
