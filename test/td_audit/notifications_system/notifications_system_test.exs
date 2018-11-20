@@ -1,4 +1,7 @@
 defmodule TdAudit.NotificationsSystemTest do
+  @moduledoc """
+  Test functions of notifications system
+  """
   use TdAudit.DataCase
 
   alias TdAudit.NotificationsSystem
