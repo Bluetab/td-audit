@@ -51,11 +51,6 @@ config :td_audit, :auth_service,
   users_path: "/api/users/",
   sessions_path: "/api/sessions/"
 
-config :td_audit, custom_events: [
-  %{name: "create_concept_draft", event_subscribers: ["data_owner"]}
-]
-
-config :td_audit, notification_loader_on_startup: false
 config :td_audit, notification_load_frequency: 60_000
 
 config :td_audit, :phoenix_swagger,
