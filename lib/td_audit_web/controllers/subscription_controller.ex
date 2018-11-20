@@ -74,6 +74,7 @@ defmodule TdAuditWeb.SubscriptionController do
     response 201, "OK", Schema.ref(:SubscriptionResponse)
     response 400, "Client Error"
   end
+
   def update(conn, %{"id" => id, "subscription" => subscription_params}) do
     subscription = Subscriptions.get_subscription!(id)
 

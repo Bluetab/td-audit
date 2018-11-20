@@ -91,6 +91,7 @@ defmodule TdAuditWeb.EventController do
     response 204, "No Content"
     response 400, "Client Error"
   end
+
   def delete(conn, %{"id" => id}) do
     event = Audit.get_event!(id)
     with {:ok, %Event{}} <- Audit.delete_event(event) do
