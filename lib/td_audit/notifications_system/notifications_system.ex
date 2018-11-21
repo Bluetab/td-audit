@@ -4,10 +4,10 @@ defmodule TdAudit.NotificationsSystem do
   """
 
   import Ecto.Query, warn: false
+  alias TdAudit.NotificationsSystem.Configuration
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
-
-  alias TdAudit.NotificationsSystem.Configuration
+  alias TdAudit.Subscriptions
 
   @doc """
   Returns the list of notifications_system_configuration.
@@ -73,9 +73,13 @@ defmodule TdAudit.NotificationsSystem do
 
   """
   def create_configuration(attrs \\ %{}) do
-    %Configuration{}
-    |> Configuration.changeset(attrs)
-    |> Repo.insert()
+    response =
+        %Configuration{}
+            |> Configuration.changeset(attrs)
+            |> Repo.insert()
+
+            Subscriptions.update_last_consumed_events_on_activation(response)
+    response
   end
 
   @doc """
@@ -91,9 +95,13 @@ defmodule TdAudit.NotificationsSystem do
 
   """
   def update_configuration(%Configuration{} = configuration, attrs) do
-    configuration
-    |> Configuration.changeset(attrs)
-    |> Repo.update()
+    response =
+        configuration
+            |> Configuration.changeset(attrs)
+            |> Repo.update()
+
+            Subscriptions.update_last_consumed_events_on_activation(response)
+    response
   end
 
   @doc """

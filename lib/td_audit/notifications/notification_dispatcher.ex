@@ -15,49 +15,19 @@ defmodule TdAudit.NotificationDispatcher do
   def dispatch_notification({:dispatch_on_comment_creation, event}) do
     subscription_filters = %{"event" => event, "resource_type" => "business_concept"}
 
-    {active_subscriptions_list, inactive_subscriptions_list} =
+    subscriptions_list =
       subscription_filters
       |> Subscriptions.list_subscriptions_by_filter()
-      |> split_subscriptions()
 
     events_with_subscribers =
-      active_subscriptions_list
+      subscriptions_list
       |> retrieve_events_with_subscribers
-
-    inactive_subscriptions_list |> init_subscriptions()
 
     events_with_subscribers |> update_last_consumed_events()
 
     events_with_subscribers
       |> Enum.map(&compose_notification(&1, :comment_creation))
       |> Enum.map(&send_notification(&1, :email_on_comment))
-  end
-
-  defp split_subscriptions(list_subscriptions) do
-    active_subscriptions_list =
-      list_subscriptions
-      |> Enum.filter(
-        fn sub -> Map.get(sub, :last_consumed_event) != nil
-      end)
-
-    inactive_subscriptions_list =
-      list_subscriptions
-        |> Enum.filter(
-          fn sub -> Map.get(sub, :last_consumed_event) == nil
-      end)
-
-    {active_subscriptions_list, inactive_subscriptions_list}
-  end
-
-  defp init_subscriptions(inactive_subscriptions_list) do
-    last_consumed_event = DateTime.utc_now()
-
-    inactive_subscriptions_list
-      |> Enum.map(&Map.from_struct(&1))
-      |> Enum.map(&Map.new(&1, fn {key, value} ->
-        {Atom.to_string(key), value} end))
-      |> Enum.map(&Map.put(&1, "subscribers", [Map.get(&1, "user_email")]))
-      |> Enum.map(&Subscriptions.update_last_consumed_events(&1, last_consumed_event))
   end
 
   defp update_last_consumed_events(events_with_subscribers) do
@@ -133,7 +103,7 @@ defmodule TdAudit.NotificationDispatcher do
       |> Map.take(["content", "resource_id"])
 
     business_concept_name = @business_concept_cache.get_name(resource_id)
-    user_name = user_id |> @user_cache.get_user() |> Map.get("user_name")
+    user_name = user_id |> @user_cache.get_user() |> Map.get(:full_name)
 
     Map.new()
     |> Map.put("who", user_name)

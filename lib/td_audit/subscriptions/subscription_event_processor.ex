@@ -19,7 +19,8 @@ defmodule TdAudit.SubscriptionEventProcessor do
   def process_event(%{"event" => "delete_concept_draft"}  = event_params) do
     %{}
     |> Map.put("event", "create_comment")
-    |> Map.merge(Map.take(event_params, ["resource_id", "resource_type"]))
+    |> Map.put("resource_type", "business_concept")
+    |> Map.merge(Map.take(event_params, ["resource_id"]))
     |> delete_subscriptions()
   end
 
@@ -40,7 +41,10 @@ defmodule TdAudit.SubscriptionEventProcessor do
       configuration
         |> involved_roles_from_configuration()
 
-    involved_params = event_params |> Map.take(["payload", "resource_id", "resource_type"])
+    involved_params =
+      event_params
+      |> Map.take(["payload", "resource_id"])
+      |> Map.put("resource_type", "business_concept")
 
     create_subscription_for_roles(
       involved_params,
@@ -48,8 +52,8 @@ defmodule TdAudit.SubscriptionEventProcessor do
     )
   end
 
-  defp involved_roles_from_configuration(%Configuration{configuration: configuration}) do
-      configuration
+  defp involved_roles_from_configuration(%Configuration{settings: settings}) do
+    settings
       |> Map.fetch!("generate_subscription")
       |> Map.fetch!("roles")
   end

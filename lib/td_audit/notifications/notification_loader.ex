@@ -40,7 +40,7 @@ defmodule TdAudit.NotificationLoader do
       nil -> nil
       configuration ->
         configuration
-          |> Map.fetch!(:configuration)
+          |> Map.fetch!(:settings)
           |> Map.fetch!("generate_notification")
           |> Map.fetch!("active")
     end

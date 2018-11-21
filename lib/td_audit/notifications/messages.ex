@@ -7,8 +7,8 @@ defmodule TdAudit.Notifications.Messages do
       "content" => content
     }) do
     %{
-      subject: "<h1>#{who} has written a new comment on business concept #{entity_name}.</h1>",
-      body: "<i>#{content}</i>"
+      subject: "Nuevo comentario en concepto de negocio #{entity_name}.",
+      body: "<p><b>#{who}</b> ha creado un nuevo comentario en el concepto <b>#{entity_name}</b>:</p></br><p><i>\"#{content}\"</i></p>"
     }
   end
 end

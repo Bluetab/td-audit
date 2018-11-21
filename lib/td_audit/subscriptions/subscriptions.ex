@@ -4,6 +4,7 @@ defmodule TdAudit.Subscriptions do
   """
 
   import Ecto.Query, warn: false
+  alias TdAudit.NotificationsSystem.Configuration
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
   alias TdAudit.Subscriptions.Subscription
@@ -90,6 +91,28 @@ defmodule TdAudit.Subscriptions do
     |> Repo.update()
   end
 
+  def update_last_consumed_events_on_activation(
+      {:ok, %Configuration{settings: settings} = configuration}) do
+    if has_subscription_been_activated?(settings) do
+        update_last_consumed_events_by_event_type(
+            Map.get(configuration, :event), DateTime.utc_now()
+        )
+    end
+  end
+
+  def update_last_consumed_events_on_activation(_) do
+  end
+
+  defp has_subscription_been_activated?(
+      %{"generate_notification" => notification_settings}
+    ) do
+    has_active_notification_flag?(notification_settings)
+  end
+  defp has_subscription_been_activated?(_), do: false
+
+  defp has_active_notification_flag?(%{"active" => true}), do: true
+  defp has_active_notification_flag?(_), do: false
+
   def update_last_consumed_events(
       %{
           "resource_id" => resource_id,
@@ -106,6 +129,17 @@ defmodule TdAudit.Subscriptions do
 
         query |> Repo.update_all([])
      end
+
+     def update_last_consumed_events_by_event_type(
+        event,
+        last_consumed_event
+       ) do
+        query = from(from p in Subscription,
+            update: [set: [last_consumed_event: ^last_consumed_event]],
+            where: p.event  == ^event)
+
+    query |> Repo.update_all([])
+  end
 
   @doc """
   Deletes a Subscription.
