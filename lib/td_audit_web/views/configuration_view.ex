@@ -13,6 +13,6 @@ defmodule TdAuditWeb.ConfigurationView do
   def render("configuration.json", %{configuration: configuration}) do
     %{id: configuration.id,
       event: configuration.event,
-      configuration: configuration.configuration}
+      settings: configuration.settings}
   end
 end

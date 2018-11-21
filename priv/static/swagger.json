@@ -831,29 +831,31 @@
         "configuration": {
           "type": "object",
           "required": [
-            "configuration",
+            "settings",
             "event"
           ],
           "properties": {
+            "settings": {
+              "type": "object",
+              "description": "Specifics of the configuration"
+            },
             "event": {
               "type": "string",
               "description": "Event to create a configuration"
-            },
-            "configuration": {
-              "type": "object",
-              "description": "Specifics of the configuration"
             }
           }
         }
       },
       "example": {
-        "event": "create_concept_draft",
         "configuration": {
-          "generate_subscription": {
-            "roles": [
-              "data_officer"
-            ]
-          }
+          "settings": {
+            "generate_subscription": {
+              "roles": [
+                "data_officer"
+              ]
+            }
+          },
+          "event": "create_concept_draft"
         }
       }
     },
@@ -871,32 +873,34 @@
         "configuration": {
           "type": "object",
           "required": [
-            "configuration",
+            "settings",
             "event"
           ],
           "properties": {
+            "settings": {
+              "type": "object",
+              "description": "Specifics of the configuration"
+            },
             "event": {
               "type": "string",
               "description": "Event to create a configuration"
-            },
-            "configuration": {
-              "type": "object",
-              "description": "Specifics of the configuration"
             }
           }
         }
       },
       "example": {
-        "event": "create_concept_draft",
         "configuration": {
-          "generate_subscription": {
-            "roles": [
-              "data_owner"
-            ]
+          "settings": {
+            "generate_subscription": {
+              "roles": [
+                "data_owner"
+              ]
+            },
+            "generate_notification": {
+              "active": false
+            }
           },
-          "generate_notification": {
-            "active": false
-          }
+          "event": "create_concept_draft"
         }
       }
     },
@@ -904,6 +908,10 @@
       "type": "object",
       "title": "Configuration",
       "properties": {
+        "settings": {
+          "type": "object",
+          "description": "Specifics of the configuration"
+        },
         "id": {
           "type": "integer",
           "description": "Unique identifier"
@@ -911,23 +919,21 @@
         "event": {
           "type": "string",
           "description": "Event to generate a configuration"
-        },
-        "configuration": {
-          "type": "object",
-          "description": "Specifics of the configuration"
         }
       },
       "example": {
-        "event": "create_concept_draft",
         "configuration": {
-          "generate_subscription": {
-            "roles": [
-              "data_owner"
-            ]
+          "settings": {
+            "generate_subscription": {
+              "roles": [
+                "data_owner"
+              ]
+            },
+            "generate_notification": {
+              "active": false
+            }
           },
-          "generate_notification": {
-            "active": false
-          }
+          "event": "create_concept_draft"
         }
       },
       "description": "A configuration for our notifications system"
