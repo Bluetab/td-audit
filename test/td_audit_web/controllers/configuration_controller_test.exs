@@ -12,9 +12,9 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   import TdAuditWeb.Authentication, only: :functions
 
   @admin_user_name "app-admin"
-  @create_attrs %{configuration: %{}, event: "some event"}
-  @update_attrs %{configuration: %{}, event: "some updated event"}
-  @invalid_attrs %{configuration: nil, event: nil}
+  @create_attrs %{settings: %{}, event: "some event"}
+  @update_attrs %{settings: %{}, event: "some updated event"}
+  @invalid_attrs %{settings: nil, event: nil}
 
   setup_all do
     start_supervised MockTdAuthService
@@ -52,7 +52,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
       validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
-        "configuration" => %{},
+        "settings" => %{},
         "event" => "some event"}
     end
 
@@ -78,7 +78,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
       validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
-        "configuration" => %{},
+        "settings" => %{},
         "event" => "some updated event"}
     end
 

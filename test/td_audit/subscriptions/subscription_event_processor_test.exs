@@ -19,7 +19,7 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
   @conf_create_attrs %{
     event: "create_concept_draft",
-    configuration: %{
+    settings: %{
       "generate_subscription" => %{
         "roles" => ["data_owner"]
       }
@@ -97,7 +97,7 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
     assert Enum.all?(
              created_subscriptions,
-             &(Map.get(&1, :event) == "create_comment" && Map.get(&1, :resource_type) == "concept")
+             &(Map.get(&1, :event) == "create_comment" && Map.get(&1, :resource_type) == "business_concept")
            )
 
     assert Enum.all?(valid_ids, fn id ->
