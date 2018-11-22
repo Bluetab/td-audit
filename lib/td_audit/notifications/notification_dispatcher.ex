@@ -113,7 +113,7 @@ defmodule TdAudit.NotificationDispatcher do
     |> Map.put("to", subscribers)
     |> Map.put("entity_name", business_concept_name)
     |> Map.put("content", content)
-    |> Map.put("resource_link", @web_host <> @concepts_path <> "/#{business_concept_version}" )
+    |> Map.put("resource_link", @web_host <> @concepts_path <> "/#{business_concept_version}")
   end
 
   defp send_notification(%{"to" => to} = data, :email_on_comment) do
