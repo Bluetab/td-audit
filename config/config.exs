@@ -64,6 +64,8 @@ config :td_audit, user_cache: TdPerms.UserCache
 
 config :td_audit, business_concept_cache: TdPerms.BusinessConceptCache
 
+config :td_audit, concepts_path: "/concepts"
+
 config :td_perms, permissions: [
   :is_admin,
   :create_acl_entry,

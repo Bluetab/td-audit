@@ -7,6 +7,8 @@ defmodule TdAudit.NotificationDispatcher do
 
   @user_cache Application.get_env(:td_audit, :user_cache)
   @business_concept_cache Application.get_env(:td_audit, :business_concept_cache)
+  @web_host Application.get_env(:td_audit, :host_name)
+  @concepts_path Application.get_env(:td_audit, :concepts_path)
 
   @moduledoc """
   This module will create and dispatch the notifications created
@@ -103,6 +105,7 @@ defmodule TdAudit.NotificationDispatcher do
       |> Map.take(["content", "resource_id"])
 
     business_concept_name = @business_concept_cache.get_name(resource_id)
+    business_concept_version = @business_concept_cache.get_business_concept_version_id(resource_id)
     user_name = user_id |> @user_cache.get_user() |> Map.get(:full_name)
 
     Map.new()
@@ -110,6 +113,7 @@ defmodule TdAudit.NotificationDispatcher do
     |> Map.put("to", subscribers)
     |> Map.put("entity_name", business_concept_name)
     |> Map.put("content", content)
+    |> Map.put("resource_link", @web_host <> @concepts_path <> "/#{business_concept_version}" )
   end
 
   defp send_notification(%{"to" => to} = data, :email_on_comment) do

@@ -19,8 +19,8 @@ defmodule TdAudit.NotificationDispatcherTest do
 
   describe "notification_dispatcher" do
     @user_1 %{"id" => 42, "user_name" => "my_user_name", "email" => "my_user_email@foo.bar"}
-    @bc_1 %{"id" => 1, "name" => "BC Name 1"}
-    @bc_4 %{"id" => 4, "name" => "BC Name 4"}
+    @bc_1 %{"id" => 1, "name" => "BC Name 1", "business_concept_version_id" => 1}
+    @bc_4 %{"id" => 4, "name" => "BC Name 4", "business_concept_version_id" => 1}
 
     @user_list [@user_1]
     @bc_list [@bc_1, @bc_4]

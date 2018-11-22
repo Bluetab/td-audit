@@ -37,9 +37,8 @@ config :td_audit, TdAudit.Smtp.Mailer,
   adapter: Bamboo.TestAdapter
 
 config :td_audit, user_cache: TdPerms.UserCacheMock
-
 config :td_audit, business_concept_cache: TdPerms.BusinessConceptCacheMock
-
 config :td_audit, notification_loader_on_startup: false
 
 config :td_perms, redis_uri: "redis://localhost"
+config :td_audit, host_name: "http://localhost:8080"

@@ -57,14 +57,14 @@ config :td_audit, :elasticsearch,
   es_port: 9200,
   type_name: "doc"
 
-config :td_audit, email_account: "email@foo.bar"
+config :td_audit, email_account: "no-reply@example.com"
 
 config :td_audit, TdAudit.Smtp.Mailer,
   adapter: Bamboo.SMTPAdapter,
-  server: "smtp.server.com",
+  server: "smtp.example.com",
   port: 587,
-  username: "email@foo.bar",
-  password: "xxxxxx",
+  username: "auth_user",
+  password: "secret-pasword",
   tls: :always,
   ssl: false,
   retries: 3
@@ -72,3 +72,4 @@ config :td_audit, TdAudit.Smtp.Mailer,
 config :td_audit, queue: TdAudit.Queue
 
 config :td_perms, redis_uri: "redis://localhost"
+config :td_audit, host_name: "http://localhost:8080"
