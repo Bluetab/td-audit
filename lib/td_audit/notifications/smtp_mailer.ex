@@ -11,14 +11,14 @@ defmodule TdAudit.EmailBuilder do
   """
   import Bamboo.Email
   require Logger
-  @email_account Application.get_env(:td_audit, :email_account)
 
   def create(to, subject, body) do
+    email_account = Application.get_env(:td_audit, :email_account)
     Logger.info(
-      "Sending email to #{to} from email #{@email_account}"
+      "Sending email to #{to} from account #{email_account}"
     )
     new_email()
-    |> from(@email_account)
+    |> from(email_account)
     |> to(to)
     |> subject(subject)
     |> html_body(body)
