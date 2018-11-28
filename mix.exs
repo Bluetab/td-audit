@@ -44,7 +44,7 @@ defmodule TdAudit.Mixfile do
       {:exq_ui, "~> 0.9.0"},
       {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
       {:edeliver, "~> 1.5.0"},
-      {:distillery, "~> 1.0.0", warn_missing: false},
+      {:distillery, "~> 1.5", warn_missing: false},
       {:guardian, "~> 1.1.0"},
       {:httpoison, "~> 1.2.0"},
       {:phoenix_swagger, "~> 0.7.0"},
