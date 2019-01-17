@@ -4,57 +4,47 @@ defmodule TdAudit.SearchEventProcessor do
   alias TdAudit.BusinessConcept.Search
   alias TdPerms.BusinessConceptCache
 
-  def process_event(%{"event" => "create_rule", "payload" => payload, "resource_id" => _}) do
-    # Field to increment in elastic bc
-    field = "rule_count"
+  def process_event(%{"event" => "create_rule", "payload" => payload}) do
     resource_id = Map.get(payload, "business_concept_id")
-    BusinessConceptCache.increment(resource_id, field)
+    BusinessConceptCache.increment(resource_id, "rule_count")
 
     Search.update_business_concept_by_script(
       %{business_concept_id: resource_id},
-      retrieve_script_map(field).increment_int_field
+      retrieve_script_map("rule_count").increment_int_field
     )
   end
-  def process_event(%{"event" => "delete_rule", "payload" => payload, "resource_id" => _}) do
-    # Field to decrement in elastic bc
-    field = "rule_count"
+  def process_event(%{"event" => "delete_rule", "payload" => payload}) do
     resource_id = Map.get(payload, "business_concept_id")
-    BusinessConceptCache.decrement(resource_id, field)
+    BusinessConceptCache.decrement(resource_id, "rule_count")
 
     Search.update_business_concept_by_script(
       %{business_concept_id: resource_id},
-      retrieve_script_map(field).decrement_int_field
+      retrieve_script_map("rule_count").decrement_int_field
     )
   end
   def process_event(%{
-        "event" => "add_resource_field",
-        "payload" => _,
+        "event" => "add_relation",
         "resource_id" => resource_id
       }) do
-    # Field to increment in elastic bc
-    field = "link_count"
-    BusinessConceptCache.increment(resource_id, field)
+    BusinessConceptCache.increment(resource_id, "link_count")
 
     Search.update_business_concept_by_script(
       %{business_concept_id: resource_id},
-      retrieve_script_map(field).increment_int_field
+      retrieve_script_map("link_count").increment_int_field
     )
   end
   def process_event(%{
-        "event" => "delete_resource_field",
-        "payload" => _,
+        "event" => "delete_relation",
         "resource_id" => resource_id
       }) do
-    # Field to decrement in elastic bc
-    field = "link_count"
-    BusinessConceptCache.decrement(resource_id, field)
+    BusinessConceptCache.decrement(resource_id, "link_count")
 
     Search.update_business_concept_by_script(
       %{business_concept_id: resource_id},
-      retrieve_script_map(field).decrement_int_field
+      retrieve_script_map("link_count").decrement_int_field
     )
   end
-  def process_event(%{"event" => event, "payload" => _, "resource_id" => resource_id}) do
+  def process_event(%{"event" => event, "resource_id" => resource_id}) do
     Logger.info(
       "SearchEventProcessor not implemented for event #{event} and resource_id #{resource_id}"
     )
