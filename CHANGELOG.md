@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.7.0] 2018-01-17
+
+### Changed
+
+- Modified the identifiers of those events creating or deleting links
+
+### Changed
+
+- Completed notification engine for create_comment events
+
 ## [2.6.3] 2018-11-22
 
 ### Changed
