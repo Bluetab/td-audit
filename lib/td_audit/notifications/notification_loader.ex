@@ -25,7 +25,7 @@ defmodule TdAudit.NotificationLoader do
 
  @impl true
  def handle_info(:work, state) do
-  execute_notifications_dispatcher_for_event(%{"event": "create_comment"})
+  execute_notifications_dispatcher_for_event(%{event: "create_comment"})
   schedule_work()
   {:noreply, state}
  end
@@ -34,7 +34,7 @@ defmodule TdAudit.NotificationLoader do
   Process.send_after(self(), :work, @notification_load_frequency)
  end
 
- defp execute_notifications_dispatcher_for_event(%{"event": "create_comment"} = params) do
+ defp execute_notifications_dispatcher_for_event(%{event: "create_comment"} = params) do
   active =
     case NotificationsSystem.get_configuration_by_filter(params) do
       nil -> nil
@@ -45,14 +45,14 @@ defmodule TdAudit.NotificationLoader do
           |> Map.fetch!("active")
     end
 
-  dispatch_notification(active, %{"event": "create_comment"})
+  dispatch_notification(active, %{event: "create_comment"})
  end
 
- defp dispatch_notification(true, %{"event": "create_comment"}) do
+ defp dispatch_notification(true, %{event: "create_comment"}) do
   NotificationDispatcher.dispatch_notification({:dispatch_on_comment_creation, "create_comment"})
  end
 
- defp dispatch_notification(_, %{"event": "create_comment"}) do
+ defp dispatch_notification(_, %{event: "create_comment"}) do
   Logger.info(
       "Inactive configuration for event create_comment"
     )
