@@ -5,7 +5,7 @@ defmodule TdAudit.Mixfile do
   def project do
     [
       app: :td_audit,
-      version: case System.get_env("APP_VERSION") do nil -> "2.6.0-local"; v -> v end,
+      version: case System.get_env("APP_VERSION") do nil -> "2.16.0-local"; v -> v end,
       elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
@@ -65,8 +65,8 @@ defmodule TdAudit.Mixfile do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "test": ["ecto.create --quiet", "ecto.migrate", "test"],
-      "compile": ["compile", &pxh_swagger_generate/1]
+      test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      compile: ["compile", &pxh_swagger_generate/1]
     ]
   end
 
