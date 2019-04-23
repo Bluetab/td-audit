@@ -40,8 +40,9 @@ defmodule TdAudit.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:exq, "~> 0.11.0"},
+      {:exq, "~> 0.13.2"},
       {:exq_ui, "~> 0.9.0"},
+      {:jason, "~> 1.0"},
       {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
       {:edeliver, "~> 1.5.0"},
       {:distillery, "~> 1.5", warn_missing: false},
@@ -49,7 +50,7 @@ defmodule TdAudit.Mixfile do
       {:httpoison, "~> 1.2.0"},
       {:phoenix_swagger, "~> 0.7.0"},
       {:ex_json_schema, "~> 0.5"},
-      {:td_perms, git: "https://github.com/Bluetab/td-perms.git"},
+      {:td_perms, git: "https://github.com/Bluetab/td-perms.git", tag: "2.16.3"},
       {:bamboo, "~> 1.1"},
       {:bamboo_smtp, "~> 1.6.0"}
     ]

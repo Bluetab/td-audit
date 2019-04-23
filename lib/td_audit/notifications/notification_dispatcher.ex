@@ -6,7 +6,7 @@ defmodule TdAudit.NotificationDispatcher do
   alias TdAudit.Subscriptions
 
   @user_cache Application.get_env(:td_audit, :user_cache)
-  @business_concept_cache Application.get_env(:td_audit, :business_concept_cache)
+  @bc_cache Application.get_env(:td_audit, :bc_cache)
   @concepts_path Application.get_env(:td_audit, :concepts_path)
 
   @moduledoc """
@@ -103,8 +103,8 @@ defmodule TdAudit.NotificationDispatcher do
       payload
       |> Map.take(["content", "resource_id"])
 
-    business_concept_name = @business_concept_cache.get_name(resource_id)
-    business_concept_version = @business_concept_cache.get_business_concept_version_id(resource_id)
+    business_concept_name = @bc_cache.get_name(resource_id)
+    business_concept_version = @bc_cache.get_business_concept_version_id(resource_id)
     user_name = user_id |> @user_cache.get_user() |> Map.get(:full_name)
 
     web_host = Application.get_env(:td_audit, :host_name)

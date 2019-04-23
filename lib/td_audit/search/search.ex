@@ -7,8 +7,8 @@ defmodule TdAudit.Search do
     Search Engine calls
   """
 
-  def udapte_by_query(index_name, query) do
-    response = ESClientApi.udapte_by_query(index_name, query)
+  def update_by_query(index_name, query) do
+    response = ESClientApi.update_by_query(index_name, query)
     case response do
       {:ok, %HTTPoison.Response{status_code: status}} ->
         Logger.info "Updated index #{index_name} with status #{status}"

@@ -8,7 +8,7 @@ defmodule TdAudit.ESClientApi do
     post("#{index_name}/" <> "_search/", query |> JSON.encode!())
   end
 
-  def udapte_by_query(index_name, query) do
+  def update_by_query(index_name, query) do
     post("#{index_name}/" <> "_update_by_query/", query |> JSON.encode!())
   end
     @doc """
