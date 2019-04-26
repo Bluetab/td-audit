@@ -38,9 +38,9 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       resource_id_filter = 42
       resource_type_filter = "some resource_type"
       result_subscription = subscription_view_fixture()
-      subscription_view_fixture(%{"resource_id": 43, "resource_type": "some new resource_type"})
-      subscription_view_fixture(%{"resource_id": 44, "resource_type": "some new new resource_type"})
-      conn = get conn, subscription_path(conn, :index, "resource_id": resource_id_filter, "resource_type": resource_type_filter)
+      subscription_view_fixture(%{resource_id: 43, resource_type: "some new resource_type"})
+      subscription_view_fixture(%{resource_id: 44, resource_type: "some new new resource_type"})
+      conn = get conn, subscription_path(conn, :index, resource_id: resource_id_filter, resource_type: resource_type_filter)
       validate_resp_schema(conn, schema, "SubscriptionsResponse")
       assert json_response(conn, 200)["data"] == [result_subscription]
     end

@@ -5,7 +5,7 @@ defmodule TdAuditWeb.AuditControllerTest do
 
   alias TdAuditWeb.ApiServices.MockTdAuthService
 
-  @create_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00.000000Z", user_id: 42, user_name: "user name"}
+  @create_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00Z", user_id: 42, user_name: "user name"}
   @invalid_attrs %{event: nil, payload: nil, resource_id: nil, resource_type: nil, service: nil, ts: nil, user_id: nil, user_name: nil}
 
   @admin_user_name "app-admin"
@@ -41,7 +41,7 @@ defmodule TdAuditWeb.AuditControllerTest do
           "resource_id" => 42,
           "resource_type" => "some resource_type",
           "service" => "some service",
-          "ts" => "2010-04-17T14:00:00.000000Z",
+          "ts" => "2010-04-17T14:00:00Z",
           "user_id" => 42,
           "user_name" => "user name"}
     end

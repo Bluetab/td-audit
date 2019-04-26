@@ -70,5 +70,5 @@ config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthS
   auth_port: "${API_AUTH_PORT}",
   auth_domain: ""
 
-config :td_perms, redis_uri: "${REDIS_URL}"
+config :td_perms, redis_host: "${REDIS_HOST}"
 config :td_audit, host_name: "${WEB_HOST}"

@@ -1,5 +1,7 @@
 defmodule TdAudit.Repo do
-  use Ecto.Repo, otp_app: :td_audit
+  use Ecto.Repo,
+    otp_app: :td_audit,
+    adapter: Ecto.Adapters.Postgres
 
   @doc """
   Dynamically loads the repository url from the

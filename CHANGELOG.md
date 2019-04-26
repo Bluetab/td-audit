@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Update Exq version and config for Redix 0.8.2
+- [TD-1660] Will only update business concept link_count on add_relation/delete_relation event if "target_type" is "data_field"
+
 ## [2.16.0] 2019-04-01
 
 ### Added

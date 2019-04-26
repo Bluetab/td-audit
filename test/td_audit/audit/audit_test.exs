@@ -9,10 +9,10 @@ defmodule TdAudit.AuditTest do
   describe "events" do
     alias TdAudit.Audit.Event
 
-    @valid_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00.000000Z", user_id: 42, user_name: "some name"}
-    @valid_attrs_new_type_same_id %{event: "some event with new type", payload: %{}, resource_id: 43, resource_type: "some new resource_type", service: "some updated service", ts: "2011-05-18 15:01:01.000000Z", user_id: 43, user_name: "some updated name"}
-    @valid_attrs_new_type_diff_id %{event: "some event with new type", payload: %{}, resource_id: 42, resource_type: "some new resource_type", service: "some service", ts: "2010-04-17 14:00:00.000000Z", user_id: 42, user_name: "some name"}
-    @update_attrs %{event: "some updated event", payload: %{}, resource_id: 43, resource_type: "some updated resource_type", service: "some updated service", ts: "2011-05-18 15:01:01.000000Z", user_id: 43, user_name: "some updated name"}
+    @valid_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00Z", user_id: 42, user_name: "some name"}
+    @valid_attrs_new_type_same_id %{event: "some event with new type", payload: %{}, resource_id: 43, resource_type: "some new resource_type", service: "some updated service", ts: "2011-05-18 15:01:01Z", user_id: 43, user_name: "some updated name"}
+    @valid_attrs_new_type_diff_id %{event: "some event with new type", payload: %{}, resource_id: 42, resource_type: "some new resource_type", service: "some service", ts: "2010-04-17 14:00:00Z", user_id: 42, user_name: "some name"}
+    @update_attrs %{event: "some updated event", payload: %{}, resource_id: 43, resource_type: "some updated resource_type", service: "some updated service", ts: "2011-05-18 15:01:01Z", user_id: 43, user_name: "some updated name"}
     @invalid_attrs %{event: nil, payload: nil, resource_id: nil, resource_type: nil, service: nil, ts: nil, user_id: nil, user_name: nil}
 
     def event_fixture(attrs \\ %{}) do
@@ -39,7 +39,7 @@ defmodule TdAudit.AuditTest do
       event_1 = event_fixture(%{payload: %{"subscriber" => "mymail@foo.com"}})
       event_2 = event_fixture(%{payload: %{"subscriber" => "mymail@foo.com"}})
       event_fixture(%{payload: %{"subscriber" => "notmymail@foo.com"}})
-      assert Audit.list_events_by_filter(%{"payload": %{"subscriber": "mymail@foo.com"}}) == [event_1, event_2]
+      assert Audit.list_events_by_filter(%{payload: %{subscriber: "mymail@foo.com"}}) == [event_1, event_2]
     end
 
     test "list_events/1 returns all events filtered by resource_type" do
@@ -68,7 +68,7 @@ defmodule TdAudit.AuditTest do
       assert event.resource_id == 42
       assert event.resource_type == "some resource_type"
       assert event.service == "some service"
-      assert event.ts == DateTime.from_naive!(~N[2010-04-17 14:00:00.000000Z], "Etc/UTC")
+      assert event.ts == DateTime.from_naive!(~N[2010-04-17 14:00:00Z], "Etc/UTC")
       assert event.user_id == 42
     end
 
@@ -85,7 +85,7 @@ defmodule TdAudit.AuditTest do
       assert event.resource_id == 43
       assert event.resource_type == "some updated resource_type"
       assert event.service == "some updated service"
-      assert event.ts == DateTime.from_naive!(~N[2011-05-18 15:01:01.000000Z], "Etc/UTC")
+      assert event.ts == DateTime.from_naive!(~N[2011-05-18 15:01:01Z], "Etc/UTC")
       assert event.user_id == 43
     end
 

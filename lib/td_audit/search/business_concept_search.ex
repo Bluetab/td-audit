@@ -15,7 +15,7 @@ defmodule TdAudit.BusinessConcept.Search do
       script: script
     }
 
-    @search_service.udapte_by_query("business_concept", payload)
+    @search_service.update_by_query("business_concept", payload)
   end
 
   def create_filters(%{"filters" => filters}) do

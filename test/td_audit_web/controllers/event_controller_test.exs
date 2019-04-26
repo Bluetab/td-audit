@@ -11,8 +11,8 @@ defmodule TdAuditWeb.EventControllerTest do
   alias TdAudit.Audit.Event
   alias TdAuditWeb.ApiServices.MockTdAuthService
 
-  @create_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00.000000Z", user_id: 42, user_name: "user name"}
-  @update_attrs %{event: "some updated event", payload: %{}, resource_id: 43, resource_type: "some updated resource_type", service: "some updated service", ts: "2011-05-18 15:01:01.000000Z", user_id: 43, user_name: "some updated name"}
+  @create_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00Z", user_id: 42, user_name: "user name"}
+  @update_attrs %{event: "some updated event", payload: %{}, resource_id: 43, resource_type: "some updated resource_type", service: "some updated service", ts: "2011-05-18 15:01:01Z", user_id: 43, user_name: "some updated name"}
   @invalid_attrs %{event: nil, payload: nil, resource_id: nil, resource_type: nil, service: nil, ts: nil, user_id: nil, user_name: nil}
 
   @admin_user_name "app-admin"
@@ -41,7 +41,7 @@ defmodule TdAuditWeb.EventControllerTest do
 
     @tag authenticated_user: @admin_user_name
     test "lists all events filtered", %{conn: conn, swagger_schema: schema} do
-      conn = get conn, event_path(conn, :index, "resource_id": 42, "resource_type": "some resource_type")
+      conn = get conn, event_path(conn, :index, resource_id: 42, resource_type: "some resource_type")
       validate_resp_schema(conn, schema, "EventsResponse")
       assert json_response(conn, 200)["data"] == []
     end
@@ -65,7 +65,7 @@ defmodule TdAuditWeb.EventControllerTest do
         "resource_id" => 42,
         "resource_type" => "some resource_type",
         "service" => "some service",
-        "ts" => "2010-04-17T14:00:00.000000Z",
+        "ts" => "2010-04-17T14:00:00Z",
         "user_id" => 42,
         "user_name" => "user name"}
     end
@@ -97,7 +97,7 @@ defmodule TdAuditWeb.EventControllerTest do
         "resource_id" => 43,
         "resource_type" => "some updated resource_type",
         "service" => "some updated service",
-        "ts" => "2011-05-18T15:01:01.000000Z",
+        "ts" => "2011-05-18T15:01:01Z",
         "user_id" => 43,
         "user_name" => "some updated name"}
     end

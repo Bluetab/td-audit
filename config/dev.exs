@@ -72,5 +72,5 @@ config :td_audit, TdAudit.Smtp.Mailer,
 
 config :td_audit, queue: TdAudit.Queue
 
-config :td_perms, redis_uri: "redis://localhost"
+config :td_perms, redis_host: "localhost"
 config :td_audit, host_name: "http://localhost:8080"

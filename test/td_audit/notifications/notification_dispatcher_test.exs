@@ -8,19 +8,19 @@ defmodule TdAudit.NotificationDispatcherTest do
   use TdAudit.DataCase
   alias TdAudit.NotificationDispatcher
   alias TdAudit.Subscriptions
-  alias TdPerms.BusinessConceptCacheMock
+  alias TdPerms.MockBusinessConceptCache
   alias TdPerms.UserCacheMock
 
   setup_all do
     start_supervised(UserCacheMock)
-    start_supervised(BusinessConceptCacheMock)
+    start_supervised(MockBusinessConceptCache)
     :ok
   end
 
   describe "notification_dispatcher" do
     @user_1 %{"id" => 42, "user_name" => "my_user_name", "email" => "my_user_email@foo.bar"}
-    @bc_1 %{"id" => 1, "name" => "BC Name 1", "business_concept_version_id" => 1}
-    @bc_4 %{"id" => 4, "name" => "BC Name 4", "business_concept_version_id" => 1}
+    @bc_1 %{"id" => 1, "domain_id"=> 4, "name" => "BC Name 1", "business_concept_version_id" => 1}
+    @bc_4 %{"id" => 4, "domain_id"=> 4, "name" => "BC Name 4", "business_concept_version_id" => 1}
 
     @user_list [@user_1]
     @bc_list [@bc_1, @bc_4]
@@ -137,8 +137,13 @@ defmodule TdAudit.NotificationDispatcherTest do
 
   defp create_bcs_in_cache do
     @bc_list
-    |> Enum.map(&Map.take(&1, ["id", "name"]))
-    |> Enum.map(&BusinessConceptCacheMock.put_bc_in_cache(&1))
+    |> Enum.map(&Map.take(&1, ["id", "name", "domain_id", "business_concept_version_id"]))
+    |> Enum.map(&atomize_keys(&1))
+    |> Enum.map(&MockBusinessConceptCache.put_business_concept(&1))
+  end
+
+  defp atomize_keys(map) do
+    for {key, val} <- map, into: %{}, do: {String.to_atom(key), val}
   end
 
   defp events_fixture do
