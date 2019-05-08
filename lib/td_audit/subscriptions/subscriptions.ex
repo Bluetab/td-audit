@@ -22,7 +22,7 @@ defmodule TdAudit.Subscriptions do
     Repo.all(Subscription)
   end
 
-   @doc """
+  @doc """
   Returns the list of subscriptions after filters are applied.
 
   ## Examples
@@ -34,9 +34,12 @@ defmodule TdAudit.Subscriptions do
   def list_subscriptions_by_filter(params) do
     fields = Subscription.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
-    Repo.all(from p in Subscription,
+
+    Repo.all(
+      from(p in Subscription,
         where: ^dynamic
       )
+    )
   end
 
   @doc """
@@ -92,51 +95,61 @@ defmodule TdAudit.Subscriptions do
   end
 
   def update_last_consumed_events_on_activation(
-      {:ok, %Configuration{settings: settings} = configuration}) do
+        {:ok, %Configuration{settings: settings} = configuration}
+      ) do
     if has_subscription_been_activated?(settings) do
-        update_last_consumed_events_by_event_type(
-            Map.get(configuration, :event), DateTime.utc_now()
-        )
+      update_last_consumed_events_by_event_type(
+        Map.get(configuration, :event),
+        DateTime.utc_now()
+      )
     end
   end
 
   def update_last_consumed_events_on_activation(_) do
   end
 
-  defp has_subscription_been_activated?(
-      %{"generate_notification" => notification_settings}
-    ) do
+  defp has_subscription_been_activated?(%{"generate_notification" => notification_settings}) do
     has_active_notification_flag?(notification_settings)
   end
+
   defp has_subscription_been_activated?(_), do: false
 
   defp has_active_notification_flag?(%{"active" => true}), do: true
   defp has_active_notification_flag?(_), do: false
 
   def update_last_consumed_events(
-      %{
+        %{
           "resource_id" => resource_id,
           "resource_type" => resource_type,
           "subscribers" => subscribers
         },
-      last_consumed_event
-     ) do
-        query = from(from p in Subscription,
-            update: [set: [last_consumed_event: ^last_consumed_event]],
-            where: p.resource_id  == ^resource_id
-                and p.resource_type  == ^resource_type
-                and p.user_email in ^subscribers)
+        last_consumed_event
+      ) do
+    query =
+      from(
+        from(p in Subscription,
+          update: [set: [last_consumed_event: ^last_consumed_event]],
+          where:
+            p.resource_id == ^resource_id and
+              p.resource_type == ^resource_type and
+              p.user_email in ^subscribers
+        )
+      )
 
-        query |> Repo.update_all([])
-     end
+    query |> Repo.update_all([])
+  end
 
-     def update_last_consumed_events_by_event_type(
+  def update_last_consumed_events_by_event_type(
         event,
         last_consumed_event
-       ) do
-        query = from(from p in Subscription,
-            update: [set: [last_consumed_event: ^last_consumed_event]],
-            where: p.event  == ^event)
+      ) do
+    query =
+      from(
+        from(p in Subscription,
+          update: [set: [last_consumed_event: ^last_consumed_event]],
+          where: p.event == ^event
+        )
+      )
 
     query |> Repo.update_all([])
   end

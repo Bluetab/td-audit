@@ -2,10 +2,10 @@
 
 ## [Unreleased]
 
-### Added
+### Changed
 
-- Update Exq version and config for Redix 0.8.2
 - [TD-1660] Will only update business concept link_count on add_relation/delete_relation event if "target_type" is "data_field"
+- Update to phoenix 1.4, ecto 3.0, exq 0.13, redix 0.8.2
 
 ## [2.16.0] 2019-04-01
 

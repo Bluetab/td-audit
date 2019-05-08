@@ -30,7 +30,7 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             resource_id: 100,
             resource_type: "some resource type",
             service: "some service",
-            ts: "2018-05-08T17:17:59.691460",
+            ts: "2018-05-08T17:17:59.691000",
             user_id: 1,
             user_name: "some user name"
           })
