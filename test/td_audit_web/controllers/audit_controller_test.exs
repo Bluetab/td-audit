@@ -62,7 +62,7 @@ defmodule TdAuditWeb.AuditControllerTest do
                  "resource_id" => 42,
                  "resource_type" => "some resource_type",
                  "service" => "some service",
-                 "ts" => "2010-04-17T14:00:00Z",
+                 "ts" => "2010-04-17T14:00:00.000000Z",
                  "user_id" => 42,
                  "user_name" => "user name"
                }

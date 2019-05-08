@@ -5,9 +5,10 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   use TdAuditWeb.ConnCase
   use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
-  import TdAuditWeb.Authentication, only: :functions
-  alias TdAudit.Subscriptions.Subscription
   import TdAudit.SubscriptionTestHelper
+  import TdAuditWeb.Authentication, only: :functions
+
+  alias TdAudit.Subscriptions.Subscription
   alias TdAuditWeb.ApiServices.MockTdAuthService
 
   @update_attrs %{user_email: "mynewmail@foo.com", periodicity: "monthly"}
