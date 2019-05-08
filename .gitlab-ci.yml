@@ -61,7 +61,7 @@ acceptance:
   after_script:
     - docker-compose down -v
 
-acceptance:
+acceptance:branches:
   stage: acceptance
   except:
     - master
