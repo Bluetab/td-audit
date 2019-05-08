@@ -15,12 +15,11 @@ use Mix.Config
 # which you typically run after static files are built.
 config :td_audit, TdAuditWeb.Endpoint,
   http: [port: 4007],
-  url: [host: "truedat.bluetab.net", port: 8008],
   server: true
 
 # Do not print debug messages in production
 config :logger, :console,
-  format: (System.get_env("EX_LOGGER_FORMAT") || "[$level] $message") || "\n",
+  format: System.get_env("EX_LOGGER_FORMAT") || "[$level] $message" || "\n",
   level: :info
 
 # ## SSL Support

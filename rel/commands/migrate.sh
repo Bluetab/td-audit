@@ -1,3 +1,3 @@
 #!/bin/sh
 
-bin/td_audit command Elixir.TdAudit.ReleaseTasks seed
+$RELEASE_ROOT_DIR/bin/td_audit eval 'Elixir.TdAudit.ReleaseTasks.migrate()'

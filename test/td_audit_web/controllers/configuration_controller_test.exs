@@ -17,7 +17,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   @invalid_attrs %{settings: nil, event: nil}
 
   setup_all do
-    start_supervised MockTdAuthService
+    start_supervised(MockTdAuthService)
     :ok
   end
 
@@ -33,7 +33,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   describe "index" do
     @tag authenticated_user: @admin_user_name
     test "lists all notifications_system_configuration", %{conn: conn, swagger_schema: schema} do
-      conn = get conn, configuration_path(conn, :index)
+      conn = get(conn, Routes.configuration_path(conn, :index))
       validate_resp_schema(conn, schema, "ConfigurationsResponse")
       assert json_response(conn, 200)["data"] == []
     end
@@ -42,23 +42,25 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   describe "create configuration" do
     @tag authenticated_user: @admin_user_name
     test "renders configuration when data is valid", %{conn: conn, swagger_schema: schema} do
-      conn = post conn, configuration_path(conn, :create), configuration: @create_attrs
+      conn = post(conn, Routes.configuration_path(conn, :create), configuration: @create_attrs)
       validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle_and_put_headers(conn)
 
-      conn = get conn, configuration_path(conn, :show, id)
+      conn = get(conn, Routes.configuration_path(conn, :show, id))
       validate_resp_schema(conn, schema, "ConfigurationResponse")
+
       assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "settings" => %{},
-        "event" => "some event"}
+               "id" => id,
+               "settings" => %{},
+               "event" => "some event"
+             }
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post conn, configuration_path(conn, :create), configuration: @invalid_attrs
+      conn = post(conn, Routes.configuration_path(conn, :create), configuration: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -67,24 +69,38 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
     setup [:create_configuration]
 
     @tag authenticated_user: @admin_user_name
-    test "renders configuration when data is valid", %{conn: conn, configuration: %Configuration{id: id} = configuration, swagger_schema: schema} do
-      conn = put conn, configuration_path(conn, :update, configuration), configuration: @update_attrs
+    test "renders configuration when data is valid", %{
+      conn: conn,
+      configuration: %Configuration{id: id} = configuration,
+      swagger_schema: schema
+    } do
+      conn =
+        put(conn, Routes.configuration_path(conn, :update, configuration),
+          configuration: @update_attrs
+        )
+
       validate_resp_schema(conn, schema, "ConfigurationResponse")
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = recycle_and_put_headers(conn)
 
-      conn = get conn, configuration_path(conn, :show, id)
+      conn = get(conn, Routes.configuration_path(conn, :show, id))
       validate_resp_schema(conn, schema, "ConfigurationResponse")
+
       assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "settings" => %{},
-        "event" => "some updated event"}
+               "id" => id,
+               "settings" => %{},
+               "event" => "some updated event"
+             }
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn, configuration: configuration} do
-      conn = put conn, configuration_path(conn, :update, configuration), configuration: @invalid_attrs
+      conn =
+        put(conn, Routes.configuration_path(conn, :update, configuration),
+          configuration: @invalid_attrs
+        )
+
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -93,16 +109,20 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
     setup [:create_configuration]
 
     @tag authenticated_user: @admin_user_name
-    test "deletes chosen configuration", %{conn: conn, configuration: configuration, swagger_schema: schema} do
-      conn = delete conn, configuration_path(conn, :delete, configuration)
+    test "deletes chosen configuration", %{
+      conn: conn,
+      configuration: configuration,
+      swagger_schema: schema
+    } do
+      conn = delete(conn, Routes.configuration_path(conn, :delete, configuration))
       assert response(conn, 204)
 
       conn = recycle_and_put_headers(conn)
 
-      assert_error_sent 404, fn ->
-        get conn, configuration_path(conn, :show, configuration)
+      assert_error_sent(404, fn ->
+        get(conn, Routes.configuration_path(conn, :show, configuration))
         validate_resp_schema(conn, schema, "ConfigurationResponse")
-      end
+      end)
     end
   end
 

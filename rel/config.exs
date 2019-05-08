@@ -23,7 +23,7 @@ environment :prod do
   set include_erts: true
   set include_src: false
   set cookie: :"z{ckwDE>plPqKz7JcsQPQsmI(NGeQvdvIHOYI)`zu0qp*.&*_.6PU0OlogX?KZvK"
-  set pre_start_hook: "rel/hooks/pre-start"
+  set pre_start_hooks: "rel/hooks/pre_start"
 end
 
 # You may define one or more releases in this file.
@@ -37,7 +37,7 @@ release :td_audit do
     :runtime_tools
   ]
   set commands: [
-    "migrate": "rel/commands/migrate.sh"
+    migrate: "rel/commands/migrate.sh"
   ]
 end
 

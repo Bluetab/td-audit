@@ -42,7 +42,7 @@ config :td_audit, TdAudit.Smtp.Mailer,
 
 # Configure Exq
 config :exq,
-  url: "${REDIS_URL}",
+  host: "${REDIS_HOST}",
   namespace: "${REDIS_NAMESPACE}",
   concurrency: 1000,
   queues: ["timeline"],
@@ -50,12 +50,6 @@ config :exq,
   dead_max_jobs: 10_000,
   dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
   start_on_application: false
-
-# Configure Exq-Ui
-config :exq_ui,
-  web_port: 4047,
-  web_namespace: "",
-  server: true
 
 config :td_audit, queue: TdAudit.Queue
 

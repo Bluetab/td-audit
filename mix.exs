@@ -1,15 +1,18 @@
 defmodule TdAudit.Mixfile do
   use Mix.Project
-  alias Mix.Tasks.Phx.Swagger.Generate, as: PhxSwaggerGenerate
 
   def project do
     [
       app: :td_audit,
-      version: case System.get_env("APP_VERSION") do nil -> "2.16.0-local"; v -> v end,
+      version:
+        case System.get_env("APP_VERSION") do
+          nil -> "2.16.0-local"
+          v -> v
+        end,
       elixir: "~> 1.6",
-      elixirc_paths: elixirc_paths(Mix.env),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers,
-      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext, :phoenix_swagger] ++ Mix.compilers(),
+      start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
     ]
@@ -21,13 +24,13 @@ defmodule TdAudit.Mixfile do
   def application do
     [
       mod: {TdAudit.Application, []},
-      extra_applications: [:logger, :bamboo, :bamboo_smtp, :runtime_tools, :exq_ui]
+      extra_applications: [:logger, :bamboo, :bamboo_smtp, :runtime_tools]
     ]
   end
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
   #
@@ -36,19 +39,18 @@ defmodule TdAudit.Mixfile do
     [
       {:phoenix, "~> 1.4.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:plug, "~> 1.7"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
       {:exq, "~> 0.13.2"},
-      {:exq_ui, "~> 0.10.0"},
       {:jason, "~> 1.0"},
-      {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
-      {:edeliver, "~> 1.5.0"},
-      {:distillery, "~> 1.5", warn_missing: false},
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:distillery, "~> 2.0", runtime: false},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.2.0"},
-      {:phoenix_swagger, "~> 0.7.0"},
+      {:phoenix_swagger, "~> 0.8.0"},
       {:ex_json_schema, "~> 0.5"},
       {:td_perms, git: "https://github.com/Bluetab/td-perms.git", tag: "2.16.3"},
       {:bamboo, "~> 1.1"},
@@ -66,14 +68,7 @@ defmodule TdAudit.Mixfile do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"],
-      compile: ["compile", &pxh_swagger_generate/1]
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
-  end
-
-  defp pxh_swagger_generate(_) do
-    if Mix.env in [:dev, :prod] do
-      PhxSwaggerGenerate.run(["priv/static/swagger.json"])
-    end
   end
 end

@@ -11,9 +11,36 @@ defmodule TdAuditWeb.EventControllerTest do
   alias TdAudit.Audit.Event
   alias TdAuditWeb.ApiServices.MockTdAuthService
 
-  @create_attrs %{event: "some event", payload: %{}, resource_id: 42, resource_type: "some resource_type", service: "some service", ts: "2010-04-17 14:00:00Z", user_id: 42, user_name: "user name"}
-  @update_attrs %{event: "some updated event", payload: %{}, resource_id: 43, resource_type: "some updated resource_type", service: "some updated service", ts: "2011-05-18 15:01:01Z", user_id: 43, user_name: "some updated name"}
-  @invalid_attrs %{event: nil, payload: nil, resource_id: nil, resource_type: nil, service: nil, ts: nil, user_id: nil, user_name: nil}
+  @create_attrs %{
+    event: "some event",
+    payload: %{},
+    resource_id: 42,
+    resource_type: "some resource_type",
+    service: "some service",
+    ts: "2010-04-17 14:00:00Z",
+    user_id: 42,
+    user_name: "user name"
+  }
+  @update_attrs %{
+    event: "some updated event",
+    payload: %{},
+    resource_id: 43,
+    resource_type: "some updated resource_type",
+    service: "some updated service",
+    ts: "2011-05-18 15:01:01Z",
+    user_id: 43,
+    user_name: "some updated name"
+  }
+  @invalid_attrs %{
+    event: nil,
+    payload: nil,
+    resource_id: nil,
+    resource_type: nil,
+    service: nil,
+    ts: nil,
+    user_id: nil,
+    user_name: nil
+  }
 
   @admin_user_name "app-admin"
 
@@ -27,21 +54,26 @@ defmodule TdAuditWeb.EventControllerTest do
   end
 
   setup_all do
-    start_supervised MockTdAuthService
+    start_supervised(MockTdAuthService)
     :ok
   end
 
   describe "index" do
     @tag authenticated_user: @admin_user_name
     test "lists all events", %{conn: conn, swagger_schema: schema} do
-      conn = get conn, event_path(conn, :index)
+      conn = get(conn, Routes.event_path(conn, :index))
       validate_resp_schema(conn, schema, "EventsResponse")
       assert json_response(conn, 200)["data"] == []
     end
 
     @tag authenticated_user: @admin_user_name
     test "lists all events filtered", %{conn: conn, swagger_schema: schema} do
-      conn = get conn, event_path(conn, :index, resource_id: 42, resource_type: "some resource_type")
+      conn =
+        get(
+          conn,
+          Routes.event_path(conn, :index, resource_id: 42, resource_type: "some resource_type")
+        )
+
       validate_resp_schema(conn, schema, "EventsResponse")
       assert json_response(conn, 200)["data"] == []
     end
@@ -50,29 +82,31 @@ defmodule TdAuditWeb.EventControllerTest do
   describe "create event" do
     @tag authenticated_user: @admin_user_name
     test "renders event when data is valid", %{conn: conn, swagger_schema: schema} do
-      conn = post conn, event_path(conn, :create), event: @create_attrs
+      conn = post(conn, Routes.event_path(conn, :create), event: @create_attrs)
       validate_resp_schema(conn, schema, "EventResponse")
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle_and_put_headers(conn)
 
-      conn = get conn, event_path(conn, :show, id)
+      conn = get(conn, Routes.event_path(conn, :show, id))
       validate_resp_schema(conn, schema, "EventResponse")
+
       assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "event" => "some event",
-        "payload" => %{},
-        "resource_id" => 42,
-        "resource_type" => "some resource_type",
-        "service" => "some service",
-        "ts" => "2010-04-17T14:00:00Z",
-        "user_id" => 42,
-        "user_name" => "user name"}
+               "id" => id,
+               "event" => "some event",
+               "payload" => %{},
+               "resource_id" => 42,
+               "resource_type" => "some resource_type",
+               "service" => "some service",
+               "ts" => "2010-04-17T14:00:00Z",
+               "user_id" => 42,
+               "user_name" => "user name"
+             }
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post conn, event_path(conn, :create), event: @invalid_attrs
+      conn = post(conn, Routes.event_path(conn, :create), event: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -81,30 +115,36 @@ defmodule TdAuditWeb.EventControllerTest do
     setup [:create_event]
 
     @tag authenticated_user: @admin_user_name
-    test "renders event when data is valid", %{conn: conn, event: %Event{id: id} = event, swagger_schema: schema} do
-      conn = put conn, event_path(conn, :update, event), event: @update_attrs
+    test "renders event when data is valid", %{
+      conn: conn,
+      event: %Event{id: id} = event,
+      swagger_schema: schema
+    } do
+      conn = put(conn, Routes.event_path(conn, :update, event), event: @update_attrs)
       validate_resp_schema(conn, schema, "EventResponse")
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = recycle_and_put_headers(conn)
 
-      conn = get conn, event_path(conn, :show, id)
+      conn = get(conn, Routes.event_path(conn, :show, id))
       validate_resp_schema(conn, schema, "EventResponse")
+
       assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "event" => "some updated event",
-        "payload" => %{},
-        "resource_id" => 43,
-        "resource_type" => "some updated resource_type",
-        "service" => "some updated service",
-        "ts" => "2011-05-18T15:01:01Z",
-        "user_id" => 43,
-        "user_name" => "some updated name"}
+               "id" => id,
+               "event" => "some updated event",
+               "payload" => %{},
+               "resource_id" => 43,
+               "resource_type" => "some updated resource_type",
+               "service" => "some updated service",
+               "ts" => "2011-05-18T15:01:01Z",
+               "user_id" => 43,
+               "user_name" => "some updated name"
+             }
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn, event: event} do
-      conn = put conn, event_path(conn, :update, event), event: @invalid_attrs
+      conn = put(conn, Routes.event_path(conn, :update, event), event: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -114,15 +154,15 @@ defmodule TdAuditWeb.EventControllerTest do
 
     @tag authenticated_user: @admin_user_name
     test "deletes chosen event", %{conn: conn, event: event, swagger_schema: schema} do
-      conn = delete conn, event_path(conn, :delete, event)
+      conn = delete(conn, Routes.event_path(conn, :delete, event))
       assert response(conn, 204)
 
       conn = recycle_and_put_headers(conn)
 
-      assert_error_sent 404, fn ->
-        get conn, event_path(conn, :show, event)
+      assert_error_sent(404, fn ->
+        get(conn, Routes.event_path(conn, :show, event))
         validate_resp_schema(conn, schema, "EventResponse")
-      end
+      end)
     end
   end
 
