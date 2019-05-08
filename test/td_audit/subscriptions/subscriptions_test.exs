@@ -16,7 +16,7 @@ defmodule TdAudit.SubscriptionsTest do
       resource_id: 42,
       resource_type: "some resource_type",
       service: "some service",
-      ts: "2010-04-17 14:00:00.000000Z",
+      ts: "2010-04-17 14:00:00.000Z",
       user_id: 42,
       user_name: "some name"
     }
@@ -60,7 +60,8 @@ defmodule TdAudit.SubscriptionsTest do
     end
 
     test "create_subscription/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(retrieve_invalid_attrs())
+      assert {:error, %Ecto.Changeset{}} =
+               Subscriptions.create_subscription(retrieve_invalid_attrs())
     end
 
     test "update_subscription/2 with valid data updates the subscription" do
