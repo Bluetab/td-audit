@@ -17,26 +17,26 @@ defmodule TdAuditWeb do
   and import those modules here.
   """
 
-  def controller do
-    quote do
-      use Phoenix.Controller, namespace: TdAuditWeb
+  def controller(log \\ :info) do
+    quote bind_quoted: [log: log] do
+      use Phoenix.Controller, namespace: TdAuditWeb, log: log
       import Plug.Conn
-      import TdAuditWeb.Router.Helpers
       import TdAuditWeb.Gettext
+      alias TdAuditWeb.Router.Helpers, as: Routes
     end
   end
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/td_audit_web/templates",
-                        namespace: TdAuditWeb
+      use Phoenix.View,
+        root: "lib/td_audit_web/templates",
+        namespace: TdAuditWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
-
-      import TdAuditWeb.Router.Helpers
       import TdAuditWeb.ErrorHelpers
       import TdAuditWeb.Gettext
+      alias TdAuthWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -60,5 +60,12 @@ defmodule TdAuditWeb do
   """
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
+  end
+
+  @doc """
+  Custom log level for controllers
+  """
+  defmacro __using__([:controller = which, log]) do
+    apply(__MODULE__, which, [log])
   end
 end

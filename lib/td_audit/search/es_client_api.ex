@@ -11,8 +11,9 @@ defmodule TdAudit.ESClientApi do
   def update_by_query(index_name, query) do
     post("#{index_name}/" <> "_update_by_query/", query |> JSON.encode!())
   end
-    @doc """
-    Concatenates elasticsearch path at the beggining of HTTPoison requests
+
+  @doc """
+  Concatenates elasticsearch path at the beggining of HTTPoison requests
   """
   def process_url(path) do
     es_config = Application.get_env(:td_audit, :elasticsearch)
@@ -20,7 +21,7 @@ defmodule TdAudit.ESClientApi do
   end
 
   @doc """
-    Decodes response body
+  Decodes response body
   """
   def process_response_body(body) do
     body
@@ -28,10 +29,9 @@ defmodule TdAudit.ESClientApi do
   end
 
   @doc """
-    Adds requests headers
+  Adds requests headers
   """
   def process_request_headers(_headers) do
-    headers = [{"Content-Type", "application/json"}]
-    headers
+    [{"Content-Type", "application/json"}]
   end
 end

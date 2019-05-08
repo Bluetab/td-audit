@@ -20,7 +20,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   end
 
   setup_all do
-    start_supervised MockTdAuthService
+    start_supervised(MockTdAuthService)
     :ok
   end
 
@@ -28,7 +28,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag authenticated_user: @admin_user_name
     test "lists all subscriptions", %{conn: conn, swagger_schema: schema} do
       subscription = subscription_view_fixture()
-      conn = get conn, subscription_path(conn, :index)
+      conn = get(conn, Routes.subscription_path(conn, :index))
       validate_resp_schema(conn, schema, "SubscriptionsResponse")
       assert json_response(conn, 200)["data"] == [subscription]
     end
@@ -40,7 +40,16 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       result_subscription = subscription_view_fixture()
       subscription_view_fixture(%{resource_id: 43, resource_type: "some new resource_type"})
       subscription_view_fixture(%{resource_id: 44, resource_type: "some new new resource_type"})
-      conn = get conn, subscription_path(conn, :index, resource_id: resource_id_filter, resource_type: resource_type_filter)
+
+      conn =
+        get(
+          conn,
+          Routes.subscription_path(conn, :index,
+            resource_id: resource_id_filter,
+            resource_type: resource_type_filter
+          )
+        )
+
       validate_resp_schema(conn, schema, "SubscriptionsResponse")
       assert json_response(conn, 200)["data"] == [result_subscription]
     end
@@ -49,28 +58,33 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   describe "create subscription" do
     @tag authenticated_user: @admin_user_name
     test "renders a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
-      conn = post conn, subscription_path(conn, :create), subscription: retrieve_valid_attrs()
+      conn =
+        post(conn, Routes.subscription_path(conn, :create), subscription: retrieve_valid_attrs())
+
       validate_resp_schema(conn, schema, "SubscriptionResponse")
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle_and_put_headers(conn)
 
-      conn = get conn, subscription_path(conn, :show, id)
+      conn = get(conn, Routes.subscription_path(conn, :show, id))
       validate_resp_schema(conn, schema, "SubscriptionResponse")
+
       assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "event" => Map.get(retrieve_valid_attrs(), :event),
-        "resource_id" => Map.get(retrieve_valid_attrs(), :resource_id),
-        "resource_type" => Map.get(retrieve_valid_attrs(), :resource_type),
-        "user_email" => Map.get(retrieve_valid_attrs(), :user_email),
-        "periodicity" => Map.get(retrieve_valid_attrs(), :periodicity),
-        "last_consumed_event" => Map.get(retrieve_valid_attrs(), :last_consumed_event)
-      }
+               "id" => id,
+               "event" => Map.get(retrieve_valid_attrs(), :event),
+               "resource_id" => Map.get(retrieve_valid_attrs(), :resource_id),
+               "resource_type" => Map.get(retrieve_valid_attrs(), :resource_type),
+               "user_email" => Map.get(retrieve_valid_attrs(), :user_email),
+               "periodicity" => Map.get(retrieve_valid_attrs(), :periodicity),
+               "last_consumed_event" => Map.get(retrieve_valid_attrs(), :last_consumed_event)
+             }
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post conn, subscription_path(conn, :create), subscription: retrieve_invalid_attrs()
+      conn =
+        post(conn, Routes.subscription_path(conn, :create), subscription: retrieve_invalid_attrs())
+
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -78,30 +92,42 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   describe "update subscription" do
     setup [:create_subscription]
     @tag authenticated_user: @admin_user_name
-    test "renders subscription when data is valid", %{conn: conn, subscription: %Subscription{id: id} = subscription, swagger_schema: schema} do
-      conn = put conn, subscription_path(conn, :update, subscription), subscription: @update_attrs
+    test "renders subscription when data is valid", %{
+      conn: conn,
+      subscription: %Subscription{id: id} = subscription,
+      swagger_schema: schema
+    } do
+      conn =
+        put(conn, Routes.subscription_path(conn, :update, subscription),
+          subscription: @update_attrs
+        )
+
       validate_resp_schema(conn, schema, "SubscriptionResponse")
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = recycle_and_put_headers(conn)
 
-      conn = get conn, subscription_path(conn, :show, id)
+      conn = get(conn, Routes.subscription_path(conn, :show, id))
       validate_resp_schema(conn, schema, "SubscriptionResponse")
 
       assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "event" => Map.get(retrieve_valid_attrs(), :event),
-        "resource_id" => Map.get(retrieve_valid_attrs(), :resource_id),
-        "resource_type" => Map.get(retrieve_valid_attrs(), :resource_type),
-        "periodicity" =>  Map.get(@update_attrs, :periodicity),
-        "user_email" => Map.get(@update_attrs, :user_email),
-        "last_consumed_event" => Map.get(retrieve_valid_attrs(), :last_consumed_event)
-      }
+               "id" => id,
+               "event" => Map.get(retrieve_valid_attrs(), :event),
+               "resource_id" => Map.get(retrieve_valid_attrs(), :resource_id),
+               "resource_type" => Map.get(retrieve_valid_attrs(), :resource_type),
+               "periodicity" => Map.get(@update_attrs, :periodicity),
+               "user_email" => Map.get(@update_attrs, :user_email),
+               "last_consumed_event" => Map.get(retrieve_valid_attrs(), :last_consumed_event)
+             }
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn, subscription: subscription} do
-      conn = put conn, subscription_path(conn, :update, subscription), subscription: @invalid_update_attrs
+      conn =
+        put(conn, Routes.subscription_path(conn, :update, subscription),
+          subscription: @invalid_update_attrs
+        )
+
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -110,16 +136,20 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     setup [:create_subscription]
 
     @tag authenticated_user: @admin_user_name
-    test "deletes chosen subscription", %{conn: conn, subscription: subscription, swagger_schema: schema} do
-      conn = delete conn, subscription_path(conn, :delete, subscription)
+    test "deletes chosen subscription", %{
+      conn: conn,
+      subscription: subscription,
+      swagger_schema: schema
+    } do
+      conn = delete(conn, Routes.subscription_path(conn, :delete, subscription))
       assert response(conn, 204)
 
       conn = recycle_and_put_headers(conn)
 
-      assert_error_sent 404, fn ->
-        get conn, subscription_path(conn, :show, subscription)
+      assert_error_sent(404, fn ->
+        get(conn, Routes.subscription_path(conn, :show, subscription))
         validate_resp_schema(conn, schema, "SubscriptionResponse")
-      end
+      end)
     end
   end
 end

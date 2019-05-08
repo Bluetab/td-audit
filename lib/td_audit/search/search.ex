@@ -23,8 +23,7 @@ defmodule TdAudit.Search do
       {:ok, %HTTPoison.Response{body: %{"aggregations" => aggretations}}} ->
         aggretations
           |> Map.to_list
-          |> Enum.map(&filter_values/1)
-          |> Enum.into(%{})
+          |> Enum.into(%{}, &filter_values/1)
       {:ok, %HTTPoison.Response{body: error}} ->
         error
     end

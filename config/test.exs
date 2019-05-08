@@ -15,8 +15,9 @@ config :td_audit, TdAudit.Repo,
   username: "postgres",
   password: "postgres",
   database: "td_audit_test",
-  hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  hostname: "postgres",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 1
 
 config :td_audit, queue: TdAudit.QueueMock
 
@@ -27,7 +28,7 @@ config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.MockTdAuthS
 
 config :td_audit, :elasticsearch,
   search_service: TdAudit.Search.MockSearch,
-  es_host: "localhost",
+  es_host: "elastic",
   es_port: 9200,
   type_name: "doc"
 
@@ -41,5 +42,8 @@ config :td_audit, bc_cache: TdPerms.MockBusinessConceptCache
 
 config :td_audit, notification_loader_on_startup: false
 
-config :td_perms, redis_host: "localhost"
+config :td_perms, redis_host: "redis"
 config :td_audit, host_name: "http://localhost:8080"
+
+config :exq,
+  host: "redis"

@@ -8,7 +8,6 @@ use Mix.Config
 # with brunch.io to recompile .js and .css sources.
 config :td_audit, TdAuditWeb.Endpoint,
   http: [port: 4007],
-  url: [host: "localhost", port: 4007],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
@@ -47,7 +46,8 @@ config :td_audit, TdAudit.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
+config :td_audit, :auth_service,
+  api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
   auth_host: "localhost",
   auth_port: "4001",
   auth_domain: ""

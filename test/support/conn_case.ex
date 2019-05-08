@@ -26,7 +26,7 @@ defmodule TdAuditWeb.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      import TdAuditWeb.Router.Helpers
+      alias TdAuditWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       @endpoint Endpoint
