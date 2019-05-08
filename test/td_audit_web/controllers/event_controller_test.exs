@@ -98,7 +98,7 @@ defmodule TdAuditWeb.EventControllerTest do
                "resource_id" => 42,
                "resource_type" => "some resource_type",
                "service" => "some service",
-               "ts" => "2010-04-17T14:00:00Z",
+               "ts" => "2010-04-17T14:00:00.000000Z",
                "user_id" => 42,
                "user_name" => "user name"
              }
@@ -136,7 +136,7 @@ defmodule TdAuditWeb.EventControllerTest do
                "resource_id" => 43,
                "resource_type" => "some updated resource_type",
                "service" => "some updated service",
-               "ts" => "2011-05-18T15:01:01Z",
+               "ts" => "2011-05-18T15:01:01.000000Z",
                "user_id" => 43,
                "user_name" => "some updated name"
              }

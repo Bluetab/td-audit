@@ -11,7 +11,7 @@ defmodule TdAudit.SubscriptionTestHelper do
     resource_type: "some resource_type",
     user_email: "mymail@foo.com",
     periodicity: "daily",
-    last_consumed_event: "2018-01-23T21:50:07Z"
+    last_consumed_event: "2018-01-23T21:50:07.000000Z"
   }
 
   @invalid_attrs %{

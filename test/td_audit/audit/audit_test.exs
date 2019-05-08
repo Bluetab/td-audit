@@ -124,7 +124,7 @@ defmodule TdAudit.AuditTest do
       assert event.resource_id == 42
       assert event.resource_type == "some resource_type"
       assert event.service == "some service"
-      assert event.ts == DateTime.from_naive!(~N[2010-04-17 14:00:00Z], "Etc/UTC")
+      assert event.ts == DateTime.from_naive!(~N[2010-04-17 14:00:00.000000Z], "Etc/UTC")
       assert event.user_id == 42
     end
 
@@ -141,7 +141,7 @@ defmodule TdAudit.AuditTest do
       assert event.resource_id == 43
       assert event.resource_type == "some updated resource_type"
       assert event.service == "some updated service"
-      assert event.ts == DateTime.from_naive!(~N[2011-05-18 15:01:01Z], "Etc/UTC")
+      assert event.ts == DateTime.from_naive!(~N[2011-05-18 15:01:01.000000Z], "Etc/UTC")
       assert event.user_id == 43
     end
 
