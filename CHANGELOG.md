@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- [TD-1774] Newline is missing in logger format
+
 ### Changed
 
 - [TD-1660] Will only update business concept link_count on add_relation/delete_relation event if "target_type" is "data_field"
