@@ -13,19 +13,11 @@ config :td_audit, TdAuditWeb.Endpoint,
 
 # Configure your database
 config :td_audit, TdAudit.Repo,
-  adapter: Ecto.Adapters.Postgres,
   username: "${DB_USER}",
   password: "${DB_PASSWORD}",
   database: "${DB_NAME}",
   hostname: "${DB_HOST}",
   pool_size: 10
-
-#Configure elasticsearch
-config :td_audit, :elasticsearch,
-  search_service: TdAudit.Search,
-  es_host: "${ES_HOST}",
-  es_port: "${ES_PORT}",
-  type_name: "doc"
 
 #Configure smtp client
 config :td_audit, email_account: "${SMTP_SENDER}"

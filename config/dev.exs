@@ -39,7 +39,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Configure your database
 config :td_audit, TdAudit.Repo,
-  adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
   database: "td_audit_dev",
@@ -51,12 +50,6 @@ config :td_audit, :auth_service,
   auth_host: "localhost",
   auth_port: "4001",
   auth_domain: ""
-
-config :td_audit, :elasticsearch,
-  search_service: TdAudit.Search,
-  es_host: "localhost",
-  es_port: 9200,
-  type_name: "doc"
 
 config :td_audit, email_account: "no-reply@example.com"
 

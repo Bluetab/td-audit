@@ -11,7 +11,6 @@ config :logger, level: :warn
 
 # Configure your database
 config :td_audit, TdAudit.Repo,
-  adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
   database: "td_audit_test",
@@ -25,12 +24,6 @@ config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.MockTdAuthS
   auth_host: "localhost",
   auth_port: "4001",
   auth_domain: ""
-
-config :td_audit, :elasticsearch,
-  search_service: TdAudit.Search.MockSearch,
-  es_host: "elastic",
-  es_port: 9200,
-  type_name: "doc"
 
 config :td_audit, email_account: "email@foo.bar"
 
