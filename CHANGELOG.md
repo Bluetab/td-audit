@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- [TD-1618] Use TdCache.ConceptCache instead of TdPerms.BusinessConceptCache
+ 
+### Removed
+
+- Changes to business concept link count & rule count are now reindexed by bg
+
 ## [2.19.0] 2019-05-14
 
 ### Fixed
