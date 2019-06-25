@@ -4,7 +4,7 @@
 
 ### Changed
 
-- [TD-1618] Use TdCache.ConceptCache instead of TdPerms.BusinessConceptCache
+- [TD-1618] Use TdCache instead of TdPerms
  
 ### Removed
 

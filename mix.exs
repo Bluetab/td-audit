@@ -55,7 +55,7 @@ defmodule TdAudit.Mixfile do
       {:td_perms, git: "https://github.com/Bluetab/td-perms.git", tag: "2.16.3"},
       {:td_cache,
        git: "https://github.com/Bluetab/td-cache.git",
-       ref: "597841cdad3a0908b297dcdebf0bfdc119fbc31c"},
+       ref: "f70607e8ada8a60103b7f1bbfe516152adec3489"},
       {:bamboo, "~> 1.1"},
       {:bamboo_smtp, "~> 1.6.0"}
     ]

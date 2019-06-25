@@ -5,8 +5,8 @@ defmodule TdAudit.NotificationDispatcher do
   alias TdAudit.Smtp.Mailer
   alias TdAudit.Subscriptions
   alias TdCache.ConceptCache
+  alias TdCache.UserCache
 
-  @user_cache Application.get_env(:td_audit, :user_cache)
   @concepts_path Application.get_env(:td_audit, :concepts_path)
 
   @moduledoc """
@@ -100,19 +100,20 @@ defmodule TdAudit.NotificationDispatcher do
       payload
       |> Map.take(["content", "resource_id"])
 
-    {:ok, %{name: business_concept_name, business_concept_version_id: business_concept_version}} =
-      ConceptCache.get(resource_id)
+    with(
+      {:ok, %{name: business_concept_name, business_concept_version_id: business_concept_version}} <-
+        ConceptCache.get(resource_id),
+      {:ok, %{full_name: user_name}} <- UserCache.get(user_id)
+    ) do
+      web_host = Application.get_env(:td_audit, :host_name)
 
-    user_name = user_id |> @user_cache.get_user() |> Map.get(:full_name)
-
-    web_host = Application.get_env(:td_audit, :host_name)
-
-    Map.new()
-    |> Map.put("who", user_name)
-    |> Map.put("to", subscribers)
-    |> Map.put("entity_name", business_concept_name)
-    |> Map.put("content", content)
-    |> Map.put("resource_link", web_host <> @concepts_path <> "/#{business_concept_version}")
+      Map.new()
+      |> Map.put("who", user_name)
+      |> Map.put("to", subscribers)
+      |> Map.put("entity_name", business_concept_name)
+      |> Map.put("content", content)
+      |> Map.put("resource_link", web_host <> @concepts_path <> "/#{business_concept_version}")
+    end
   end
 
   defp send_notification(%{"to" => to} = data, :email_on_comment) do

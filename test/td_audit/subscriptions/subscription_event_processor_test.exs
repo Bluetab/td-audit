@@ -5,15 +5,32 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   """
   use ExUnit.Case, async: false
   use TdAudit.DataCase
+
+  import TdAudit.SubscriptionTestHelper
+
   alias TdAudit.NotificationsSystem
   alias TdAudit.SubscriptionEventProcessor
   alias TdAudit.Subscriptions
-  import TdAudit.SubscriptionTestHelper
-  alias TdPerms.UserCacheMock
+  alias TdCache.UserCache
 
-  @user_1 %{"id" => 1, "user_name" => "my_user_name", "full_name" => "full_name", "email" => "my_user_email@foo.bar"}
-  @user_2 %{"id" => 2, "user_name" => "my_user_name_2", "full_name" => "full_name_2", "email" => "my_user_email_2@foo.bar"}
-  @user_3 %{"id" => 3, "user_name" => "my_user_name_3", "full_name" => "full_name_3", "email" => "my_user_email_3@foo.bar"}
+  @user_1 %{
+    "id" => 1,
+    "user_name" => "my_user_name",
+    "full_name" => "full_name",
+    "email" => "my_user_email@foo.bar"
+  }
+  @user_2 %{
+    "id" => 2,
+    "user_name" => "my_user_name_2",
+    "full_name" => "full_name_2",
+    "email" => "my_user_email_2@foo.bar"
+  }
+  @user_3 %{
+    "id" => 3,
+    "user_name" => "my_user_name_3",
+    "full_name" => "full_name_3",
+    "email" => "my_user_email_3@foo.bar"
+  }
 
   @user_list [@user_1, @user_2, @user_3]
 
@@ -25,11 +42,6 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
       }
     }
   }
-
-  setup_all do
-    start_supervised(UserCacheMock)
-    :ok
-  end
 
   defp process_event_fixture do
     create_configuration()
@@ -47,8 +59,9 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
   defp create_users_in_cache do
     @user_list
-    |> Enum.map(&Map.take(&1, ["id", "email", "full_name"]))
-    |> Enum.map(&UserCacheMock.put_user_in_cache(&1))
+    |> Enum.map(&Map.take(&1, ["id", "email", "full_name", "user_name"]))
+    |> Enum.map(&Map.new(&1, fn {k, v} -> {String.to_atom(k), v} end))
+    |> Enum.map(&UserCache.put/1)
   end
 
   defp create_list_of_events_for_process do
@@ -97,7 +110,8 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
     assert Enum.all?(
              created_subscriptions,
-             &(Map.get(&1, :event) == "create_comment" && Map.get(&1, :resource_type) == "business_concept")
+             &(Map.get(&1, :event) == "create_comment" &&
+                 Map.get(&1, :resource_type) == "business_concept")
            )
 
     assert Enum.all?(valid_ids, fn id ->

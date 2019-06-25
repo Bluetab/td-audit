@@ -60,8 +60,6 @@ config :td_audit, :phoenix_swagger,
 
 config :td_audit, permission_resolver: TdPerms.Permissions
 
-config :td_audit, user_cache: TdPerms.UserCache
-
 config :td_audit, concepts_path: "/concepts"
 
 config :td_perms,

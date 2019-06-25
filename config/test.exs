@@ -30,8 +30,6 @@ config :td_audit, email_account: "email@foo.bar"
 
 config :td_audit, TdAudit.Smtp.Mailer, adapter: Bamboo.TestAdapter
 
-config :td_audit, user_cache: TdPerms.UserCacheMock
-
 config :td_audit, notification_loader_on_startup: false
 
 config :td_audit, host_name: "http://localhost:8080"

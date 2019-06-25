@@ -56,8 +56,11 @@ defmodule TdAudit.NotificationsSystem do
     fields = Configuration.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
 
-    Repo.one(from p in Configuration,
-        where: ^dynamic)
+    Repo.one(
+      from(p in Configuration,
+        where: ^dynamic
+      )
+    )
   end
 
   @doc """
@@ -74,11 +77,11 @@ defmodule TdAudit.NotificationsSystem do
   """
   def create_configuration(attrs \\ %{}) do
     response =
-        %Configuration{}
-            |> Configuration.changeset(attrs)
-            |> Repo.insert()
+      %Configuration{}
+      |> Configuration.changeset(attrs)
+      |> Repo.insert()
 
-            Subscriptions.update_last_consumed_events_on_activation(response)
+    Subscriptions.update_last_consumed_events_on_activation(response)
     response
   end
 
@@ -96,11 +99,11 @@ defmodule TdAudit.NotificationsSystem do
   """
   def update_configuration(%Configuration{} = configuration, attrs) do
     response =
-        configuration
-            |> Configuration.changeset(attrs)
-            |> Repo.update()
+      configuration
+      |> Configuration.changeset(attrs)
+      |> Repo.update()
 
-            Subscriptions.update_last_consumed_events_on_activation(response)
+    Subscriptions.update_last_consumed_events_on_activation(response)
     response
   end
 

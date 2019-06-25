@@ -2,7 +2,6 @@ defmodule TdAudit.NotificationDispatcherTest do
   @moduledoc """
   Testing of the module TdAudit.NotificationDispatcher
   """
-  use Bamboo.Test
   use ExUnit.Case
   use TdAudit.DataCase
 
@@ -10,15 +9,15 @@ defmodule TdAudit.NotificationDispatcherTest do
   alias TdAudit.NotificationDispatcher
   alias TdAudit.Subscriptions
   alias TdCache.ConceptCache
-  alias TdPerms.UserCacheMock
-
-  setup_all do
-    start_supervised(UserCacheMock)
-    :ok
-  end
+  alias TdCache.UserCache
 
   describe "notification_dispatcher" do
-    @user_1 %{"id" => 42, "user_name" => "my_user_name", "email" => "my_user_email@foo.bar"}
+    @user_1 %{
+      "id" => 42,
+      "user_name" => "my_user_name",
+      "email" => "my_user_email@foo.bar",
+      "full_name" => "My User Name"
+    }
     @bc_1 %{
       "id" => 1,
       "domain_id" => 4,
@@ -142,14 +141,15 @@ defmodule TdAudit.NotificationDispatcherTest do
   defp create_users_in_cache do
     @user_list
     |> Enum.map(&Map.take(&1, ["id", "email", "user_name", "full_name"]))
-    |> Enum.map(&UserCacheMock.put_user_in_cache(&1))
+    |> Enum.map(&atomize_keys/1)
+    |> Enum.map(&UserCache.put/1)
   end
 
   defp create_bcs_in_cache do
     @bc_list
     |> Enum.map(&Map.take(&1, ["id", "name", "domain_id", "business_concept_version_id"]))
-    |> Enum.map(&atomize_keys(&1))
-    |> Enum.map(&ConceptCache.put(&1))
+    |> Enum.map(&atomize_keys/1)
+    |> Enum.map(&ConceptCache.put/1)
   end
 
   defp atomize_keys(map) do
