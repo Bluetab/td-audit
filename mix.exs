@@ -52,10 +52,9 @@ defmodule TdAudit.Mixfile do
       {:httpoison, "~> 1.2.0"},
       {:phoenix_swagger, "~> 0.8.0"},
       {:ex_json_schema, "~> 0.5"},
-      {:td_perms, git: "https://github.com/Bluetab/td-perms.git", tag: "2.16.3"},
       {:td_cache,
        git: "https://github.com/Bluetab/td-cache.git",
-       ref: "f70607e8ada8a60103b7f1bbfe516152adec3489"},
+       ref: "45a6a32ebb33b3474608bd9de02eb745c8a231c8"},
       {:bamboo, "~> 1.1"},
       {:bamboo_smtp, "~> 1.6.0"}
     ]

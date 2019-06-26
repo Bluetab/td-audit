@@ -19,7 +19,7 @@ config :td_audit, TdAudit.Repo,
   hostname: "${DB_HOST}",
   pool_size: 10
 
-#Configure smtp client
+# Configure smtp client
 config :td_audit, email_account: "${SMTP_SENDER}"
 
 config :td_audit, TdAudit.Smtp.Mailer,
@@ -40,21 +40,24 @@ config :exq,
   queues: ["timeline"],
   max_retries: 25,
   dead_max_jobs: 10_000,
-  dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
+  # 6 months
+  dead_timeout_in_seconds: 180 * 24 * 60 * 60,
   start_on_application: false
 
 config :td_audit, queue: TdAudit.Queue
 
 config :td_audit, TdAudit.Auth.Guardian,
-  allowed_algos: ["HS512"], # optional
+  # optional
+  allowed_algos: ["HS512"],
   issuer: "tdauth",
-  ttl: { 1, :hours },
+  ttl: {1, :hours},
   secret_key: "${GUARDIAN_SECRET_KEY}"
 
-config :td_audit, :auth_service, api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
+config :td_audit, :auth_service,
+  api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
   auth_host: "${API_AUTH_HOST}",
   auth_port: "${API_AUTH_PORT}",
   auth_domain: ""
 
-config :td_perms, redis_host: "${REDIS_HOST}"
+config :td_cache, redis_host: "${REDIS_HOST}"
 config :td_audit, host_name: "${WEB_HOST}"

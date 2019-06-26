@@ -4,8 +4,8 @@
 
 ### Changed
 
-- [TD-1618] Use TdCache instead of TdPerms
- 
+- [TD-1618] Cache improvements (use td-cache instead of td-perms)
+
 ### Removed
 
 - Changes to business concept link count & rule count are now reindexed by bg

@@ -58,11 +58,9 @@ config :td_audit, :phoenix_swagger,
     "priv/static/swagger.json" => [router: TdAuditWeb.Router]
   }
 
-config :td_audit, permission_resolver: TdPerms.Permissions
-
 config :td_audit, concepts_path: "/concepts"
 
-config :td_perms,
+config :td_cache,
   permissions: [
     :is_admin,
     :create_acl_entry,

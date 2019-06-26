@@ -34,7 +34,7 @@ config :td_audit, notification_loader_on_startup: false
 
 config :td_audit, host_name: "http://localhost:8080"
 
-config :td_perms, redis_host: "redis"
+config :td_cache, redis_host: "redis"
 
 config :exq,
   host: "redis"
