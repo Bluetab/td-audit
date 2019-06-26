@@ -90,7 +90,23 @@ config :td_cache,
     :view_deprecated_business_concepts,
     :manage_business_concept_links,
     :manage_quality_rule,
-    :manage_confidential_business_concepts
+    :manage_confidential_business_concepts,
+    :create_ingest,
+    :update_ingest,
+    :send_ingest_for_approval,
+    :delete_ingest,
+    :publish_ingest,
+    :reject_ingest,
+    :deprecate_ingest,
+    :view_draft_ingests,
+    :view_approval_pending_ingests,
+    :view_published_ingests,
+    :view_versioned_ingests,
+    :view_rejected_ingests,
+    :view_deprecated_ingests,
+    :manage_confidential_structures,
+    :manage_ingest_relations,
+    :view_data_structures_profile
   ]
 
 # Import environment specific config. This must remain at the bottom
