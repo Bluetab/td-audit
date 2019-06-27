@@ -24,7 +24,7 @@ defmodule TdAudit.Mixfile do
   def application do
     [
       mod: {TdAudit.Application, []},
-      extra_applications: [:logger, :bamboo, :bamboo_smtp, :runtime_tools]
+      extra_applications: [:logger, :bamboo, :bamboo_smtp, :runtime_tools, :td_cache]
     ]
   end
 
@@ -52,7 +52,7 @@ defmodule TdAudit.Mixfile do
       {:httpoison, "~> 1.2.0"},
       {:phoenix_swagger, "~> 0.8.0"},
       {:ex_json_schema, "~> 0.5"},
-      {:td_perms, git: "https://github.com/Bluetab/td-perms.git", tag: "2.16.3"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.0.0"},
       {:bamboo, "~> 1.1"},
       {:bamboo_smtp, "~> 1.6.0"}
     ]

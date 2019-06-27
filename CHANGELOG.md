@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- [TD-1618] Cache improvements (use td-cache instead of td-perms)
+
+### Removed
+
+- Changes to business concept link count & rule count are now reindexed by bg
+
 ## [2.19.0] 2019-05-14
 
 ### Fixed

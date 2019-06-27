@@ -24,11 +24,15 @@ defmodule TdAudit.Audit do
   def list_events_by_filter(params) do
     fields = Event.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
-    Repo.all(from p in Event,
+
+    Repo.all(
+      from(p in Event,
         where: ^dynamic,
         order_by: [desc: :ts]
       )
+    )
   end
+
   @doc """
   Gets a single event.
 

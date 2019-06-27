@@ -3,7 +3,6 @@ defmodule TdAudit.SendEventWorker do
   @moduledoc false
 
   alias TdAudit.Audit
-  alias TdAudit.SearchEventProcessor
   alias TdAudit.SubscriptionEventProcessor
 
   def perform(event_params) do
@@ -17,7 +16,6 @@ defmodule TdAudit.SendEventWorker do
   end
 
   defp process_event(event_params) do
-    SearchEventProcessor.process_event(event_params)
     SubscriptionEventProcessor.process_event(event_params)
   end
 end

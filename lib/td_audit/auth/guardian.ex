@@ -19,6 +19,6 @@ defmodule TdAudit.Auth.Guardian do
     # the resource id so here we'll rely on that to look it up.
     sub = Poison.decode!(claims["sub"])
     resource = %User{id: sub["id"], is_admin: sub["is_admin"], user_name: sub["user_name"]}
-    {:ok,  resource}
+    {:ok, resource}
   end
 end

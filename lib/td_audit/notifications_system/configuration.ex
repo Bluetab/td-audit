@@ -7,8 +7,8 @@ defmodule TdAudit.NotificationsSystem.Configuration do
   import Ecto.Changeset
 
   schema "notifications_system_configuration" do
-    field :settings, :map
-    field :event, :string
+    field(:settings, :map)
+    field(:event, :string)
 
     timestamps()
   end
@@ -31,12 +31,13 @@ defmodule TdAudit.NotificationsSystem.Configuration do
   defp validate_settings_keys(changeset) do
     case changeset.valid? do
       true ->
-          changeset
-          |> get_field(:settings)
-          |> is_settings_format_valid?()
-          |> return_changeset(changeset, "invalid.param")
+        changeset
+        |> get_field(:settings)
+        |> is_settings_format_valid?()
+        |> return_changeset(changeset, "invalid.param")
 
-      false -> changeset
+      false ->
+        changeset
     end
   end
 
@@ -47,27 +48,30 @@ defmodule TdAudit.NotificationsSystem.Configuration do
           changeset
           |> get_field(:settings)
 
-          settings
-          |> Map.keys()
-          |> are_keys_in_settings_valid?(settings)
-          |> return_changeset(changeset, "invalid.param")
+        settings
+        |> Map.keys()
+        |> are_keys_in_settings_valid?(settings)
+        |> return_changeset(changeset, "invalid.param")
 
-        false -> changeset
+      false ->
+        changeset
     end
   end
 
   defp is_settings_format_valid?(settings) do
-      Map.keys(settings)
-      validations_list =
-        Enum.map(
-          Map.keys(settings),
-          fn el -> {Enum.any?(@valid_settings_keys, &(el == &1)), el}
-          end)
+    Map.keys(settings)
 
-      Enum.find(validations_list, true, &find_element_in_validation_list(&1))
+    validations_list =
+      Enum.map(
+        Map.keys(settings),
+        fn el -> {Enum.any?(@valid_settings_keys, &(el == &1)), el} end
+      )
+
+    Enum.find(validations_list, true, &find_element_in_validation_list(&1))
   end
 
   defp are_keys_in_settings_valid?([], _), do: true
+
   defp are_keys_in_settings_valid?(keys_in_settings, settings) do
     validations_list =
       Enum.map(
@@ -75,18 +79,18 @@ defmodule TdAudit.NotificationsSystem.Configuration do
         &is_key_in_settings_valid?(&1, Map.get(settings, &1))
       )
 
-      Enum.find(validations_list, true, &find_element_in_validation_list(&1))
+    Enum.find(validations_list, true, &find_element_in_validation_list(&1))
   end
 
   defp is_key_in_settings_valid?(parent_key, value) do
     valid_keys = Map.get(@valid_keys_in_settings, parent_key)
+
     validations_list =
       value
-        |> Map.keys()
-        |> Enum.map(fn k ->
-          {Enum.any?(valid_keys, &(k == &1)), parent_key <> "." <> k}
-        end
-        )
+      |> Map.keys()
+      |> Enum.map(fn k ->
+        {Enum.any?(valid_keys, &(k == &1)), parent_key <> "." <> k}
+      end)
 
     Enum.find(validations_list, true, &find_element_in_validation_list(&1))
   end
@@ -95,6 +99,7 @@ defmodule TdAudit.NotificationsSystem.Configuration do
   defp find_element_in_validation_list(_), do: false
 
   defp return_changeset(true, changeset, _), do: changeset
+
   defp return_changeset({false, field}, changeset, message) do
     changeset |> add_error(:settings, message <> "." <> field)
   end
