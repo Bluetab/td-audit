@@ -14,9 +14,8 @@ defmodule TdAudit.EmailBuilder do
 
   def create(to, subject, body) do
     email_account = Application.get_env(:td_audit, :email_account)
-    Logger.info(
-      "Sending email to #{to} from origin account #{email_account}"
-    )
+    Logger.info("Sending email to #{to} from origin account #{email_account}")
+
     new_email()
     |> from(email_account)
     |> to(to)

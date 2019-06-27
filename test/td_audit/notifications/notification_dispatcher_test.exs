@@ -3,24 +3,33 @@ defmodule TdAudit.NotificationDispatcherTest do
   Testing of the module TdAudit.NotificationDispatcher
   """
   use ExUnit.Case
-  use Bamboo.Test
-  alias TdAudit.Audit
   use TdAudit.DataCase
+
+  alias TdAudit.Audit
   alias TdAudit.NotificationDispatcher
   alias TdAudit.Subscriptions
-  alias TdPerms.MockBusinessConceptCache
-  alias TdPerms.UserCacheMock
-
-  setup_all do
-    start_supervised(UserCacheMock)
-    start_supervised(MockBusinessConceptCache)
-    :ok
-  end
+  alias TdCache.ConceptCache
+  alias TdCache.UserCache
 
   describe "notification_dispatcher" do
-    @user_1 %{"id" => 42, "user_name" => "my_user_name", "email" => "my_user_email@foo.bar"}
-    @bc_1 %{"id" => 1, "domain_id"=> 4, "name" => "BC Name 1", "business_concept_version_id" => 1}
-    @bc_4 %{"id" => 4, "domain_id"=> 4, "name" => "BC Name 4", "business_concept_version_id" => 1}
+    @user_1 %{
+      "id" => 42,
+      "user_name" => "my_user_name",
+      "email" => "my_user_email@foo.bar",
+      "full_name" => "My User Name"
+    }
+    @bc_1 %{
+      "id" => 1,
+      "domain_id" => 4,
+      "name" => "BC Name 1",
+      "business_concept_version_id" => 1
+    }
+    @bc_4 %{
+      "id" => 4,
+      "domain_id" => 4,
+      "name" => "BC Name 4",
+      "business_concept_version_id" => 1
+    }
 
     @user_list [@user_1]
     @bc_list [@bc_1, @bc_4]
@@ -132,14 +141,15 @@ defmodule TdAudit.NotificationDispatcherTest do
   defp create_users_in_cache do
     @user_list
     |> Enum.map(&Map.take(&1, ["id", "email", "user_name", "full_name"]))
-    |> Enum.map(&UserCacheMock.put_user_in_cache(&1))
+    |> Enum.map(&atomize_keys/1)
+    |> Enum.map(&UserCache.put/1)
   end
 
   defp create_bcs_in_cache do
     @bc_list
     |> Enum.map(&Map.take(&1, ["id", "name", "domain_id", "business_concept_version_id"]))
-    |> Enum.map(&atomize_keys(&1))
-    |> Enum.map(&MockBusinessConceptCache.put_business_concept(&1))
+    |> Enum.map(&atomize_keys/1)
+    |> Enum.map(&ConceptCache.put/1)
   end
 
   defp atomize_keys(map) do
@@ -171,15 +181,20 @@ defmodule TdAudit.NotificationDispatcherTest do
     {_events_list, subs_list} = dispatch_notification_fixture()
     to_format_resource_id_1 = [nil: "mymail1@foo.bar", nil: "mymail2@foo.bar"]
     to_format_resource_id_2 = [nil: "mymail3@foo.bar"]
+
     list_sent_notifications =
       NotificationDispatcher.dispatch_notification(
         {:dispatch_on_comment_creation, "create_comment"}
       )
 
     assert length(list_sent_notifications) == 2
+
     Enum.any?(list_sent_notifications, fn el -> Map.fetch!(el, :to) == to_format_resource_id_1 end)
+
     Enum.any?(list_sent_notifications, fn el -> Map.fetch!(el, :to) == to_format_resource_id_2 end)
+
     existing_subs = Subscriptions.list_subscriptions()
+
     Enum.all?(existing_subs, fn sb ->
       prior_sub = Enum.find(subs_list, &(sb.id == &1.id))
       prior_sub.last_consumed_event < sb.last_consumed_event

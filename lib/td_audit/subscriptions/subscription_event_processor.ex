@@ -4,8 +4,7 @@ defmodule TdAudit.SubscriptionEventProcessor do
   alias TdAudit.NotificationsSystem
   alias TdAudit.NotificationsSystem.Configuration
   alias TdAudit.Subscriptions
-
-  @user_cache Application.get_env(:td_audit, :user_cache)
+  alias TdCache.UserCache
 
   def process_event(%{"event" => "create_concept_draft"} = event_params) do
     configuration =
@@ -75,11 +74,12 @@ defmodule TdAudit.SubscriptionEventProcessor do
     involved_roles
     |> Enum.map(&Map.get(content, &1))
     |> Enum.filter(&(&1 != nil && is_binary(&1)))
-    |> Enum.map(&@user_cache.get_user_email(&1))
-    |> Enum.filter(&(&1 != nil && is_binary(&1)))
+    |> Enum.map(&UserCache.get_by_name!/1)
+    |> Enum.map(&Map.get(&1, :email))
+    |> Enum.filter(& &1)
     |> Enum.map(&Map.put(%{}, "user_email", &1))
     |> Enum.map(&Map.merge(&1, non_user_params))
-    |> Enum.map(&Subscriptions.create_subscription(&1))
+    |> Enum.map(&Subscriptions.create_subscription/1)
   end
 
   defp delete_subscriptions(params) do
