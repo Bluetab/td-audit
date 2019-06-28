@@ -1,7 +1,7 @@
 defmodule TdAuditWeb.ApiServices.HttpTdAuthService do
   @moduledoc false
 
-  alias Poison, as: JSON
+  alias Jason, as: JSON
   alias TdAudit.Accounts.User
 
   defp get_config do

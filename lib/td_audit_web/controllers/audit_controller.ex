@@ -1,8 +1,11 @@
 defmodule TdAuditWeb.AuditController do
+
   use TdAuditWeb, :controller
-  require Logger
 
   alias TdAudit.Audit.Event
+  alias Jason, as: JSON
+
+  require Logger
 
   @td_queue Application.get_env(:td_audit, :queue)
 
@@ -17,7 +20,7 @@ defmodule TdAuditWeb.AuditController do
         Logger.info  "autdit controller changeset: #{inspect(changeset)}"
         conn
         |> put_status(:unprocessable_entity)
-        |> send_resp(:unprocessable_entity, Poison.encode!(%{errors: "Invalid params"}))
+        |> send_resp(:unprocessable_entity, JSON.encode!(%{errors: "Invalid params"}))
     end
   end
 
@@ -26,12 +29,12 @@ defmodule TdAuditWeb.AuditController do
       {:ok, jid} ->
         conn
         |> put_status(:created)
-        |> send_resp(:created, Poison.encode!(%{job_id: jid}))
+        |> send_resp(:created, JSON.encode!(%{job_id: jid}))
       {:error, error} ->
         Logger.info "audit controller queue fails: #{inspect(audit_params)}"
         conn
         |> put_status(:unprocessable_entity)
-        |> send_resp(:unprocessable_entity, Poison.encode!(%{errors: error}))
+        |> send_resp(:unprocessable_entity, JSON.encode!(%{errors: error}))
     end
   end
 end
