@@ -1,8 +1,8 @@
 defmodule TdAuditWeb.AuditController do
   use TdAuditWeb, :controller
 
-  alias TdAudit.Audit.Event
   alias Jason, as: JSON
+  alias TdAudit.Audit.Event
 
   require Logger
 
