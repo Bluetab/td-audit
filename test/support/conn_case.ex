@@ -14,11 +14,13 @@ defmodule TdAuditWeb.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+
+  import TdAuditWeb.Authentication, only: :functions
+
   alias Ecto.Adapters.SQL.Sandbox
   alias Phoenix.ConnTest
   alias TdAudit.Repo
   alias TdAuditWeb.Endpoint
-  import TdAuditWeb.Authentication, only: :functions
 
   @admin_user_name "app-admin"
 
@@ -35,21 +37,26 @@ defmodule TdAuditWeb.ConnCase do
 
   setup tags do
     :ok = Sandbox.checkout(Repo)
+
     unless tags[:async] do
       Sandbox.mode(Repo, {:shared, self()})
     end
+
     {:ok, conn: ConnTest.build_conn()}
 
     cond do
       tags[:admin_authenticated] ->
-        user = find_or_create_user(@admin_user_name, is_admin: true)
-        create_user_auth_conn(user)
+        @admin_user_name
+        |> find_or_create_user(is_admin: true)
+        |> create_user_auth_conn()
+
       tags[:authenticated_user] ->
-        user = find_or_create_user(tags[:authenticated_user], is_admin: true)
-        create_user_auth_conn(user)
-       true ->
-         {:ok, conn: ConnTest.build_conn()}
+        @admin_user_name
+        |> find_or_create_user(is_admin: false)
+        |> create_user_auth_conn()
+
+      true ->
+        {:ok, conn: ConnTest.build_conn()}
     end
   end
-
 end

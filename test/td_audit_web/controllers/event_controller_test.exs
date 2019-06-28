@@ -9,7 +9,7 @@ defmodule TdAuditWeb.EventControllerTest do
 
   alias TdAudit.Audit
   alias TdAudit.Audit.Event
-  alias TdAuditWeb.ApiServices.MockTdAuthService
+  alias TdAuditWeb.ApiServices.MockAuthService
 
   @create_attrs %{
     event: "some event",
@@ -54,7 +54,7 @@ defmodule TdAuditWeb.EventControllerTest do
   end
 
   setup_all do
-    start_supervised(MockTdAuthService)
+    start_supervised(MockAuthService)
     :ok
   end
 

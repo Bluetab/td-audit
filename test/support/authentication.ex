@@ -3,12 +3,12 @@ defmodule TdAuditWeb.Authentication do
   This module defines the functions required to
   add auth headers to requests
   """
+  import Plug.Conn
+
   alias Phoenix.ConnTest
   alias TdAudit.Accounts.User
   alias TdAudit.Auth.Guardian
-  import Plug.Conn
-
-  @td_auth_api Application.get_env(:td_audit, :auth_service)[:api_service]
+  alias TdAuditWeb.ApiServices.MockAuthService
 
   @headers {"Content-type", "application/json"}
 
@@ -20,6 +20,7 @@ defmodule TdAuditWeb.Authentication do
 
   def recycle_and_put_headers(conn) do
     authorization_header = List.first(get_req_header(conn, "authorization"))
+
     conn
     |> ConnTest.recycle()
     |> put_req_header("authorization", authorization_header)
@@ -36,37 +37,33 @@ defmodule TdAuditWeb.Authentication do
     [@headers, {"authorization", "Bearer #{token}"}]
   end
 
-  # defp create_user(user_name, opts \\ []) do
-  #   is_admin = Keyword.get(opts, :is_admin, false)
-  #   password = Keyword.get(opts, :password, "secret")
-  #   user = @td_auth_api.create_user(%{"user" => %{user_name: user_name, is_admin: is_admin, password: password}})
-  #   user
-  # end
-
   def find_or_create_user(user_name, opts \\ []) do
-    user = case get_user_by_name(user_name) do
-      nil ->
-        is_admin = Keyword.get(opts, :is_admin, false)
-        password = Keyword.get(opts, :password, "secret")
-        @td_auth_api.create_user(%{"user" => %{user_name: user_name, is_admin: is_admin, password: password}})
-      user -> user
-    end
+    user =
+      case get_user_by_name(user_name) do
+        nil ->
+          is_admin = Keyword.get(opts, :is_admin, false)
+          password = Keyword.get(opts, :password, "secret")
+
+          MockAuthService.create_user(%{
+            "user" => %{user_name: user_name, is_admin: is_admin, password: password}
+          })
+
+        user ->
+          user
+      end
+
     user
   end
 
   def get_user_by_name(user_name) do
-    @td_auth_api.get_user_by_name(user_name)
-  end
-
-  def get_users do
-    @td_auth_api.index()
+    MockAuthService.get_user_by_name(user_name)
   end
 
   def build_user_token(%User{} = user) do
-      case Guardian.encode_and_sign(user) do
-        {:ok, jwt, _full_claims} -> jwt
-        _ -> raise "Problems encoding and signing a user"
-      end
+    case Guardian.encode_and_sign(user) do
+      {:ok, jwt, _full_claims} -> jwt
+      _ -> raise "Problems encoding and signing a user"
+    end
   end
 
   def build_user_token(user_name, opts \\ []) when is_binary(user_name) do
@@ -76,5 +73,4 @@ defmodule TdAuditWeb.Authentication do
   def get_user_token(user_name) do
     build_user_token(user_name, is_admin: user_name == "app-admin")
   end
-
 end

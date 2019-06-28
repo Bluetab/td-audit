@@ -1,4 +1,4 @@
-defmodule TdAuditWeb.ApiServices.MockTdAuthService do
+defmodule TdAuditWeb.ApiServices.MockAuthService do
   @moduledoc false
 
   use Agent
@@ -6,11 +6,11 @@ defmodule TdAuditWeb.ApiServices.MockTdAuthService do
   alias TdAudit.Accounts.User
 
   def start_link(_) do
-    Agent.start_link(fn -> [] end, name: MockTdAuthService)
+    Agent.start_link(fn -> [] end, name: MockAuthService)
   end
 
   def set_users(user_list) do
-    Agent.update(MockTdAuthService, fn _ -> user_list end)
+    Agent.update(MockAuthService, fn _ -> user_list end)
   end
 
   def create_user(%{"user" => %{user_name: user_name, is_admin: is_admin, password: password}}) do
@@ -21,7 +21,7 @@ defmodule TdAuditWeb.ApiServices.MockTdAuthService do
       is_admin: is_admin
     }
 
-    Agent.update(MockTdAuthService, &(&1 ++ [new_user]))
+    Agent.update(MockAuthService, &(&1 ++ [new_user]))
     new_user
   end
 
@@ -29,11 +29,7 @@ defmodule TdAuditWeb.ApiServices.MockTdAuthService do
     List.first(Enum.filter(index(), &(&1.user_name == user_name)))
   end
 
-  def search(%{"ids" => ids}) do
-    Enum.filter(index(), fn user -> Enum.find(ids, &(&1 == user.id)) != nil end)
-  end
-
   def index do
-    Agent.get(MockTdAuthService, & &1) || []
+    Agent.get(MockAuthService, & &1) || []
   end
 end

@@ -53,11 +53,5 @@ config :td_audit, TdAudit.Auth.Guardian,
   ttl: {1, :hours},
   secret_key: "${GUARDIAN_SECRET_KEY}"
 
-config :td_audit, :auth_service,
-  api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
-  auth_host: "${API_AUTH_HOST}",
-  auth_port: "${API_AUTH_PORT}",
-  auth_domain: ""
-
 config :td_cache, redis_host: "${REDIS_HOST}"
 config :td_audit, host_name: "${WEB_HOST}"

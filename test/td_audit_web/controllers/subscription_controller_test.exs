@@ -9,7 +9,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   import TdAuditWeb.Authentication, only: :functions
 
   alias TdAudit.Subscriptions.Subscription
-  alias TdAuditWeb.ApiServices.MockTdAuthService
+  alias TdAuditWeb.ApiServices.MockAuthService
 
   @update_attrs %{user_email: "mynewmail@foo.com", periodicity: "monthly"}
   @invalid_update_attrs %{user_email: nil, periodicity: "monthly"}
@@ -21,7 +21,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   end
 
   setup_all do
-    start_supervised(MockTdAuthService)
+    start_supervised(MockAuthService)
     :ok
   end
 

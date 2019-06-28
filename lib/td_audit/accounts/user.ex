@@ -1,5 +1,7 @@
 defmodule TdAudit.Accounts.User do
   @moduledoc false
+
+  @derive {Jason.Encoder, only: [:id, :is_admin, :user_name]}
   defstruct id: 0,
             user_name: nil,
             password: nil,
