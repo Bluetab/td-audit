@@ -16,12 +16,11 @@ defmodule TdAudit.Auth.Guardian do
     {:ok, sub}
   end
 
-  def resource_from_claims(claims) do
+  def resource_from_claims(%{"sub" => sub} = _claims) do
     # Here we'll look up our resource from the claims, the subject can be
     # found in the `"sub"` key. In `above subject_for_token/2` we returned
     # the resource id so here we'll rely on that to look it up.
-    sub = JSON.decode!(claims["sub"])
-    resource = %User{id: sub["id"], is_admin: sub["is_admin"], user_name: sub["user_name"]}
+    resource = struct(User, JSON.decode!(sub, keys: :atoms!))
     {:ok, resource}
   end
 end

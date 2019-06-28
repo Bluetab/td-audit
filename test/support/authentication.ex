@@ -38,21 +38,13 @@ defmodule TdAuditWeb.Authentication do
   end
 
   def find_or_create_user(user_name, opts \\ []) do
-    user =
-      case get_user_by_name(user_name) do
-        nil ->
-          is_admin = Keyword.get(opts, :is_admin, false)
-          password = Keyword.get(opts, :password, "secret")
-
-          MockAuthService.create_user(%{
-            "user" => %{user_name: user_name, is_admin: is_admin, password: password}
-          })
-
-        user ->
-          user
-      end
-
-    user
+    case get_user_by_name(user_name) do
+      nil ->
+        is_admin = Keyword.get(opts, :is_admin, false)
+        MockAuthService.create_user(%{"user" => %{user_name: user_name, is_admin: is_admin}})
+      user ->
+        user
+    end
   end
 
   def get_user_by_name(user_name) do

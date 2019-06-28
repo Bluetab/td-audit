@@ -13,11 +13,10 @@ defmodule TdAuditWeb.ApiServices.MockAuthService do
     Agent.update(MockAuthService, fn _ -> user_list end)
   end
 
-  def create_user(%{"user" => %{user_name: user_name, is_admin: is_admin, password: password}}) do
+  def create_user(%{"user" => %{user_name: user_name, is_admin: is_admin}}) do
     new_user = %User{
       id: User.gen_id_from_user_name(user_name),
       user_name: user_name,
-      password: password,
       is_admin: is_admin
     }
 
