@@ -7,7 +7,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
 
   alias TdAudit.NotificationsSystem
   alias TdAudit.NotificationsSystem.Configuration
-  alias TdAuditWeb.ApiServices.MockTdAuthService
+  alias TdAuditWeb.ApiServices.MockAuthService
 
   import TdAuditWeb.Authentication, only: :functions
 
@@ -17,7 +17,7 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   @invalid_attrs %{settings: nil, event: nil}
 
   setup_all do
-    start_supervised(MockTdAuthService)
+    start_supervised(MockAuthService)
     :ok
   end
 

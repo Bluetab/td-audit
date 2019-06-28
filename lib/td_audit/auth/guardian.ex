@@ -1,6 +1,9 @@
 defmodule TdAudit.Auth.Guardian do
   @moduledoc false
+
   use Guardian, otp_app: :td_audit
+
+  alias Jason, as: JSON
   alias TdAudit.Accounts.User
 
   def subject_for_token(resource, _claims) do
@@ -9,16 +12,15 @@ defmodule TdAudit.Auth.Guardian do
     # how it being used on `resource_from_claims/1` function.
     # A unique `id` is a good subject, a non-unique email address
     # is a poor subject.
-    sub = Poison.encode!(resource)
+    sub = JSON.encode!(resource)
     {:ok, sub}
   end
 
-  def resource_from_claims(claims) do
+  def resource_from_claims(%{"sub" => sub} = _claims) do
     # Here we'll look up our resource from the claims, the subject can be
     # found in the `"sub"` key. In `above subject_for_token/2` we returned
     # the resource id so here we'll rely on that to look it up.
-    sub = Poison.decode!(claims["sub"])
-    resource = %User{id: sub["id"], is_admin: sub["is_admin"], user_name: sub["user_name"]}
+    resource = struct(User, JSON.decode!(sub, keys: :atoms!))
     {:ok, resource}
   end
 end

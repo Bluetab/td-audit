@@ -45,12 +45,6 @@ config :td_audit, TdAudit.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :td_audit, :auth_service,
-  api_service: TdAuditWeb.ApiServices.HttpTdAuthService,
-  auth_host: "localhost",
-  auth_port: "4001",
-  auth_domain: ""
-
 config :td_audit, email_account: "no-reply@example.com"
 
 config :td_audit, TdAudit.Smtp.Mailer,

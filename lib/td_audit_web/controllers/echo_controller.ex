@@ -1,9 +1,11 @@
-defmodule TdAuditWeb.PingController do
-  use TdAuditWeb, :controller
+defmodule TdAuditWeb.EchoController do
+  use TdAuditWeb, [:controller, :warn]
 
-  action_fallback TdAuditWeb.FallbackController
+  alias Jason, as: JSON
 
-  def ping(conn, _params) do
-    send_resp(conn, 200, "pong")
+  action_fallback(TdAuditWeb.FallbackController)
+
+  def echo(conn, params) do
+    send_resp(conn, 200, params |> JSON.encode!())
   end
 end

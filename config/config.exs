@@ -46,11 +46,6 @@ config :td_audit, TdAudit.Auth.Guardian,
   ttl: {1, :hours},
   secret_key: "SuperSecretTruedat"
 
-config :td_audit, :auth_service,
-  protocol: "http",
-  users_path: "/api/users/",
-  sessions_path: "/api/sessions/"
-
 config :td_audit, notification_load_frequency: 60_000
 
 config :td_audit, :phoenix_swagger,

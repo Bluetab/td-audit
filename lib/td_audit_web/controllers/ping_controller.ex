@@ -1,9 +1,9 @@
-defmodule TdAuditWeb.EchoController do
-  use TdAuditWeb, [:controller, :warn]
+defmodule TdAuditWeb.PingController do
+  use TdAuditWeb, :controller
 
-  action_fallback(TdAuditWeb.FallbackController)
+  action_fallback TdAuditWeb.FallbackController
 
-  def echo(conn, params) do
-    send_resp(conn, 200, params |> Poison.encode!())
+  def ping(conn, _params) do
+    send_resp(conn, 200, "pong")
   end
 end
