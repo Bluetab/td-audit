@@ -1,5 +1,4 @@
 defmodule TdAuditWeb.EchoController do
-
   use TdAuditWeb, [:controller, :warn]
 
   alias Jason, as: JSON

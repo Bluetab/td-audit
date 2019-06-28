@@ -1,5 +1,4 @@
 defmodule TdAuditWeb.AuditController do
-
   use TdAuditWeb, :controller
 
   alias TdAudit.Audit.Event
@@ -11,13 +10,16 @@ defmodule TdAuditWeb.AuditController do
 
   def create(conn, %{"audit" => audit_params}) do
     changeset = Event.changeset(%Event{}, audit_params)
+
     case changeset.valid? do
       true ->
         conn
         |> enqueue(audit_params)
+
       false ->
-        Logger.info  "audit controller invalid params: #{inspect(audit_params)}"
-        Logger.info  "autdit controller changeset: #{inspect(changeset)}"
+        Logger.info("audit controller invalid params: #{inspect(audit_params)}")
+        Logger.info("autdit controller changeset: #{inspect(changeset)}")
+
         conn
         |> put_status(:unprocessable_entity)
         |> send_resp(:unprocessable_entity, JSON.encode!(%{errors: "Invalid params"}))
@@ -30,8 +32,10 @@ defmodule TdAuditWeb.AuditController do
         conn
         |> put_status(:created)
         |> send_resp(:created, JSON.encode!(%{job_id: jid}))
+
       {:error, error} ->
-        Logger.info "audit controller queue fails: #{inspect(audit_params)}"
+        Logger.info("audit controller queue fails: #{inspect(audit_params)}")
+
         conn
         |> put_status(:unprocessable_entity)
         |> send_resp(:unprocessable_entity, JSON.encode!(%{errors: error}))
