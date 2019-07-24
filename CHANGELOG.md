@@ -1,5 +1,7 @@
 # Changelog
 
+## [3.2.0] 2019-07-24
+
 ### Changed
 
 - [TD-2002] Update td-cache and delete permissions list from config
