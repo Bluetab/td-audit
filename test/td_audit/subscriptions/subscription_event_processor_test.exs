@@ -34,27 +34,36 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
   @user_list [@user_1, @user_2, @user_3]
 
-  @conf_create_attrs %{
-    event: "create_concept_draft",
-    settings: %{
-      "generate_subscription" => %{
-        "roles" => ["data_owner"]
-      }
-    }
-  }
-
   defp process_event_fixture do
-    create_configuration()
+    create_configurations()
     create_users_in_cache()
     create_list_of_events_for_process()
   end
 
-  defp create_configuration do
-    {:ok, configuration} =
-      @conf_create_attrs
-      |> NotificationsSystem.create_configuration()
+  defp create_configurations do
+    {:ok, conf_1} =
+      NotificationsSystem.create_configuration(%{
+        event: "create_concept_draft",
+        settings: %{
+          "generate_subscription" => %{
+            "roles" => ["data_owner"],
+            "target_event" => "create_comment"
+          }
+        }
+      })
 
-    configuration
+    {:ok, conf_2} =
+      NotificationsSystem.create_configuration(%{
+        event: "create_concept_draft",
+        settings: %{
+          "generate_subscription" => %{
+            "roles" => ["data_owner"],
+            "target_event" => "failed_rule_results"
+          }
+        }
+      })
+
+    [conf_1, conf_2]
   end
 
   defp create_users_in_cache do
@@ -106,11 +115,12 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
     valid_ids = [1, 2, 3]
     created_subscriptions = Subscriptions.list_subscriptions()
-    assert length(created_subscriptions) == 3
+
+    assert length(created_subscriptions) == 6
 
     assert Enum.all?(
              created_subscriptions,
-             &(Map.get(&1, :event) == "create_comment" &&
+             &(Map.get(&1, :event) in ["create_comment", "failed_rule_results"] &&
                  Map.get(&1, :resource_type) == "business_concept")
            )
 
@@ -120,9 +130,26 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   end
 
   test "process_event/1 for event delete_concept_draft" do
-    subscription_fixture(%{resource_id: 1, event: "create_comment"})
-    remaining_subscription_1 = subscription_fixture(%{resource_id: 2, event: "create_comment"})
-    remaining_subscription_2 = subscription_fixture(%{resource_id: 3, event: "create_comment"})
+    subscription_fixture(%{
+      resource_id: 1,
+      event: "create_comment",
+      resource_type: "business_concept"
+    })
+
+    remaining_subscription_1 =
+      subscription_fixture(%{
+        resource_id: 2,
+        event: "create_comment",
+        resource_type: "business_concept"
+      })
+
+    remaining_subscription_2 =
+      subscription_fixture(%{
+        resource_id: 3,
+        event: "create_comment",
+        resource_type: "business_concept"
+      })
+
     remaining_subscriptions = [remaining_subscription_1, remaining_subscription_2]
 
     SubscriptionEventProcessor.process_event(%{
@@ -132,7 +159,58 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
     })
 
     subscriptions = Subscriptions.list_subscriptions()
-    assert length(remaining_subscriptions) == 2
+    assert length(subscriptions) == 2
+
+    assert Enum.all?(remaining_subscriptions, fn s ->
+             Enum.any?(subscriptions, &(Map.get(&1, :resource_id) == Map.get(s, :resource_id)))
+           end)
+  end
+
+  test "process_event/1 for update_concept_draft" do
+    del_sub =
+      subscription_fixture(%{
+        resource_id: 1,
+        event: "create_comment",
+        resource_type: "business_concept"
+      })
+
+    sub_1 =
+      subscription_fixture(%{
+        resource_id: 2,
+        event: "create_comment",
+        resource_type: "business_concept"
+      })
+
+    sub_2 =
+      subscription_fixture(%{
+        resource_id: 3,
+        event: "create_comment",
+        resource_type: "business_concept"
+      })
+
+    remaining_subscriptions = [sub_1, sub_2]
+    event_fixture = hd(process_event_fixture())
+
+    content =
+      event_fixture
+      |> Map.get("payload")
+      |> Map.get("content")
+
+    new_payload =
+      Map.new()
+      |> Map.put("content", Map.new() |> Map.put("changed", content))
+
+    event_fixture =
+      event_fixture
+      |> Map.put("event", "update_concept_draft")
+      |> Map.put("payload", new_payload)
+
+    SubscriptionEventProcessor.process_event(event_fixture)
+
+    subscriptions = Subscriptions.list_subscriptions()
+    assert length(subscriptions) == 4
+
+    assert not Enum.any?(subscriptions, &(Map.get(&1, :id) == Map.get(del_sub, :id)))
 
     assert Enum.all?(remaining_subscriptions, fn s ->
              Enum.any?(subscriptions, &(Map.get(&1, :resource_id) == Map.get(s, :resource_id)))

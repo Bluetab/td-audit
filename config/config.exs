@@ -46,7 +46,12 @@ config :td_audit, TdAudit.Auth.Guardian,
   ttl: {1, :hours},
   secret_key: "SuperSecretTruedat"
 
-config :td_audit, notification_load_frequency: 60_000
+config :td_audit, :notification_load_frequency,
+  events: %{
+    create_comment: 60_000,
+    # failed_rule_results: 86_400_000
+    failed_rule_results: 60_000
+  }
 
 config :td_audit, :phoenix_swagger,
   swagger_files: %{

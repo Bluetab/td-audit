@@ -5,6 +5,8 @@ defmodule TdAudit.NotificationDispatcher do
   alias TdAudit.Smtp.Mailer
   alias TdAudit.Subscriptions
   alias TdCache.ConceptCache
+  alias TdCache.RuleCache
+  alias TdCache.RuleResultCache
   alias TdCache.UserCache
 
   @concepts_path Application.get_env(:td_audit, :concepts_path)
@@ -29,6 +31,67 @@ defmodule TdAudit.NotificationDispatcher do
     events_with_subscribers
     |> Enum.map(&compose_notification(&1, :comment_creation))
     |> Enum.map(&send_notification(&1, :email_on_comment))
+  end
+
+  def dispatch_notification({:dispatch_on_failed_results, event}) do
+    subscription_filters = %{"event" => event, "resource_type" => "business_concept"}
+    subscriptions = Subscriptions.list_subscriptions_by_filter(subscription_filters)
+
+    RuleResultCache.members_failed_ids()
+    |> rule_results()
+    |> with_rule()
+    |> with_concept()
+
+    # Enum.group_by(subscriptions, &Map.get(&1, :user_email))
+  end
+
+  defp rule_results({:ok, failed_ids}) do
+    failed_ids
+    |> Enum.map(fn id ->
+      case RuleResultCache.get(id) do
+        {:ok, result} -> result
+        _ -> nil
+      end
+    end)
+    |> Enum.filter(& &1)
+  end
+
+  defp rule_results(_), do: []
+
+  defp with_rule(rule_results) do
+    rule_results
+    |> Enum.map(fn result ->
+      rule_id = Map.get(result, :rule_id)
+
+      case RuleCache.get(rule_id) do
+        {:ok, rule} ->
+          rule
+          |> Map.put(:rule_name, Map.get(rule, :name))
+          |> Map.delete(:name)
+          |> Map.merge(result)
+
+        _ ->
+          nil
+      end
+    end)
+    |> Enum.filter(& &1)
+  end
+
+  defp with_concept(rule_results) do
+    Enum.map(rule_results, fn result ->
+      business_concept_id = Map.get(result, :business_concept_id)
+
+      case ConceptCache.get(business_concept_id) do
+        {:ok, concept} ->
+          concept
+          |> Map.put(:business_concept_name, Map.get(concept, :name))
+          |> Map.delete(:name)
+          |> Map.merge(result)
+
+        _ ->
+          nil
+      end
+    end)
   end
 
   defp update_last_consumed_events(events_with_subscribers) do
