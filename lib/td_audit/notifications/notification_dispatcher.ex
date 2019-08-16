@@ -37,12 +37,16 @@ defmodule TdAudit.NotificationDispatcher do
     subscription_filters = %{"event" => event, "resource_type" => "business_concept"}
     subscriptions = Subscriptions.list_subscriptions_by_filter(subscription_filters)
 
-    RuleResultCache.members_failed_ids()
-    |> rule_results()
-    |> with_rule()
-    |> with_concept()
+    results =
+      RuleResultCache.members_failed_ids()
+      |> rule_results()
+      |> with_rule()
+      |> with_concept()
+      |> Enum.group_by(&Map.get(&1, :business_concept_id))
 
-    # Enum.group_by(subscriptions, &Map.get(&1, :user_email))
+    
+    subscrivers = with_results(subscriptions, results)
+    # 
   end
 
   defp rule_results({:ok, failed_ids}) do
@@ -92,6 +96,16 @@ defmodule TdAudit.NotificationDispatcher do
           nil
       end
     end)
+  end
+
+  defp with_results(subscriptions, results) do
+    subscriptions
+    |> Enum.group_by(&Map.get(&1, :user_email))
+    |> Enum.map(fn {k, vs} -> {k, Enum.map(vs, &Map.get(&1, :resource_id))} end)
+    |> Enum.map(fn {k, vs} -> {k, Enum.map(vs, &Map.get(&1, results))} end)
+    |> IO.inspect 
+
+    # TODO
   end
 
   defp update_last_consumed_events(events_with_subscribers) do
