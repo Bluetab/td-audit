@@ -59,6 +59,7 @@ config :td_audit, :phoenix_swagger,
   }
 
 config :td_audit, concepts_path: "/concepts"
+config :td_audit, rules_path: "/rules"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
