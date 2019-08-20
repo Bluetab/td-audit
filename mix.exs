@@ -53,8 +53,8 @@ defmodule TdAudit.Mixfile do
       {:phoenix_swagger, "~> 0.8.0"},
       {:ex_json_schema, "~> 0.5"},
       {:td_cache, path: "../td-cache"},
-      {:bamboo, "~> 1.1"},
-      {:bamboo_smtp, "~> 1.6.0"}
+      {:bamboo, "~> 1.3"},
+      {:bamboo_smtp, "~> 1.7.0"}
     ]
   end
 

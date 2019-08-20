@@ -22,8 +22,9 @@ defmodule TdAudit.Notifications.Messages do
       <th>Regla</th>
       <th>Implemtación</th>
       <th>Mínimo</th>
-      <th>Resultado/th>
+      <th>Resultado</th>
     </tr>"
+
     body = Enum.reduce(content, "", &table_line/2)
 
     %{

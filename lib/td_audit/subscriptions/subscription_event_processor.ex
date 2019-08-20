@@ -21,7 +21,10 @@ defmodule TdAudit.SubscriptionEventProcessor do
       |> Map.put("event", "create_concept_draft")
       |> NotificationsSystem.get_configurations_by_filter()
 
-    events = Enum.map(configurations, &target_event(&1))
+    events =
+      configurations
+      |> Enum.filter(&changed_involved_roles?(&1, event_params))
+      |> Enum.map(&target_event(&1))
 
     Map.new()
     |> Map.put("resource_id", Map.get(event_params, "resource_id"))
@@ -69,6 +72,19 @@ defmodule TdAudit.SubscriptionEventProcessor do
       params,
       involved_roles
     )
+  end
+
+  defp changed_involved_roles?(configuration, event_params) do
+    roles = involved_roles(configuration)
+
+    keys =
+      event_params
+      |> Map.get("payload", %{})
+      |> Map.get("content", %{})
+      |> Map.get("changed", %{})
+      |> Map.keys()
+
+    Enum.any?(keys, &(&1 in roles))
   end
 
   defp involved_roles(%Configuration{settings: settings}) do

@@ -26,7 +26,7 @@ defmodule TdAudit.NotificationDispatcher do
 
     events_with_subscribers =
       subscriptions_list
-      |> retrieve_events_with_subscribers
+      |> retrieve_events_with_subscribers()
 
     events_with_subscribers |> update_last_consumed_events()
 
@@ -46,7 +46,7 @@ defmodule TdAudit.NotificationDispatcher do
       |> with_rule()
       |> with_concept()
       |> Enum.group_by(&Map.get(&1, :business_concept_id))
-    
+
     emails =
       subscriptions
       |> create_content(results)
@@ -54,8 +54,8 @@ defmodule TdAudit.NotificationDispatcher do
       |> Enum.map(&send_notification(&1, :failed_rule_results))
 
     unless emails == [] do
-      Enum.map(failed_ids, &RuleResultCache.delete_from_failed_ids/1)
-    end 
+      clean_cache(failed_ids)
+    end
 
     emails
   end
@@ -114,6 +114,11 @@ defmodule TdAudit.NotificationDispatcher do
     |> Enum.map(fn {k, vs} -> {k, Enum.map(vs, &Map.get(results, Integer.to_string(&1)))} end)
     |> Enum.map(fn {k, vs} -> {k, Enum.filter(vs, & &1)} end)
     |> Enum.map(fn {k, vs} -> {k, List.flatten(vs)} end)
+    |> Enum.filter(fn {_k, vs} -> not (vs == []) end)
+  end
+
+  defp clean_cache(failed_ids) do
+    Enum.map(failed_ids, &RuleResultCache.delete_from_failed_ids/1)
   end
 
   defp update_last_consumed_events(events_with_subscribers) do
