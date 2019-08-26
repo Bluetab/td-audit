@@ -49,8 +49,7 @@ config :td_audit, TdAudit.Auth.Guardian,
 config :td_audit, :notification_load_frequency,
   events: %{
     create_comment: 60_000,
-    # failed_rule_results: 86_400_000
-    failed_rule_results: 60_000
+    failed_rule_results: 86_400_000
   }
 
 config :td_audit, :phoenix_swagger,
