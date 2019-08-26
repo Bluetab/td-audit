@@ -15,7 +15,7 @@ defmodule TdAudit.NotificationsSystem.Configuration do
 
   @valid_settings_keys ["generate_subscription", "generate_notification"]
   @valid_keys_in_settings %{
-    "generate_subscription" => ["roles"],
+    "generate_subscription" => ["roles", "target_event"],
     "generate_notification" => ["active"]
   }
 

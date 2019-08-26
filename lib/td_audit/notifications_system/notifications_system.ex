@@ -64,6 +64,31 @@ defmodule TdAudit.NotificationsSystem do
   end
 
   @doc """
+  Gets a multiple configurations given a set of params.
+
+  [] if no configurations found.
+
+  ## Examples
+
+      iex> get_configurations_by_filter(%{})
+      [%Configuration{}]
+
+      iex> get_configuration!(%{})
+      ** []
+
+  """
+  def get_configurations_by_filter(params) do
+    fields = Configuration.__schema__(:fields)
+    dynamic = QuerySupport.filter(params, fields)
+
+    Repo.all(
+      from(p in Configuration,
+        where: ^dynamic
+      )
+    )
+  end
+
+  @doc """
   Creates a configuration.
 
   ## Examples

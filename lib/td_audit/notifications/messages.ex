@@ -15,4 +15,42 @@ defmodule TdAudit.Notifications.Messages do
       </p></br><p><i>\"#{content}\"</i></p>"
     }
   end
+
+  def content_on_failed_rule_results(%{"content" => content}) do
+    headers = "<tr>
+      <th>Concepto de Negocio</th>
+      <th>Regla</th>
+      <th>Implemtación</th>
+      <th>Mínimo</th>
+      <th>Resultado</th>
+    </tr>"
+
+    body = Enum.reduce(content, "", &table_line/2)
+
+    %{
+      subject: "Ejecuciones de reglas terminadas en error.",
+      body: "<table>#{headers}#{body}</table>"
+    }
+  end
+
+  defp table_line(
+         %{
+           business_concept_name: business_concept_name,
+           implementation_key: implementation_key,
+           result: result,
+           rule_name: rule_name,
+           concept_link: concept_link,
+           rule_link: rule_link
+         } = line,
+         acc
+       ) do
+    minimum = Map.get(line, :minimum, "")
+    acc <> "<tr>
+      <td><a href=\"#{concept_link}\">#{business_concept_name}</a></td>
+      <td><a href=\"#{rule_link}\">#{rule_name}</a></td>
+      <td>#{implementation_key}</td>
+      <td>#{minimum}</td>
+      <td>#{result}</td>
+    </tr>"
+  end
 end

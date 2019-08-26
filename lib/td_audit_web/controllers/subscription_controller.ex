@@ -9,6 +9,8 @@ defmodule TdAuditWeb.SubscriptionController do
   alias TdAudit.Subscriptions.Subscription
   alias TdAuditWeb.SwaggerDefinitions
 
+  alias TdCache.UserCache
+
   action_fallback(TdAuditWeb.FallbackController)
 
   def swagger_definitions do
@@ -38,6 +40,8 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   def create(conn, %{"subscription" => subscription_params}) do
+    subscription_params = with_email(subscription_params)
+
     with {:ok, %Subscription{} = subscription} <-
            Subscriptions.create_subscription(subscription_params) do
       conn
@@ -105,4 +109,27 @@ defmodule TdAuditWeb.SubscriptionController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  defp with_email(subscription_params) do
+    case Map.has_key?(subscription_params, "user_email") do
+      true ->
+        subscription_params
+
+      false ->
+        email_from_full_name(subscription_params)
+    end
+  end
+
+  defp email_from_full_name(%{"full_name" => nil} = subscription_params), do: subscription_params
+
+  defp email_from_full_name(%{"full_name" => full_name} = subscription_params) do
+    email =
+      full_name
+      |> UserCache.get_by_name!()
+      |> Map.get(:email)
+
+    Map.put(subscription_params, "user_email", email)
+  end
+
+  defp email_from_full_name(subscription_params), do: subscription_params
 end

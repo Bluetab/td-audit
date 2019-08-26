@@ -46,7 +46,11 @@ config :td_audit, TdAudit.Auth.Guardian,
   ttl: {1, :hours},
   secret_key: "SuperSecretTruedat"
 
-config :td_audit, notification_load_frequency: 60_000
+config :td_audit, :notification_load_frequency,
+  events: %{
+    create_comment: 60_000,
+    failed_rule_results: 86_400_000
+  }
 
 config :td_audit, :phoenix_swagger,
   swagger_files: %{
@@ -54,6 +58,7 @@ config :td_audit, :phoenix_swagger,
   }
 
 config :td_audit, concepts_path: "/concepts"
+config :td_audit, rules_path: "/rules"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

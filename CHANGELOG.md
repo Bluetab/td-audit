@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] 
+
+### Added
+
+- [TD-1907] Notification under failed rule results 
+
 ## [3.2.0] 2019-07-24
 
 ### Changed

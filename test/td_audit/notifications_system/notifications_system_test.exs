@@ -170,5 +170,12 @@ defmodule TdAudit.NotificationsSystemTest do
       assert NotificationsSystem.get_configuration_by_filter(%{event: "create_concept_draft"}) ==
                configuration
     end
+
+    test "get_configurations_by_filter/1 returns a configuration valid atributes" do
+      configuration = configuration_fixture(@event_subscription_valid)
+
+      assert NotificationsSystem.get_configurations_by_filter(%{event: "create_concept_draft"}) ==
+               [configuration]
+    end
   end
 end

@@ -38,10 +38,13 @@ defmodule TdAudit.SubscriptionsTest do
     test "list_subscriptions/1 returns all subscriptions filtered by resource_id" do
       target_resource_id = 44
       subscription_fixture()
-      subscription = subscription_fixture(%{resource_id: target_resource_id})
+      subscription_1 = subscription_fixture(%{resource_id: target_resource_id, event: "my event"})
+      subscription_2 = subscription_fixture(%{resource_id: target_resource_id, event: "my event"})
 
-      assert Subscriptions.list_subscriptions_by_filter(%{"resource_id" => target_resource_id}) ==
-               [subscription]
+      assert Subscriptions.list_subscriptions_by_filter(%{
+               "resource_id" => target_resource_id,
+               "event" => ["my event"]
+             }) == [subscription_1, subscription_2]
     end
 
     test "get_subscription!/1 returns the subscription with given id" do
