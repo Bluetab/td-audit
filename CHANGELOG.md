@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-1987] Change text in table header of Rule Notification email
+
 ## [3.5.1] 2019-09-03
 
 ### Fixed

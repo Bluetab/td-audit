@@ -21,7 +21,7 @@ defmodule TdAudit.Notifications.Messages do
       <th>Concepto de Negocio</th>
       <th>Regla</th>
       <th>Implemtación</th>
-      <th>Mínimo</th>
+      <th>Umbral</th>
       <th>Resultado</th>
     </tr>"
 
