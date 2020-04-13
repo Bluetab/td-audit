@@ -6,15 +6,22 @@ defmodule TdAudit.Mixfile do
       app: :td_audit,
       version:
         case System.get_env("APP_VERSION") do
-          nil -> "3.8.0-local"
+          nil -> "3.20.0-local"
           v -> v
         end,
-      elixir: "~> 1.6",
+      elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: [
+        td_audit: [
+          include_executables_for: [:unix],
+          applications: [runtime_tools: :permanent],
+          steps: [:assemble, &copy_bin_files/1, :tar]
+        ]
+      ]
     ]
   end
 
@@ -32,29 +39,32 @@ defmodule TdAudit.Mixfile do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
+  defp copy_bin_files(release) do
+    File.cp_r("rel/bin", Path.join(release.path, "bin"))
+    release
+  end
+
   # Specifies your project dependencies.
   #
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.0"},
+      {:phoenix, "~> 1.4.16"},
       {:plug_cowboy, "~> 2.0"},
-      {:plug, "~> 1.7"},
       {:phoenix_ecto, "~> 4.0"},
-      {:ecto_sql, "~> 3.0"},
+      {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
       {:exq, "~> 0.13.2"},
       {:jason, "~> 1.0"},
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
-      {:distillery, "~> 2.0", runtime: false},
-      {:guardian, "~> 1.2.1"},
-      {:httpoison, "~> 1.2.0"},
-      {:phoenix_swagger, "~> 0.8.0"},
-      {:ex_json_schema, "~> 0.5"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.5.1"},
-      {:bamboo, "~> 1.3"},
-      {:bamboo_smtp, "~> 1.7.0"}
+      {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
+      {:guardian, "~> 2.0"},
+      {:httpoison, "~> 1.6"},
+      {:phoenix_swagger, "~> 0.8.2"},
+      {:ex_json_schema, "~> 0.7.3"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.20.0"},
+      {:bamboo, "~> 1.4"},
+      {:bamboo_smtp, "~> 2.1.0"}
     ]
   end
 

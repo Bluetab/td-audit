@@ -42,6 +42,7 @@ defmodule TdAuditWeb.Authentication do
       nil ->
         is_admin = Keyword.get(opts, :is_admin, false)
         MockAuthService.create_user(%{"user" => %{user_name: user_name, is_admin: is_admin}})
+
       user ->
         user
     end

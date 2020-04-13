@@ -23,7 +23,7 @@ services:
       start_period: 10s
 
   build:
-    image: bluetab/elixir:1.7.4-alpine-20190503114134
+    image: bluetab/elixir:1.10.1-alpine-20200212171042
     command: ci/build.sh
     environment:
       APP_VERSION: "${APP_VERSION}"
@@ -36,7 +36,7 @@ services:
       - "${CI_PROJECT_DIR}:/code"
 
   test:
-    image: bluetab/elixir:1.7.4-alpine-20190503114134
+    image: bluetab/elixir:1.10.1-alpine-20200212171042
     command: ci/test.sh
     environment:
       HOME: /tmp # CURRENT_UID doesn't have a home
@@ -57,9 +57,9 @@ services:
       DB_NAME: postgres
       DB_PASSWORD: postgres
       DB_USER: postgres
+      GUARDIAN_SECRET_KEY: topsecret
       REDIS_HOST: redis
       REDIS_NAMESPACE: exq
-      REPLACE_OS_VARS: "true"
     depends_on:
       - postgres
       - redis

@@ -1,6 +1,6 @@
-# /truedat Data Audit
+# Truedat Data Audit
 
-TdAudit is a back-end service developed as part of /truedat project that supports the management of events
+TdAudit is a back-end service developed as part of Truedat project that supports the management of events
 
 ## Getting Started
 
@@ -17,7 +17,7 @@ To start your Phoenix server:
   * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
   * Start Phoenix endpoint with `mix phx.server`
 
-  * Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+  * Now you can visit [`localhost:4007`](http://localhost:4007) from your browser.
 
 ## Running the tests
 
@@ -36,8 +36,6 @@ Ready to run in production? Please [check deployment guides](http://www.phoenixf
 * [Gettext](https://hexdocs.pm/gettext) - Internationalization and localization support for Elixir
 * [Cowboy](https://ninenines.eu) - HTTP server for Erlang/OTP
 * [credo](http://credo-ci.org/) - Static code analysis tool for the Elixir language
-* [edeliver](https://github.com/edeliver/edeliver) - Deployment for Elixir and Erlang
-* [distillery](https://github.com/bitwalker/distillery) - Release packaging for the Erlang VM
 * [guardian](https://github.com/ueberauth/guardian) - Authentication library
 * [phoenix_swagger](https://github.com/xerions/phoenix_swagger) - Swagger integration to Phoenix framework
 * [httpoison](https://hex.pm/packages/httpoison) - HTTP client for Elixir
