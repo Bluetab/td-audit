@@ -7,7 +7,7 @@ defmodule TdAudit.Repo.Migrations.AddFieldLastConsumedEvent do
 
   def change do
     alter table(:subscriptions) do
-      add :last_consumed_event, :utc_datetime
+      add(:last_consumed_event, :utc_datetime)
     end
   end
 end

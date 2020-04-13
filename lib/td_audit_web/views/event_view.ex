@@ -11,7 +11,8 @@ defmodule TdAuditWeb.EventView do
   end
 
   def render("event.json", %{event: event}) do
-    %{id: event.id,
+    %{
+      id: event.id,
       service: event.service,
       resource_id: event.resource_id,
       resource_type: event.resource_type,
@@ -19,6 +20,7 @@ defmodule TdAuditWeb.EventView do
       payload: event.payload,
       user_id: event.user_id,
       user_name: event.user_name,
-      ts: event.ts}
+      ts: event.ts
+    }
   end
 end

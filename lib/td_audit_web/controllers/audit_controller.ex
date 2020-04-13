@@ -13,12 +13,11 @@ defmodule TdAuditWeb.AuditController do
 
     case changeset.valid? do
       true ->
-        conn
-        |> enqueue(audit_params)
+        enqueue(conn, audit_params)
 
       false ->
         Logger.info("audit controller invalid params: #{inspect(audit_params)}")
-        Logger.info("autdit controller changeset: #{inspect(changeset)}")
+        Logger.info("audit controller changeset: #{inspect(changeset)}")
 
         conn
         |> put_status(:unprocessable_entity)

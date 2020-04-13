@@ -3,12 +3,16 @@ defmodule TdAudit.Repo.Migrations.AddNotificationsConfiguration do
 
   def change do
     create table(:notifications_system_configuration) do
-      add :event, :string, null: false
-      add :configuration, :map, null: false
+      add(:event, :string, null: false)
+      add(:configuration, :map, null: false)
 
       timestamps()
     end
 
-    create unique_index(:notifications_system_configuration, [:event], name: :index_notifications_system_configuration_by_event)
+    create(
+      unique_index(:notifications_system_configuration, [:event],
+        name: :index_notifications_system_configuration_by_event
+      )
+    )
   end
 end

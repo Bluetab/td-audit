@@ -11,8 +11,8 @@ config :td_audit,
 
 # Configures the endpoint
 config :td_audit, TdAuditWeb.Endpoint,
+  http: [port: 4007],
   url: [host: "localhost"],
-  secret_key_base: "VtmbTFfMSsQ9Q6w56ZSIwNbyyxoAfK4DTe647m8H0kTn5rG/EQpTbHNLnCJQswtL",
   render_errors: [view: TdAuditWeb.ErrorView, accepts: ~w(json)]
 
 # Configures Elixir's Logger
@@ -20,11 +20,16 @@ config :td_audit, TdAuditWeb.Endpoint,
 # (without the 'end of line' character)
 # EX_LOGGER_FORMAT='$date $time [$level] $message'
 config :logger, :console,
-  format: (System.get_env("EX_LOGGER_FORMAT") || "$time $metadata[$level] $message") <> "\n",
-  metadata: [:request_id]
+  format:
+    (System.get_env("EX_LOGGER_FORMAT") || "$date\T$time\Z [$level]$levelpad $metadata$message") <>
+      "\n",
+  level: :info,
+  metadata: [:pid, :module],
+  utc_log: true
 
 # Configuration for Phoenix
 config :phoenix, :json_library, Jason
+config :phoenix_swagger, :json_library, Jason
 
 # Configure Exq
 config :exq,
@@ -59,6 +64,10 @@ config :td_audit, :phoenix_swagger,
 
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"
+
+config :td_audit, queue: TdAudit.Queue
+
+config :td_audit, TdAudit.Smtp.Mailer, adapter: Bamboo.SMTPAdapter
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -3,7 +3,7 @@ defmodule TdAudit.Repo.Migrations.AddUserNameToEvents do
 
   def change do
     alter table(:events) do
-      add :user_name, :string
+      add(:user_name, :string)
     end
   end
 end

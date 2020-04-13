@@ -5,6 +5,7 @@ defmodule TdAudit.QueueMock do
 
   def enqueue(_queue, worker, params) do
     status = worker.perform(params)
+
     case status do
       {:ok, %Event{} = event} -> {:ok, event.id}
       {:error, _} -> status

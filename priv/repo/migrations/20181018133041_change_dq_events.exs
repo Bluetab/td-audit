@@ -12,6 +12,4 @@ defmodule TdAudit.Repo.Migrations.ChangeDqEvents do
     execute("update events set event='delete_quality_control' where event='delete_rule'")
     execute("update events set resource_type='quality_control' where resource_type='rule'")
   end
-
-
 end

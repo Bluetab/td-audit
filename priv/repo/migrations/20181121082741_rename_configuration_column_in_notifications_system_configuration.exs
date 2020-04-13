@@ -5,6 +5,6 @@ defmodule TdAudit.Repo.Migrations.RenameConfigurationColumnInNotificationsSystem
   use Ecto.Migration
 
   def change do
-    rename table(:notifications_system_configuration), :configuration, to: :settings
+    rename(table(:notifications_system_configuration), :configuration, to: :settings)
   end
 end
