@@ -24,9 +24,6 @@ defmodule TdAuditWeb.ApiServices.MockAuthService do
     new_user
   end
 
-  def get_user_by_name(user_name) do
-    List.first(Enum.filter(index(), &(&1.user_name == user_name)))
-  end
 
   def index do
     Agent.get(MockAuthService, & &1) || []

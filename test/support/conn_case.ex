@@ -19,27 +19,26 @@ defmodule TdAuditWeb.ConnCase do
 
   alias Ecto.Adapters.SQL.Sandbox
   alias Phoenix.ConnTest
-  alias TdAudit.Repo
-  alias TdAuditWeb.Endpoint
 
   @admin_user_name "app-admin"
 
   using do
     quote do
-      # Import conveniences for testing with connections
       use Phoenix.ConnTest
+
+      import TdAudit.Factory
+
       alias TdAuditWeb.Router.Helpers, as: Routes
 
-      # The default endpoint for testing
-      @endpoint Endpoint
+      @endpoint TdAuditWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Sandbox.checkout(Repo)
+    :ok = Sandbox.checkout(TdAudit.Repo)
 
     unless tags[:async] do
-      Sandbox.mode(Repo, {:shared, self()})
+      Sandbox.mode(TdAudit.Repo, {:shared, self()})
     end
 
     {:ok, conn: ConnTest.build_conn()}

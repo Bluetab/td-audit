@@ -1,11 +1,10 @@
 defmodule TdAudit.Subscriptions.Subscription do
   @moduledoc """
-  Module defining the existing attributes for a
-  Subscription entity
+  Ecto Schema module for Subscriptions.
   """
+  import Ecto.Changeset
 
   use Ecto.Schema
-  import Ecto.Changeset
 
   schema "subscriptions" do
     field(:event, :string)
@@ -18,9 +17,12 @@ defmodule TdAudit.Subscriptions.Subscription do
     timestamps()
   end
 
-  @doc false
-  def changeset(event, attrs) do
-    event
+  def changeset(%{} = params) do
+    changeset(%__MODULE__{}, params)
+  end
+
+  def changeset(%__MODULE__{} = subscription, attrs) do
+    subscription
     |> cast(attrs, [
       :event,
       :resource_id,
@@ -30,5 +32,6 @@ defmodule TdAudit.Subscriptions.Subscription do
       :last_consumed_event
     ])
     |> validate_required([:resource_id, :resource_type, :event, :user_email])
+    |> unique_constraint(:unique_resource_subscription, name: :unique_resource_subscription)
   end
 end

@@ -6,8 +6,6 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   use ExUnit.Case, async: false
   use TdAudit.DataCase
 
-  import TdAudit.SubscriptionTestHelper
-
   alias TdAudit.NotificationsSystem
   alias TdAudit.SubscriptionEventProcessor
   alias TdAudit.Subscriptions
@@ -130,63 +128,46 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   end
 
   test "process_event/1 for event delete_concept_draft" do
-    subscription_fixture(%{
-      resource_id: 1,
-      event: "create_comment",
-      resource_type: "business_concept"
-    })
-
-    remaining_subscription_1 =
-      subscription_fixture(%{
-        resource_id: 2,
-        event: "create_comment",
-        resource_type: "business_concept"
-      })
-
-    remaining_subscription_2 =
-      subscription_fixture(%{
-        resource_id: 3,
-        event: "create_comment",
-        resource_type: "business_concept"
-      })
-
-    remaining_subscriptions = [remaining_subscription_1, remaining_subscription_2]
+    [s1, s2, s3] =
+      Enum.map(1..3, fn _ ->
+        insert(:subscription, event: "delete_concept_draft", resource_type: "business_concept")
+      end)
 
     SubscriptionEventProcessor.process_event(%{
-      "resource_id" => 1,
+      "resource_id" => s1.resource_id,
       "event" => "delete_concept_draft",
-      "resource_type" => "some resource_type"
+      "resource_type" => "business_concept"
     })
 
     subscriptions = Subscriptions.list_subscriptions()
     assert length(subscriptions) == 2
 
-    assert Enum.all?(remaining_subscriptions, fn s ->
+    assert Enum.all?([s2, s3], fn s ->
              Enum.any?(subscriptions, &(Map.get(&1, :resource_id) == Map.get(s, :resource_id)))
            end)
   end
 
   test "process_event/1 for update_concept_draft" do
     del_sub =
-      subscription_fixture(%{
+      insert(:subscription,
         resource_id: 1,
         event: "create_comment",
         resource_type: "business_concept"
-      })
+      )
 
     sub_1 =
-      subscription_fixture(%{
+      insert(:subscription,
         resource_id: 2,
         event: "create_comment",
         resource_type: "business_concept"
-      })
+      )
 
     sub_2 =
-      subscription_fixture(%{
+      insert(:subscription,
         resource_id: 3,
         event: "create_comment",
         resource_type: "business_concept"
-      })
+      )
 
     remaining_subscriptions = [sub_1, sub_2]
     event_fixture = hd(process_event_fixture())

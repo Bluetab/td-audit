@@ -7,7 +7,6 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
 
   alias TdAudit.NotificationsSystem
   alias TdAudit.NotificationsSystem.Configuration
-  alias TdAuditWeb.ApiServices.MockAuthService
 
   import TdAuditWeb.Authentication, only: :functions
 
@@ -15,11 +14,6 @@ defmodule TdAuditWeb.ConfigurationControllerTest do
   @create_attrs %{settings: %{}, event: "some event"}
   @update_attrs %{settings: %{}, event: "some updated event"}
   @invalid_attrs %{settings: nil, event: nil}
-
-  setup_all do
-    start_supervised(MockAuthService)
-    :ok
-  end
 
   def fixture(:configuration) do
     {:ok, configuration} = NotificationsSystem.create_configuration(@create_attrs)

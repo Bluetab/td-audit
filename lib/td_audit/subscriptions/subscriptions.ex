@@ -4,6 +4,7 @@ defmodule TdAudit.Subscriptions do
   """
 
   import Ecto.Query, warn: false
+
   alias TdAudit.NotificationsSystem.Configuration
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
@@ -171,19 +172,6 @@ defmodule TdAudit.Subscriptions do
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking subscription changes.
-
-  ## Examples
-
-      iex> change_subscription(subscription)
-      %Ecto.Changeset{source: %Subscription{}}
-
-  """
-  def change_subscription(%Subscription{} = subscription) do
-    Subscription.changeset(subscription, %{})
-  end
-
-  @doc """
   Deletes a group of subscriptions filtered by a group of params.
 
   ## Examples
@@ -197,5 +185,54 @@ defmodule TdAudit.Subscriptions do
 
     query = from(p in Subscription, where: ^dynamic)
     query |> Repo.delete_all()
+  end
+
+  def create_subscriptions(%{"role" => role, "event" => event, "resource_type" => resource_type, "periodicity" => periodicity}) do
+    Repo.transaction(fn ->
+      role
+      |> get_resource_ids_by_subscriber(resource_type)
+      |> Enum.flat_map(fn {email, resource_ids} ->
+        Enum.map(resource_ids, fn resource_id ->
+          %{
+            user_email: email,
+            resource_type: resource_type,
+            resource_id: resource_id,
+            event: event
+          }
+        end)
+      end)
+      |> Enum.reject(&Repo.get_by(Subscription, &1))
+      |> Enum.map(&Map.put(&1, :periodicity, periodicity))
+      |> Enum.map(&Subscription.changeset/1)
+      |> Enum.map(&Repo.insert!/1)
+    end)
+  rescue
+    e in Ecto.InvalidChangesetError -> {:error, e.changeset}
+  end
+
+  defp get_resource_ids_by_subscriber(role, "business_concept" = _resource_type) do
+    alias TdCache.{ConceptCache, UserCache}
+    {:ok, ids} = ConceptCache.active_ids()
+
+    ids
+    |> Enum.flat_map(fn id ->
+      case ConceptCache.get(id, :content) do
+        {:ok, nil} ->
+          []
+
+        {:ok, content} ->
+          case Map.get(content, role) do
+            nil -> []
+            full_name -> [{full_name, id}]
+          end
+      end
+    end)
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Enum.flat_map(fn {full_name, ids} ->
+      case UserCache.get_by_name(full_name) do
+        {:ok, %{email: email}} -> [{email, ids}]
+        _ -> []
+      end
+    end)
   end
 end

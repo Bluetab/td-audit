@@ -60,9 +60,10 @@ defmodule TdAudit.Mixfile do
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:guardian, "~> 2.0"},
       {:httpoison, "~> 1.6"},
+      {:ex_machina, "~> 2.4", only: :test},
       {:phoenix_swagger, "~> 0.8.2"},
       {:ex_json_schema, "~> 0.7.3"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.20.0"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.20.1"},
       {:bamboo, "~> 1.4"},
       {:bamboo_smtp, "~> 2.1.0"}
     ]
