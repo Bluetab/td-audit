@@ -9,6 +9,7 @@ defmodule TdAudit.Subscriptions do
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
   alias TdAudit.Subscriptions.Subscription
+  alias TdCache.{ConceptCache, UserCache}
 
   @doc """
   Returns the list of subscriptions.
@@ -187,20 +188,16 @@ defmodule TdAudit.Subscriptions do
     query |> Repo.delete_all()
   end
 
-  def create_subscriptions(%{"role" => role, "event" => event, "resource_type" => resource_type, "periodicity" => periodicity}) do
+  def create_subscriptions(%{
+        "role" => role,
+        "event" => event,
+        "resource_type" => resource_type,
+        "periodicity" => periodicity
+      }) do
     Repo.transaction(fn ->
       role
       |> get_resource_ids_by_subscriber(resource_type)
-      |> Enum.flat_map(fn {email, resource_ids} ->
-        Enum.map(resource_ids, fn resource_id ->
-          %{
-            user_email: email,
-            resource_type: resource_type,
-            resource_id: resource_id,
-            event: event
-          }
-        end)
-      end)
+      |> Enum.flat_map(&subscription_params(&1, resource_type, event))
       |> Enum.reject(&Repo.get_by(Subscription, &1))
       |> Enum.map(&Map.put(&1, :periodicity, periodicity))
       |> Enum.map(&Subscription.changeset/1)
@@ -211,22 +208,10 @@ defmodule TdAudit.Subscriptions do
   end
 
   defp get_resource_ids_by_subscriber(role, "business_concept" = _resource_type) do
-    alias TdCache.{ConceptCache, UserCache}
     {:ok, ids} = ConceptCache.active_ids()
 
     ids
-    |> Enum.flat_map(fn id ->
-      case ConceptCache.get(id, :content) do
-        {:ok, nil} ->
-          []
-
-        {:ok, content} ->
-          case Map.get(content, role) do
-            nil -> []
-            full_name -> [{full_name, id}]
-          end
-      end
-    end)
+    |> Enum.flat_map(&subscribers_from_role(&1, role))
     |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
     |> Enum.flat_map(fn {full_name, ids} ->
       case UserCache.get_by_name(full_name) do
@@ -234,5 +219,29 @@ defmodule TdAudit.Subscriptions do
         _ -> []
       end
     end)
+  end
+
+  defp subscription_params({email, resource_ids}, resource_type, event) do
+    Enum.map(resource_ids, fn resource_id ->
+      %{
+        user_email: email,
+        resource_type: resource_type,
+        resource_id: resource_id,
+        event: event
+      }
+    end)
+  end
+
+  defp subscribers_from_role(concept_id, role) do
+    case ConceptCache.get(concept_id, :content) do
+      {:ok, nil} ->
+        []
+
+      {:ok, content} ->
+        case Map.get(content, role) do
+          nil -> []
+          full_name -> [{full_name, concept_id}]
+        end
+    end
   end
 end
