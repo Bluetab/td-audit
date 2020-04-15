@@ -26,6 +26,7 @@ defmodule TdAudit.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import TdAudit.DataCase
+      import TdAudit.Factory
     end
   end
 

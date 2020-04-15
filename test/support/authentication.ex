@@ -8,7 +8,6 @@ defmodule TdAuditWeb.Authentication do
   alias Phoenix.ConnTest
   alias TdAudit.Accounts.User
   alias TdAudit.Auth.Guardian
-  alias TdAuditWeb.ApiServices.MockAuthService
 
   @headers {"Content-type", "application/json"}
 
@@ -38,32 +37,10 @@ defmodule TdAuditWeb.Authentication do
   end
 
   def find_or_create_user(user_name, opts \\ []) do
-    case get_user_by_name(user_name) do
-      nil ->
-        is_admin = Keyword.get(opts, :is_admin, false)
-        MockAuthService.create_user(%{"user" => %{user_name: user_name, is_admin: is_admin}})
-
-      user ->
-        user
-    end
-  end
-
-  def get_user_by_name(user_name) do
-    MockAuthService.get_user_by_name(user_name)
-  end
-
-  def build_user_token(%User{} = user) do
-    case Guardian.encode_and_sign(user) do
-      {:ok, jwt, _full_claims} -> jwt
-      _ -> raise "Problems encoding and signing a user"
-    end
-  end
-
-  def build_user_token(user_name, opts \\ []) when is_binary(user_name) do
-    build_user_token(find_or_create_user(user_name, opts))
-  end
-
-  def get_user_token(user_name) do
-    build_user_token(user_name, is_admin: user_name == "app-admin")
+    %User{
+      id: User.gen_id_from_user_name(user_name),
+      user_name: user_name,
+      is_admin: Keyword.get(opts, :is_admin, false)
+    }
   end
 end

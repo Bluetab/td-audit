@@ -25,6 +25,7 @@ defmodule TdAuditWeb.Router do
     pipe_through([:api, :api_secure])
     resources("/events", EventController, except: [:new, :edit])
     resources("/subscriptions", SubscriptionController, except: [:new, :edit])
+    resources("/subscriptions", SubscriptionsController, singleton: true, only: [:update])
 
     resources("/notifications_system/configurations", ConfigurationController,
       except: [:new, :edit]
@@ -38,7 +39,6 @@ defmodule TdAuditWeb.Router do
         version: Application.spec(:td_audit, :vsn),
         title: "Truedat Audit Service"
       },
-      basePath: "/api",
       securityDefinitions: %{
         bearer: %{
           type: "apiKey",

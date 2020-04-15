@@ -1,7 +1,8 @@
 defmodule TdAuditWeb.SwaggerDefinitions do
   @moduledoc """
-   Swagger definitions used by controllers
+  Swagger definitions used by controllers
   """
+
   import PhoenixSwagger
 
   def event_swagger_definitions do
@@ -119,9 +120,9 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             event(:string, "Event to subscribe")
             resource_id(:integer, "ID of the resource triggering the event")
             resource_type(:string, "Type of the resource triggering the event")
-            user_email(:string, "Email of the subscriptor")
+            user_email(:string, "Email of the subscriber")
             periodicity(:string, "Periodicity of the subscription")
-            last_consumed_event(:string, "Timestamps")
+            last_consumed_event(:string, "Timestamps", nullable: true)
           end
         end,
       SubscriptionCreate:
@@ -138,7 +139,7 @@ defmodule TdAuditWeb.SwaggerDefinitions do
                     required: true
                   )
 
-                  user_email(:string, "Email of the subscriptor", required: true)
+                  user_email(:string, "Email of the subscriber", required: true)
                   periodicity(:string, "Periodicity of the subscription")
                 end
               end
@@ -149,6 +150,23 @@ defmodule TdAuditWeb.SwaggerDefinitions do
         swagger_schema do
           properties do
             data(Schema.ref(:Subscription))
+          end
+        end,
+      SubscriptionsUpdate:
+        swagger_schema do
+          properties do
+            subscriptions(
+              Schema.new do
+                properties do
+                  event(:string, "Event to subscribe", required: true)
+                  resource_type(:string, "Type of the resource triggering the event",
+                    required: true
+                  )
+                  role(:string, "Role of the subscribers", required: true)
+                  periodicity(:string, "Periodicity of the subscription", required: true)
+                end
+              end
+            )
           end
         end,
       SubscriptionUpdate:
@@ -164,7 +182,7 @@ defmodule TdAuditWeb.SwaggerDefinitions do
                     required: true
                   )
 
-                  user_email(:string, "Email of the subscriptor", required: true)
+                  user_email(:string, "Email of the subscriber", required: true)
                   periodicity(:string, "Periodicity of the subscription")
                 end
               end

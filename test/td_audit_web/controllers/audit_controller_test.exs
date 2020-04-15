@@ -3,8 +3,6 @@ defmodule TdAuditWeb.AuditControllerTest do
 
   import TdAuditWeb.Authentication, only: :functions
 
-  alias TdAuditWeb.ApiServices.MockAuthService
-
   @create_attrs %{
     event: "some event",
     payload: %{},
@@ -27,11 +25,6 @@ defmodule TdAuditWeb.AuditControllerTest do
   }
 
   @admin_user_name "app-admin"
-
-  setup_all do
-    start_supervised(MockAuthService)
-    :ok
-  end
 
   describe "create audit event" do
     @tag authenticated_user: @admin_user_name

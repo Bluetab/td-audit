@@ -3,10 +3,13 @@ defmodule TdAudit.NotificationLoader do
   This module saves those subscriptions that should be
   sent automatically
   """
+
   use GenServer
-  require Logger
+
   alias TdAudit.NotificationDispatcher
   alias TdAudit.NotificationsSystem
+
+  require Logger
 
   @notification_load_frequency Application.get_env(
                                  :td_audit,

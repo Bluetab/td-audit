@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-2500] Support bulk subscription for all users with a role on existing
+  business concepts. For example, to subscribe data owners to comment
+  notifications on their business concepts:
+  ```
+  PATCH /api/subscriptions
+  {
+    "subscriptions": {
+      "role": "data_owner",
+      "event": "create_comment",
+      "resource_type": "business_concept",
+      "periodicity": "daily"
+    }
+  }
+  ```
+
 ### Changed
 
 - [TD-2508] Update to Elixir 1.10
