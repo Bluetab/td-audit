@@ -39,7 +39,6 @@ defmodule TdAuditWeb.Router do
         version: Application.spec(:td_audit, :vsn),
         title: "Truedat Audit Service"
       },
-      basePath: "/api",
       securityDefinitions: %{
         bearer: %{
           type: "apiKey",

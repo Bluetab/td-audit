@@ -162,7 +162,7 @@ defmodule TdAuditWeb.SwaggerDefinitions do
                   resource_type(:string, "Type of the resource triggering the event",
                     required: true
                   )
-                  user_role(:string, "Role of the subscribers", required: true)
+                  role(:string, "Role of the subscribers", required: true)
                   periodicity(:string, "Periodicity of the subscription", required: true)
                 end
               end
