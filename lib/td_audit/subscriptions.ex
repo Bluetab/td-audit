@@ -37,11 +37,7 @@ defmodule TdAudit.Subscriptions do
     fields = Subscription.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
 
-    Repo.all(
-      from(p in Subscription,
-        where: ^dynamic
-      )
-    )
+    Repo.all(from(p in Subscription, where: ^dynamic))
   end
 
   @doc """
@@ -72,9 +68,9 @@ defmodule TdAudit.Subscriptions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_subscription(attrs \\ %{}) do
-    %Subscription{}
-    |> Subscription.changeset(attrs)
+  def create_subscription(params \\ %{}) do
+    params
+    |> Subscription.changeset()
     |> Repo.insert()
   end
 
@@ -90,9 +86,9 @@ defmodule TdAudit.Subscriptions do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_subscription(%Subscription{} = subscription, attrs) do
+  def update_subscription(%Subscription{} = subscription, param) do
     subscription
-    |> Subscription.changeset(attrs)
+    |> Subscription.changeset(param)
     |> Repo.update()
   end
 
@@ -127,33 +123,25 @@ defmodule TdAudit.Subscriptions do
         },
         last_consumed_event
       ) do
-    query =
-      from(
-        from(p in Subscription,
-          update: [set: [last_consumed_event: ^last_consumed_event]],
-          where:
-            p.resource_id == ^resource_id and
-              p.resource_type == ^resource_type and
-              p.user_email in ^subscribers
-        )
-      )
-
-    query |> Repo.update_all([])
+    from(p in Subscription,
+      update: [set: [last_consumed_event: ^last_consumed_event]],
+      where:
+        p.resource_id == ^resource_id and
+          p.resource_type == ^resource_type and
+          p.user_email in ^subscribers
+    )
+    |> Repo.update_all([])
   end
 
   def update_last_consumed_events_by_event_type(
         event,
         last_consumed_event
       ) do
-    query =
-      from(
-        from(p in Subscription,
-          update: [set: [last_consumed_event: ^last_consumed_event]],
-          where: p.event == ^event
-        )
-      )
-
-    query |> Repo.update_all([])
+    from(p in Subscription,
+      update: [set: [last_consumed_event: ^last_consumed_event]],
+      where: p.event == ^event
+    )
+    |> Repo.update_all([])
   end
 
   @doc """
@@ -184,8 +172,8 @@ defmodule TdAudit.Subscriptions do
     fields = Subscription.__schema__(:fields)
     dynamic = QuerySupport.filter(params, fields)
 
-    query = from(p in Subscription, where: ^dynamic)
-    query |> Repo.delete_all()
+    from(p in Subscription, where: ^dynamic)
+    |> Repo.delete_all()
   end
 
   def create_subscriptions(%{

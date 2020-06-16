@@ -19,19 +19,10 @@ config :td_audit, TdAudit.Smtp.Mailer,
   ssl: false,
   retries: 3
 
-# Configure Exq
-config :exq,
-  host: System.fetch_env!("REDIS_HOST"),
-  namespace: System.fetch_env!("REDIS_NAMESPACE"),
-  concurrency: 1000,
-  queues: ["timeline"],
-  max_retries: 25,
-  dead_max_jobs: 10_000,
-  # 180 days
-  dead_timeout_in_seconds: 180 * 24 * 60 * 60,
-  start_on_application: false
-
 config :td_audit, TdAudit.Auth.Guardian, secret_key: System.fetch_env!("GUARDIAN_SECRET_KEY")
 
 config :td_cache, redis_host: System.fetch_env!("REDIS_HOST")
 config :td_audit, host_name: System.get_env("WEB_HOST")
+config :td_audit, TdAudit.Broadway,
+  consumer_id: System.fetch_env!("HOSTNAME"),
+  redis_host: System.fetch_env!("REDIS_HOST")

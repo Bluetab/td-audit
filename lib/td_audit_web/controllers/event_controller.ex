@@ -3,7 +3,6 @@ defmodule TdAuditWeb.EventController do
   use PhoenixSwagger
 
   alias TdAudit.Audit
-  alias TdAudit.Audit.Event
   alias TdAuditWeb.SwaggerDefinitions
 
   @filters_availables ["resource_id", "resource_type"]
@@ -29,27 +28,6 @@ defmodule TdAuditWeb.EventController do
     render(conn, "index.json", events: events)
   end
 
-  swagger_path :create do
-    description("Creates Event")
-    produces("application/json")
-
-    parameters do
-      event(:body, Schema.ref(:EventCreate), "Event create attrs")
-    end
-
-    response(201, "OK", Schema.ref(:EventResponse))
-    response(400, "Client Error")
-  end
-
-  def create(conn, %{"event" => event_params}) do
-    with {:ok, %Event{} = event} <- Audit.create_event(event_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.event_path(conn, :show, event))
-      |> render("show.json", event: event)
-    end
-  end
-
   swagger_path :show do
     description("Show Event")
     produces("application/json")
@@ -65,46 +43,5 @@ defmodule TdAuditWeb.EventController do
   def show(conn, %{"id" => id}) do
     event = Audit.get_event!(id)
     render(conn, "show.json", event: event)
-  end
-
-  swagger_path :update do
-    description("Update Event")
-    produces("application/json")
-
-    parameters do
-      id(:path, :integer, "Event ID", required: true)
-      event(:body, Schema.ref(:EventUpdate), "Event update attrs")
-    end
-
-    response(201, "OK", Schema.ref(:EventResponse))
-    response(400, "Client Error")
-  end
-
-  def update(conn, %{"id" => id, "event" => event_params}) do
-    event = Audit.get_event!(id)
-
-    with {:ok, %Event{} = event} <- Audit.update_event(event, event_params) do
-      render(conn, "show.json", event: event)
-    end
-  end
-
-  swagger_path :delete do
-    description("Delete Event")
-    produces("application/json")
-
-    parameters do
-      id(:path, :integer, "Event ID", required: true)
-    end
-
-    response(204, "No Content")
-    response(400, "Client Error")
-  end
-
-  def delete(conn, %{"id" => id}) do
-    event = Audit.get_event!(id)
-
-    with {:ok, %Event{}} <- Audit.delete_event(event) do
-      send_resp(conn, :no_content, "")
-    end
   end
 end

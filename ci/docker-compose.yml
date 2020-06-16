@@ -59,7 +59,6 @@ services:
       DB_USER: postgres
       GUARDIAN_SECRET_KEY: topsecret
       REDIS_HOST: redis
-      REDIS_NAMESPACE: exq
     depends_on:
       - postgres
       - redis

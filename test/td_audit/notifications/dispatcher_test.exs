@@ -1,12 +1,13 @@
-defmodule TdAudit.NotificationDispatcherTest do
+defmodule TdAudit.Notifications.DispatcherTest do
   @moduledoc """
-  Testing of the module TdAudit.NotificationDispatcher
+  Tests for module `TdAudit.Notifications.Dispatcher`
   """
+
   use ExUnit.Case
   use TdAudit.DataCase
 
   alias TdAudit.Audit
-  alias TdAudit.NotificationDispatcher
+  alias TdAudit.Notifications.Dispatcher
   alias TdAudit.Subscriptions
   alias TdCache.ConceptCache
   alias TdCache.RuleCache
@@ -65,7 +66,7 @@ defmodule TdAudit.NotificationDispatcherTest do
         user_id: 42,
         user_name: "some name",
         service: "bg",
-        event: "create_comment",
+        event: "comment_created",
         resource_id: 1,
         resource_type: "comment",
         ts: "2018-01-24 23:53:07Z",
@@ -80,7 +81,7 @@ defmodule TdAudit.NotificationDispatcherTest do
         user_id: 42,
         user_name: "some name",
         service: "bg",
-        event: "create_comment",
+        event: "comment_created",
         resource_id: 2,
         resource_type: "comment",
         ts: "2018-01-24 23:52:07Z",
@@ -95,7 +96,7 @@ defmodule TdAudit.NotificationDispatcherTest do
         user_id: 42,
         user_name: "some name",
         service: "bg",
-        event: "create_comment",
+        event: "comment_created",
         resource_id: 3,
         resource_type: "comment",
         ts: "2018-01-22 20:50:07Z",
@@ -109,7 +110,7 @@ defmodule TdAudit.NotificationDispatcherTest do
       event_4 = %{
         user_id: 42,
         user_name: "some name",
-        event: "create_comment",
+        event: "comment_created",
         service: "bg",
         resource_id: 4,
         resource_type: "comment",
@@ -127,7 +128,7 @@ defmodule TdAudit.NotificationDispatcherTest do
     defp list_of_subscriptions(:email_on_comment) do
       # This subscription is one to be sent resource_id => 1
       subscription_1 = %{
-        event: "create_comment",
+        event: "comment_created",
         user_email: "mymail1@foo.bar",
         resource_type: "business_concept",
         last_consumed_event: "2018-01-23 21:50:07Z",
@@ -135,7 +136,7 @@ defmodule TdAudit.NotificationDispatcherTest do
       }
 
       subscription_2 = %{
-        event: "create_comment",
+        event: "comment_created",
         user_email: "mymail1@foo.bar",
         resource_type: "business_concept",
         last_consumed_event: "2018-01-23 21:50:07Z",
@@ -144,7 +145,7 @@ defmodule TdAudit.NotificationDispatcherTest do
 
       # This subscription is one to be sent resource_id => 1
       subscription_3 = %{
-        event: "create_comment",
+        event: "comment_created",
         user_email: "mymail2@foo.bar",
         resource_id: 1,
         resource_type: "business_concept",
@@ -153,7 +154,7 @@ defmodule TdAudit.NotificationDispatcherTest do
 
       # This subscription is one to be sent resource_id => 4
       subscription_4 = %{
-        event: "create_comment",
+        event: "comment_created",
         user_email: "mymail3@foo.bar",
         resource_id: 4,
         resource_type: "business_concept",
@@ -214,7 +215,7 @@ defmodule TdAudit.NotificationDispatcherTest do
 
   defp events_fixture do
     list_of_events_to_dipatch()
-    |> Enum.map(&Audit.create_event(&1))
+    |> Enum.map(&Audit.create_event/1)
   end
 
   defp subscriptions_fixture(event) do
@@ -248,9 +249,7 @@ defmodule TdAudit.NotificationDispatcherTest do
     to_format_resource_id_2 = [nil: "mymail3@foo.bar"]
 
     list_sent_notifications =
-      NotificationDispatcher.dispatch_notification(
-        {:dispatch_on_comment_creation, "create_comment"}
-      )
+      Dispatcher.dispatch_notification({:dispatch_on_comment_creation, "comment_created"})
 
     assert length(list_sent_notifications) == 2
 
@@ -279,9 +278,7 @@ defmodule TdAudit.NotificationDispatcherTest do
     expected_mails = [[nil: "mymail1@foo.bar"], [nil: "mymail2@foo.bar"]]
 
     sent_notifications =
-      NotificationDispatcher.dispatch_notification(
-        {:dispatch_on_failed_results, "failed_rule_results"}
-      )
+      Dispatcher.dispatch_notification({:dispatch_on_failed_results, "failed_rule_results"})
 
     assert length(sent_notifications) == 2
     assert Enum.all?(sent_notifications, &(Map.get(&1, :to) in expected_mails))

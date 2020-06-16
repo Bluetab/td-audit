@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-2637] Audit events are now read from the Redis stream `audit:events`
+
+### Changed
+
+- [TD-2637] Renamed events:
+  - event `create_comment` is now `comment_created`
+  - event `add_relation` is now `relation_created`
+  - event `delete_relation` is now `relation_deleted`
+  - event `concept_sent_for_approval` is now `concept_submitted`
+  - resource type `business_concept` renamed to `concept` for events from
+    service `td_lm`
+
+### Removed
+
+- [TD-2637] Removed routes:
+  - `POST /api/audits`
+  - `DELETE /api/events/:id`
+  - `PATCH /api/events/:id`
+  - `PUT /api/events/:id`
+
 ## [3.20.0] 2020-04-20
 
 ### Added
@@ -12,7 +36,7 @@
   {
     "subscriptions": {
       "role": "data_owner",
-      "event": "create_comment",
+      "event": "comment_created",
       "resource_type": "business_concept",
       "periodicity": "daily"
     }
@@ -33,7 +57,8 @@
 
 ### Fixed
 
-- [TD-2081] Event stream consumer did not respect redis_host and port config options
+- [TD-2081] Event stream consumer did not respect redis_host and port config
+  options
 
 ## [3.5.0] 2019-09-02
 
@@ -66,14 +91,16 @@
 
 ### Changed
 
-- [TD-1660] Will only update business concept link_count on add_relation/delete_relation event if "target_type" is "data_field"
+- [TD-1660] Will only update business concept link_count on
+  add_relation/delete_relation event if "target_type" is "data_field"
 - Update to phoenix 1.4, ecto 3.0, exq 0.13, redix 0.8.2
 
 ## [2.16.0] 2019-04-01
 
 ### Added
 
-- [TD-1571] Elixir's Logger config will check for EX_LOGGER_FORMAT variable to override format
+- [TD-1571] Elixir's Logger config will check for EX_LOGGER_FORMAT variable to
+  override format
 
 ## [2.7.0] 2018-01-17
 

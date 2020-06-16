@@ -1,7 +1,10 @@
 defmodule TdAudit.Audit.Event do
-  @moduledoc false
+  @moduledoc """
+  Ecto Schema module for audit events.
+  """
 
   use Ecto.Schema
+
   import Ecto.Changeset
 
   schema "events" do
@@ -13,23 +16,27 @@ defmodule TdAudit.Audit.Event do
     field(:ts, :utc_datetime_usec)
     field(:user_id, :integer)
     field(:user_name, :string)
+    field(:user, :map, virtual: true)
 
-    timestamps()
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
-  @doc false
-  def changeset(event, attrs) do
+  def changeset(%{} = params) do
+    changeset(%__MODULE__{}, params)
+  end
+
+  def changeset(%__MODULE__{} = event, params) do
     event
-    |> cast(attrs, [
+    |> cast(params, [
       :service,
       :resource_id,
       :resource_type,
       :event,
-      :payload,
       :user_id,
       :user_name,
       :ts
     ])
+    |> put_payload(params)
     |> validate_required([
       :service,
       :resource_id,
@@ -37,8 +44,20 @@ defmodule TdAudit.Audit.Event do
       :event,
       :payload,
       :user_id,
-      :user_name,
       :ts
     ])
+    |> update_change(:resource_type, &update_resource_type/1)
   end
+
+  defp update_resource_type("business_concept"), do: "concept"
+  defp update_resource_type(value), do: value
+
+  defp put_payload(changeset, %{payload: payload} = params) when is_binary(payload) do
+    case Jason.decode(payload) do
+      {:ok, value} -> put_change(changeset, :payload, value)
+      _ -> cast(changeset, params, [:payload])
+    end
+  end
+
+  defp put_payload(changeset, params), do: cast(changeset, params, [:payload])
 end

@@ -38,8 +38,6 @@ Ready to run in production? Please [check deployment guides](http://www.phoenixf
 * [credo](http://credo-ci.org/) - Static code analysis tool for the Elixir language
 * [guardian](https://github.com/ueberauth/guardian) - Authentication library
 * [phoenix_swagger](https://github.com/xerions/phoenix_swagger) - Swagger integration to Phoenix framework
-* [httpoison](https://hex.pm/packages/httpoison) - HTTP client for Elixir
-* [exq](https://github.com/akira/exq) - Job processing library for Elixir - compatible with Resque / Sidekiq
 
 ## Authors
 

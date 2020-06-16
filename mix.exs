@@ -55,17 +55,17 @@ defmodule TdAudit.Mixfile do
       {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
-      {:exq, "~> 0.13.2"},
       {:jason, "~> 1.0"},
-      {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:guardian, "~> 2.0"},
-      {:httpoison, "~> 1.6"},
       {:ex_machina, "~> 2.4", only: :test},
       {:phoenix_swagger, "~> 0.8.2"},
       {:ex_json_schema, "~> 0.7.3"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.20.1"},
       {:bamboo, "~> 1.4"},
-      {:bamboo_smtp, "~> 2.1.0"}
+      {:bamboo_smtp, "~> 2.1.0"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.24.3"},
+      {:gen_stage, "~> 1.0"},
+      {:broadway, "~> 0.6.0"}
     ]
   end
 

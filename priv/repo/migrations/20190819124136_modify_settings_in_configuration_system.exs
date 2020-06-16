@@ -23,7 +23,7 @@ defmodule TdAudit.Repo.Migrations.ModifySettingsInConfigurationSystem do
   defp update_subscription(generate_subscription, %{id: id, settings: settings}) do
     case Map.get(generate_subscription, "target_event") do
       nil ->
-        gs = Map.put(generate_subscription, "target_event", "create_comment")
+        gs = Map.put(generate_subscription, "target_event", "comment_created")
         new_settings = Map.put(settings, "generate_subscription", gs)
 
         from(c in "notifications_system_configuration")

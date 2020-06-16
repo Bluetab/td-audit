@@ -21,7 +21,8 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             service(:string, "Service audited", required: true)
             ts(:string, "Timestamps", required: true)
             user_id(:integer, "User ID", required: true)
-            user_name(:string, "User name", required: true)
+            user_name(:string, "User Name")
+            user(:object, "User")
           end
 
           example(%{
@@ -33,45 +34,9 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             service: "some service",
             ts: "2018-05-08T17:17:59.691000",
             user_id: 1,
-            user_name: "some user name"
+            user_name: "user1234",
+            user: %{"id" => 1234, "user_name" => "user1234", "full_name" => "User 1234"}
           })
-        end,
-      EventCreate:
-        swagger_schema do
-          properties do
-            event(
-              Schema.new do
-                properties do
-                  event(:string, "Event name", required: true)
-                  payload(:object, "Payload", required: true)
-                  resource_id(:integer, "Resource ID", required: true)
-                  resource_type(:string, "Resource type", required: true)
-                  service(:string, "Service audited", required: true)
-                  user_id(:integer, "User ID", required: true)
-                  user_name(:string, "User name", required: true)
-                end
-              end
-            )
-          end
-        end,
-      EventUpdate:
-        swagger_schema do
-          properties do
-            event(
-              Schema.new do
-                properties do
-                  event(:string, "Event name", required: true)
-                  payload(:object, "Payload", required: true)
-                  resource_id(:integer, "Resource ID", required: true)
-                  resource_type(:string, "Resource type", required: true)
-                  service(:string, "Service audited", required: true)
-                  ts(:string, "Timestamps")
-                  user_id(:integer, "User ID", required: true)
-                  user_name(:string, "User name", required: true)
-                end
-              end
-            )
-          end
         end,
       Events:
         swagger_schema do
@@ -159,9 +124,11 @@ defmodule TdAuditWeb.SwaggerDefinitions do
               Schema.new do
                 properties do
                   event(:string, "Event to subscribe", required: true)
+
                   resource_type(:string, "Type of the resource triggering the event",
                     required: true
                   )
+
                   role(:string, "Role of the subscribers", required: true)
                   periodicity(:string, "Periodicity of the subscription", required: true)
                 end

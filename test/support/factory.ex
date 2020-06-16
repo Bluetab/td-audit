@@ -5,11 +5,12 @@ defmodule TdAudit.Factory do
 
   use ExMachina.Ecto, repo: TdAudit.Repo
 
+  alias TdAudit.Audit.Event
   alias TdAudit.Subscriptions.Subscription
 
   def concept_factory do
     %{
-      id: sequence(:concept_id, & &1 + 123_456_789),
+      id: sequence(:concept_id, &(&1 + 123_456_789)),
       name: sequence(:concept_name, &"Concept #{&1}"),
       content: %{}
     }
@@ -17,7 +18,7 @@ defmodule TdAudit.Factory do
 
   def user_factory do
     %{
-      id: sequence(:user_id, & &1 + 123_456_789),
+      id: sequence(:user_id, &(&1 + 123_456_789)),
       email: sequence(:email, &"username_#{&1}@example.com"),
       user_name: sequence(:user_name, &"username_#{&1}"),
       full_name: sequence(:user_full_name, &"User #{&1}"),
@@ -27,13 +28,27 @@ defmodule TdAudit.Factory do
 
   def subscription_factory do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
+
     %Subscription{
-      event: "create_comment",
+      event: "comment_created",
       resource_type: "business_concept",
-      resource_id: sequence(:subscription_resource_id, & &1 + 1),
+      resource_id: sequence(:subscription_resource_id, &(&1 + 1)),
       user_email: sequence(:subscription_email, &"username_#{&1}@example.com"),
       periodicity: "daily",
       last_consumed_event: now
+    }
+  end
+
+  def event_factory do
+    %Event{
+      event: "some_event",
+      payload: %{},
+      resource_id: 42,
+      resource_type: "some resource_type",
+      service: "some service",
+      ts: DateTime.utc_now(),
+      user_id: 42,
+      user_name: "some name"
     }
   end
 end
