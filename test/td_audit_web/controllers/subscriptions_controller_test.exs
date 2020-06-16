@@ -35,7 +35,7 @@ defmodule TdAuditWeb.SubscriptionsControllerTest do
       params = %{
         "role" => @role,
         "resource_type" => "business_concept",
-        "event" => "create_comment",
+        "event" => "comment_created",
         "periodicity" => "daily"
       }
 
@@ -49,7 +49,7 @@ defmodule TdAuditWeb.SubscriptionsControllerTest do
       assert [subscription | _subscriptions] = data
 
       assert %{
-               "event" => "create_comment",
+               "event" => "comment_created",
                "periodicity" => "daily",
                "resource_type" => "business_concept",
                "user_email" => ^email

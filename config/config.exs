@@ -5,6 +5,9 @@
 # is restricted to this project.
 use Mix.Config
 
+# Environment
+config :td_audit, :env, Mix.env()
+
 # General application configuration
 config :td_audit,
   ecto_repos: [TdAudit.Repo]
@@ -31,19 +34,6 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 config :phoenix_swagger, :json_library, Jason
 
-# Configure Exq
-config :exq,
-  host: "127.0.0.1",
-  port: 6379,
-  namespace: "exq",
-  concurrency: 1000,
-  queues: ["timeline"],
-  max_retries: 25,
-  dead_max_jobs: 10_000,
-  # 6 months
-  dead_timeout_in_seconds: 180 * 24 * 60 * 60,
-  start_on_application: false
-
 config :td_audit, TdAudit.Auth.Guardian,
   # optional
   allowed_algos: ["HS512"],
@@ -53,7 +43,7 @@ config :td_audit, TdAudit.Auth.Guardian,
 
 config :td_audit, :notification_load_frequency,
   events: %{
-    create_comment: 60_000,
+    comment_created: 60_000,
     failed_rule_results: 86_400_000
   }
 
@@ -65,9 +55,15 @@ config :td_audit, :phoenix_swagger,
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"
 
-config :td_audit, queue: TdAudit.Queue
-
 config :td_audit, TdAudit.Smtp.Mailer, adapter: Bamboo.SMTPAdapter
+
+config :td_audit, TdAudit.Broadway,
+  producer_module: TdAudit.Redis.Producer,
+  consumer_group: "td_audit",
+  consumer_id: "local",
+  stream: "audit:events",
+  redis_host: "localhost",
+  port: 6379
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

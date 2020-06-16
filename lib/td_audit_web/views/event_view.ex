@@ -1,13 +1,12 @@
 defmodule TdAuditWeb.EventView do
   use TdAuditWeb, :view
-  alias TdAuditWeb.EventView
 
   def render("index.json", %{events: events}) do
-    %{data: render_many(events, EventView, "event.json")}
+    %{data: render_many(events, __MODULE__, "event.json")}
   end
 
   def render("show.json", %{event: event}) do
-    %{data: render_one(event, EventView, "event.json")}
+    %{data: render_one(event, __MODULE__, "event.json")}
   end
 
   def render("event.json", %{event: event}) do
@@ -20,6 +19,7 @@ defmodule TdAuditWeb.EventView do
       payload: event.payload,
       user_id: event.user_id,
       user_name: event.user_name,
+      user: event.user,
       ts: event.ts
     }
   end

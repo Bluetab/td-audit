@@ -1,4 +1,4 @@
-defmodule TdAudit.NotificationDispatcher do
+defmodule TdAudit.Notifications.Dispatcher do
   alias TdAudit.Audit
   alias TdAudit.EmailBuilder
   alias TdAudit.Notifications.Messages
@@ -173,7 +173,7 @@ defmodule TdAudit.NotificationDispatcher do
     |> Enum.reduce([], &retrieve_events_to_notify(&1, &2))
     |> Enum.group_by(& &1.id)
     |> Enum.map(&group_events_and_subscribers(&1))
-    |> Enum.sort(&(Map.get(&1, :ts) <= Map.get(&2, :ts)))
+    |> Enum.sort_by(&(&1.ts), {:asc, DateTime})
   end
 
   defp build_filter_for_field(origin_source, :last_consumed_event = field, filter) do
@@ -193,12 +193,12 @@ defmodule TdAudit.NotificationDispatcher do
     with(
       {:ok, %{name: business_concept_name, business_concept_version_id: business_concept_version}} <-
         ConceptCache.get(resource_id),
-      {:ok, %{full_name: user_name}} <- UserCache.get(user_id)
+      {:ok, %{full_name: full_name}} <- UserCache.get(user_id)
     ) do
       web_host = Application.get_env(:td_audit, :host_name)
 
       Map.new()
-      |> Map.put("who", user_name)
+      |> Map.put("who", full_name)
       |> Map.put("to", subscribers)
       |> Map.put("entity_name", business_concept_name)
       |> Map.put("content", content)

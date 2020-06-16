@@ -36,7 +36,5 @@ config :td_audit, TdAudit.Smtp.Mailer,
   ssl: false,
   retries: 3
 
-config :td_audit, queue: TdAudit.Queue
-
 config :td_cache, redis_host: "localhost"
 config :td_audit, host_name: "http://localhost:8080"

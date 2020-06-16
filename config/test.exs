@@ -16,8 +16,6 @@ config :td_audit, TdAudit.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 1
 
-config :td_audit, queue: TdAudit.QueueMock
-
 config :td_audit, email_account: "email@foo.bar"
 
 config :td_audit, TdAudit.Smtp.Mailer, adapter: Bamboo.TestAdapter
@@ -28,5 +26,7 @@ config :td_audit, host_name: "http://localhost:8080"
 
 config :td_cache, redis_host: "redis"
 
-config :exq,
-  host: "redis"
+config :td_audit, TdAudit.Broadway,
+  producer_module: Broadway.DummyProducer,
+  stream: "audit:events:test",
+  redis_host: "redis"

@@ -1,4 +1,4 @@
-defmodule TdAudit.NotificationLoader do
+defmodule TdAudit.Notifications.Loader do
   @moduledoc """
   This module saves those subscriptions that should be
   sent automatically
@@ -6,7 +6,7 @@ defmodule TdAudit.NotificationLoader do
 
   use GenServer
 
-  alias TdAudit.NotificationDispatcher
+  alias TdAudit.Notifications.Dispatcher
   alias TdAudit.NotificationsSystem
 
   require Logger
@@ -16,13 +16,13 @@ defmodule TdAudit.NotificationLoader do
                                  :notification_load_frequency
                                )[:events]
 
-  def start_link(name \\ nil) do
-    GenServer.start_link(__MODULE__, nil, name: name)
+  def start_link(_opts) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   @impl true
   def init(state) do
-    schedule_work(:create_comment)
+    schedule_work(:comment_created)
     schedule_work(:failed_rule_results)
     {:ok, state}
   end
@@ -35,15 +35,15 @@ defmodule TdAudit.NotificationLoader do
   end
 
   @impl true
-  def handle_info(:create_comment, state) do
-    execute_notifications_dispatcher_for_event(%{event: "create_comment"})
-    schedule_work(:create_comment)
+  def handle_info(:comment_created, state) do
+    execute_notifications_dispatcher_for_event(%{event: "comment_created"})
+    schedule_work(:comment_created)
     {:noreply, state}
   end
 
-  defp schedule_work(:create_comment) do
-    span = Map.get(@notification_load_frequency, :create_comment)
-    Process.send_after(self(), :create_comment, span)
+  defp schedule_work(:comment_created) do
+    span = Map.get(@notification_load_frequency, :comment_created)
+    Process.send_after(self(), :comment_created, span)
   end
 
   defp schedule_work(:failed_rule_results) do
@@ -51,10 +51,10 @@ defmodule TdAudit.NotificationLoader do
     Process.send_after(self(), :failed_rule_results, span)
   end
 
-  defp execute_notifications_dispatcher_for_event(%{event: "create_comment"} = params) do
+  defp execute_notifications_dispatcher_for_event(%{event: "comment_created"} = params) do
     params
     |> active_configuration?()
-    |> dispatch_notification(%{event: "create_comment"})
+    |> dispatch_notification(%{event: "comment_created"})
   end
 
   defp execute_notifications_dispatcher_for_event(%{event: "failed_rule_results"} = params) do
@@ -63,14 +63,14 @@ defmodule TdAudit.NotificationLoader do
     |> dispatch_notification(%{event: "failed_rule_results"})
   end
 
-  defp dispatch_notification(true, %{event: "create_comment"}) do
-    NotificationDispatcher.dispatch_notification(
-      {:dispatch_on_comment_creation, "create_comment"}
+  defp dispatch_notification(true, %{event: "comment_created"}) do
+    Dispatcher.dispatch_notification(
+      {:dispatch_on_comment_creation, "comment_created"}
     )
   end
 
   defp dispatch_notification(true, %{event: "failed_rule_results"}) do
-    NotificationDispatcher.dispatch_notification(
+    Dispatcher.dispatch_notification(
       {:dispatch_on_failed_results, "failed_rule_results"}
     )
   end

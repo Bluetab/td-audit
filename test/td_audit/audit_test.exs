@@ -60,60 +60,51 @@ defmodule TdAudit.AuditTest do
       user_name: nil
     }
 
-    def event_fixture(attrs \\ %{}) do
-      {:ok, event} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Audit.create_event()
-
-      event
-    end
-
     test "list_events/0 returns all events" do
-      event = event_fixture()
-      assert Audit.list_events() == [event]
+      %{id: id} = insert(:event)
+      assert [%{id: ^id}] = Audit.list_events()
     end
 
     test "list_events/1 returns all events filtered by resource_id" do
-      event_1 = event_fixture(@valid_attrs)
-      event_fixture(@update_attrs)
-      assert Audit.list_events_by_filter(%{"resource_id" => 42}) == [event_1]
+      %{id: id} = insert(:event)
+      insert(:event, @update_attrs)
+      assert [%{id: ^id}] = Audit.list_events_by_filter(%{"resource_id" => 42})
     end
 
     test "list_events/1 returns all events filtered by a payload attribute" do
-      event_fixture()
-      event_1 = event_fixture(%{payload: %{"subscriber" => "mymail@foo.com"}})
-      event_2 = event_fixture(%{payload: %{"subscriber" => "mymail@foo.com"}})
-      event_fixture(%{payload: %{"subscriber" => "notmymail@foo.com"}})
+      insert(:event)
+      %{id: id1} = insert(:event, payload: %{"subscriber" => "mymail@foo.com"})
+      %{id: id2} = insert(:event, payload: %{"subscriber" => "mymail@foo.com"})
+      insert(:event, payload: %{"subscriber" => "notmymail@foo.com"})
 
-      assert Audit.list_events_by_filter(%{payload: %{subscriber: "mymail@foo.com"}}) == [
-               event_1,
-               event_2
-             ]
+      assert [%{id: ^id1}, %{id: ^id2}] =
+               %{payload: %{subscriber: "mymail@foo.com"}}
+               |> Audit.list_events_by_filter()
+               |> Enum.sort_by(& &1.id)
     end
 
     test "list_events/1 returns all events filtered by resource_type" do
-      event_fixture(@valid_attrs)
-      event_2 = event_fixture(@update_attrs)
+      insert(:event)
+      %{id: id} = insert(:event, @update_attrs)
 
-      assert Audit.list_events_by_filter(%{"resource_type" => "some updated resource_type"}) == [
-               event_2
-             ]
+      assert [%{id: ^id}] =
+               Audit.list_events_by_filter(%{"resource_type" => "some updated resource_type"})
     end
 
     test "list_events/1 returns all events filtered by resource_type and resource_id" do
-      event_fixture(@update_attrs)
-      event_fixture(@valid_attrs_new_type_diff_id)
-      event_3 = event_fixture(@valid_attrs_new_type_same_id)
+      insert(:event, @update_attrs)
+      insert(:event, @valid_attrs_new_type_diff_id)
+      %{id: id} = insert(:event, @valid_attrs_new_type_same_id)
 
-      assert Audit.list_events_by_filter(%{
-               "resource_id" => 43,
-               "resource_type" => "some new resource_type"
-             }) == [event_3]
+      assert [%{id: ^id}] =
+               Audit.list_events_by_filter(%{
+                 "resource_id" => 43,
+                 "resource_type" => "some new resource_type"
+               })
     end
 
     test "get_event!/1 returns the event with given id" do
-      event = event_fixture()
+      event = insert(:event)
       assert Audit.get_event!(event.id) == event
     end
 
@@ -130,36 +121,6 @@ defmodule TdAudit.AuditTest do
 
     test "create_event/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Audit.create_event(@invalid_attrs)
-    end
-
-    test "update_event/2 with valid data updates the event" do
-      event = event_fixture()
-      assert {:ok, event} = Audit.update_event(event, @update_attrs)
-      assert %Event{} = event
-      assert event.event == "some updated event"
-      assert event.payload == %{}
-      assert event.resource_id == 43
-      assert event.resource_type == "some updated resource_type"
-      assert event.service == "some updated service"
-      assert event.ts == DateTime.from_naive!(~N[2011-05-18 15:01:01.000000Z], "Etc/UTC")
-      assert event.user_id == 43
-    end
-
-    test "update_event/2 with invalid data returns error changeset" do
-      event = event_fixture()
-      assert {:error, %Ecto.Changeset{}} = Audit.update_event(event, @invalid_attrs)
-      assert event == Audit.get_event!(event.id)
-    end
-
-    test "delete_event/1 deletes the event" do
-      event = event_fixture()
-      assert {:ok, %Event{}} = Audit.delete_event(event)
-      assert_raise Ecto.NoResultsError, fn -> Audit.get_event!(event.id) end
-    end
-
-    test "change_event/1 returns a event changeset" do
-      event = event_fixture()
-      assert %Ecto.Changeset{} = Audit.change_event(event)
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule TdAudit.SubscriptionEventProcessorTest do
+defmodule TdAudit.Subscriptions.EventProcessorTest do
   @moduledoc """
   This module will test the creation and deletion of subscription
   under the arrival of an event
@@ -7,8 +7,8 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   use TdAudit.DataCase
 
   alias TdAudit.NotificationsSystem
-  alias TdAudit.SubscriptionEventProcessor
   alias TdAudit.Subscriptions
+  alias TdAudit.Subscriptions.EventProcessor
   alias TdCache.UserCache
 
   @user_1 %{
@@ -45,7 +45,7 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
         settings: %{
           "generate_subscription" => %{
             "roles" => ["data_owner"],
-            "target_event" => "create_comment"
+            "target_event" => "comment_created"
           }
         }
       })
@@ -77,31 +77,31 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
     user_3 = @user_3 |> Map.get("full_name")
 
     event_1 = %{
-      "event" => "create_concept_draft",
-      "resource_id" => 1,
-      "resource_type" => "concept",
-      "payload" => %{"content" => %{"data_owner" => user_1}}
+      event: "create_concept_draft",
+      resource_id: 1,
+      resource_type: "concept",
+      payload: %{"content" => %{"data_owner" => user_1}}
     }
 
     event_2 = %{
-      "event" => "create_concept_draft",
-      "resource_id" => 2,
-      "resource_type" => "concept",
-      "payload" => %{"content" => %{"data_owner" => user_2}}
+      event: "create_concept_draft",
+      resource_id: 2,
+      resource_type: "concept",
+      payload: %{"content" => %{"data_owner" => user_2}}
     }
 
     event_3 = %{
-      "event" => "create_concept_draft",
-      "resource_id" => 3,
-      "resource_type" => "concept",
-      "payload" => %{"content" => %{"data_owner" => user_3}}
+      event: "create_concept_draft",
+      resource_id: 3,
+      resource_type: "concept",
+      payload: %{"content" => %{"data_owner" => user_3}}
     }
 
     event_4 = %{
-      "event" => "create_concept_draft",
-      "resource_id" => 4,
-      "resource_type" => "concept",
-      "payload" => %{"content" => %{"made_up_role" => user_3}}
+      event: "create_concept_draft",
+      resource_id: 4,
+      resource_type: "concept",
+      payload: %{"content" => %{"made_up_role" => user_3}}
     }
 
     [event_1, event_2, event_3, event_4]
@@ -109,7 +109,7 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
   test "process_event/1 for event create_concept_draft" do
     process_event_fixture()
-    |> Enum.map(&SubscriptionEventProcessor.process_event(&1))
+    |> Enum.map(&EventProcessor.process_event/1)
 
     valid_ids = [1, 2, 3]
     created_subscriptions = Subscriptions.list_subscriptions()
@@ -118,7 +118,7 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
 
     assert Enum.all?(
              created_subscriptions,
-             &(Map.get(&1, :event) in ["create_comment", "failed_rule_results"] &&
+             &(Map.get(&1, :event) in ["comment_created", "failed_rule_results"] &&
                  Map.get(&1, :resource_type) == "business_concept")
            )
 
@@ -133,10 +133,10 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
         insert(:subscription, event: "delete_concept_draft", resource_type: "business_concept")
       end)
 
-    SubscriptionEventProcessor.process_event(%{
-      "resource_id" => s1.resource_id,
-      "event" => "delete_concept_draft",
-      "resource_type" => "business_concept"
+    EventProcessor.process_event(%{
+      resource_id: s1.resource_id,
+      event: "delete_concept_draft",
+      resource_type: "business_concept"
     })
 
     subscriptions = Subscriptions.list_subscriptions()
@@ -148,50 +148,47 @@ defmodule TdAudit.SubscriptionEventProcessorTest do
   end
 
   test "process_event/1 for update_concept_draft" do
-    del_sub =
+    %{id: id1} =
       insert(:subscription,
         resource_id: 1,
-        event: "create_comment",
+        event: "comment_created",
         resource_type: "business_concept"
       )
 
     sub_1 =
       insert(:subscription,
         resource_id: 2,
-        event: "create_comment",
+        event: "comment_created",
         resource_type: "business_concept"
       )
 
     sub_2 =
       insert(:subscription,
         resource_id: 3,
-        event: "create_comment",
+        event: "comment_created",
         resource_type: "business_concept"
       )
 
     remaining_subscriptions = [sub_1, sub_2]
-    event_fixture = hd(process_event_fixture())
 
-    content =
-      event_fixture
-      |> Map.get("payload")
-      |> Map.get("content")
+    [event | _] = process_event_fixture()
 
-    new_payload =
-      Map.new()
-      |> Map.put("content", Map.new() |> Map.put("changed", content))
+    %{payload: %{"content" => content}} = event
 
-    event_fixture =
-      event_fixture
-      |> Map.put("event", "update_concept_draft")
-      |> Map.put("payload", new_payload)
+    event = %{
+      event
+      | event: "update_concept_draft",
+        payload: %{"content" => %{"changed" => content}}
+    }
 
-    SubscriptionEventProcessor.process_event(event_fixture)
+    EventProcessor.process_event(event)
 
     subscriptions = Subscriptions.list_subscriptions()
     assert length(subscriptions) == 4
 
-    assert not Enum.any?(subscriptions, &(Map.get(&1, :id) == Map.get(del_sub, :id)))
+    refute subscriptions
+           |> Enum.map(& &1.id)
+           |> Enum.member?(id1)
 
     assert Enum.all?(remaining_subscriptions, fn s ->
              Enum.any?(subscriptions, &(Map.get(&1, :resource_id) == Map.get(s, :resource_id)))

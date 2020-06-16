@@ -4,31 +4,10 @@ defmodule TdAudit.SubscriptionsTest do
   """
   use TdAudit.DataCase
 
-  alias TdAudit.Audit
   alias TdAudit.Subscriptions
 
   describe "subscriptions" do
     alias TdAudit.Subscriptions.Subscription
-
-    @event_attrs %{
-      event: "some event",
-      payload: %{},
-      resource_id: 42,
-      resource_type: "some resource_type",
-      service: "some service",
-      ts: "2010-04-17 14:00:00.000Z",
-      user_id: 42,
-      user_name: "some name"
-    }
-
-    def event_fixture(attrs \\ %{}) do
-      {:ok, event} =
-        attrs
-        |> Enum.into(@event_attrs)
-        |> Audit.create_event()
-
-      event
-    end
 
     test "list_subscriptions/0 returns all subscriptions" do
       subscription = insert(:subscription)
@@ -90,6 +69,17 @@ defmodule TdAudit.SubscriptionsTest do
                Subscriptions.update_subscription(subscription, %{"resource_id" => nil})
 
       assert subscription == Subscriptions.get_subscription!(subscription.id)
+    end
+
+    test "update_last_consumed_events_by_event_type/2 updates last_consumed_event" do
+      subscription = insert(:subscription, last_consumed_event: DateTime.utc_now())
+      ts = DateTime.add(subscription.last_consumed_event, 1, :millisecond)
+
+      assert {1, _} =
+               Subscriptions.update_last_consumed_events_by_event_type(subscription.event, ts)
+
+      subscriptions = Subscriptions.list_subscriptions_by_filter(%{event: subscription.event})
+      assert Enum.all?(subscriptions, &(Map.get(&1, :last_consumed_event) == ts))
     end
 
     test "delete_subscription/1 deletes the subscription" do

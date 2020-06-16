@@ -18,12 +18,11 @@ defmodule TdAuditWeb.Router do
     pipe_through(:api)
     get("/ping", PingController, :ping)
     post("/echo", EchoController, :echo)
-    post("/audits", AuditController, :create)
   end
 
   scope "/api", TdAuditWeb do
     pipe_through([:api, :api_secure])
-    resources("/events", EventController, except: [:new, :edit])
+    resources("/events", EventController, only: [:index, :show])
     resources("/subscriptions", SubscriptionController, except: [:new, :edit])
     resources("/subscriptions", SubscriptionsController, singleton: true, only: [:update])
 
