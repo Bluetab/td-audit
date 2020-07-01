@@ -8,7 +8,6 @@ defmodule TdAudit.Audit do
   alias TdAudit.Audit.Event
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
-  alias TdAudit.Subscriptions.EventHandler
   alias TdCache.UserCache
 
   @doc """
@@ -28,7 +27,7 @@ defmodule TdAudit.Audit do
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
 
-  def list_events_by_filter(params) do
+  def list_events(params) do
     user_map = UserCache.map()
 
     fields = Event.__schema__(:fields)
@@ -40,6 +39,12 @@ defmodule TdAudit.Audit do
     )
     |> Repo.all()
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
+  end
+
+  def max_event_id do
+    Event
+    |> select([e], max(e.id))
+    |> Repo.one()
   end
 
   defp get_user(user_map, id) do
@@ -78,12 +83,5 @@ defmodule TdAudit.Audit do
     %Event{}
     |> Event.changeset(params)
     |> Repo.insert()
-    |> on_create()
-  end
-
-  defp on_create(result) do
-    with {:ok, event} <- result do
-      EventHandler.after_insert(event)
-    end
   end
 end

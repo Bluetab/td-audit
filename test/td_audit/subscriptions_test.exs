@@ -4,6 +4,8 @@ defmodule TdAudit.SubscriptionsTest do
   """
   use TdAudit.DataCase
 
+  import TdAudit.TestOperators
+
   alias TdAudit.Subscriptions
 
   describe "subscriptions" do
@@ -11,75 +13,37 @@ defmodule TdAudit.SubscriptionsTest do
 
     test "list_subscriptions/0 returns all subscriptions" do
       subscription = insert(:subscription)
-      assert Subscriptions.list_subscriptions() == [subscription]
+      assert Subscriptions.list_subscriptions() <|> [subscription]
     end
 
     test "list_subscriptions/1 returns all subscriptions filtered by resource_id" do
-      target_resource_id = 44
-      insert(:subscription)
-      s1 = insert(:subscription, resource_id: 44, event: "my event")
-      s2 = insert(:subscription, resource_id: 44, event: "my event")
+      %{id: subscriber_id} = insert(:subscriber)
 
-      assert Subscriptions.list_subscriptions_by_filter(%{
-               "resource_id" => target_resource_id,
-               "event" => ["my event"]
-             }) == [s1, s2]
+      insert(:subscription)
+      s1 = insert(:subscription, subscriber_id: subscriber_id)
+      s2 = insert(:subscription, subscriber_id: subscriber_id)
+
+      assert Subscriptions.list_subscriptions(subscriber_id: subscriber_id) <|> [s1, s2]
     end
 
     test "get_subscription!/1 returns the subscription with given id" do
       subscription = insert(:subscription)
-      assert Subscriptions.get_subscription!(subscription.id) == subscription
+      assert Subscriptions.get_subscription!(subscription.id) <~> subscription
     end
 
-    test "create_subscription/1 with valid data creates a event" do
-      fields = [:event, :resource_id, :resource_type, :user_email, :periodicity]
-      params = build(:subscription) |> Map.take(fields)
+    test "create_subscription/1 with valid data creates a subscription" do
+      %{id: subscriber_id} = insert(:subscriber)
 
-      assert {:ok, %Subscription{} = subscription} = Subscriptions.create_subscription(params)
+      params =
+        :subscription
+        |> string_params_for(subscriber_id: subscriber_id)
+        |> Map.take(["subscriber_id", "scope", "periodicity"])
 
-      assert Map.take(subscription, fields) == params
+      assert {:ok, %Subscription{} = _subscription} = Subscriptions.create_subscription(params)
     end
 
     test "create_subscription/1 with invalid data returns error changeset" do
-      params = build(:subscription) |> Map.from_struct() |> Map.delete(:user_email)
-
-      assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(params)
-    end
-
-    test "update_subscription/2 with valid data updates the subscription" do
-      new_resource_id = 44
-      new_resource_type = "new resource type"
-      subscription = insert(:subscription)
-
-      assert {:ok, subscription} =
-               Subscriptions.update_subscription(subscription, %{
-                 "resource_id" => new_resource_id,
-                 "resource_type" => new_resource_type
-               })
-
-      assert %Subscription{} = subscription
-      assert subscription.resource_id == new_resource_id
-      assert subscription.resource_type == new_resource_type
-    end
-
-    test "update_subscription/2 with invalid data returns error changeset" do
-      subscription = insert(:subscription)
-
-      assert {:error, %Ecto.Changeset{}} =
-               Subscriptions.update_subscription(subscription, %{"resource_id" => nil})
-
-      assert subscription == Subscriptions.get_subscription!(subscription.id)
-    end
-
-    test "update_last_consumed_events_by_event_type/2 updates last_consumed_event" do
-      subscription = insert(:subscription, last_consumed_event: DateTime.utc_now())
-      ts = DateTime.add(subscription.last_consumed_event, 1, :millisecond)
-
-      assert {1, _} =
-               Subscriptions.update_last_consumed_events_by_event_type(subscription.event, ts)
-
-      subscriptions = Subscriptions.list_subscriptions_by_filter(%{event: subscription.event})
-      assert Enum.all?(subscriptions, &(Map.get(&1, :last_consumed_event) == ts))
+      assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(%{})
     end
 
     test "delete_subscription/1 deletes the subscription" do

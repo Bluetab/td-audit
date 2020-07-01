@@ -1,0 +1,4 @@
+<%= for %{event: event_type} = event <- @events do %>
+  <%= render("#{event_type}.html", event: event) %>
+  &nbsp;
+<% end %>

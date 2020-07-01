@@ -5,11 +5,12 @@ defmodule TdAudit.Subscriptions do
 
   import Ecto.Query, warn: false
 
-  alias TdAudit.NotificationsSystem.Configuration
+  alias TdAudit.Audit
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
   alias TdAudit.Subscriptions.Subscription
-  alias TdCache.{ConceptCache, UserCache}
+  alias TdCache.AclCache
+  alias TdCache.UserCache
 
   @doc """
   Returns the list of subscriptions.
@@ -29,15 +30,15 @@ defmodule TdAudit.Subscriptions do
 
   ## Examples
 
-      iex> list_subscriptions_by_filter(%{filed: value})
+      iex> list_subscriptions(%{field: value})
       [%Subscription{}, ...]
 
   """
-  def list_subscriptions_by_filter(params) do
+  def list_subscriptions(clauses) do
     fields = Subscription.__schema__(:fields)
-    dynamic = QuerySupport.filter(params, fields)
+    dynamic = QuerySupport.filter(clauses, fields)
 
-    Repo.all(from(p in Subscription, where: ^dynamic))
+    Repo.all(from(p in Subscription, preload: :subscriber, where: ^dynamic))
   end
 
   @doc """
@@ -54,7 +55,11 @@ defmodule TdAudit.Subscriptions do
       ** (Ecto.NoResultsError)
 
   """
-  def get_subscription!(id), do: Repo.get!(Subscription, id)
+  def get_subscription!(id) do
+    Subscription
+    |> Repo.get!(id)
+    |> Repo.preload(:subscriber)
+  end
 
   @doc """
   Creates a subscription.
@@ -69,79 +74,12 @@ defmodule TdAudit.Subscriptions do
 
   """
   def create_subscription(params \\ %{}) do
+    last_event_id = Audit.max_event_id() || 0
+
     params
+    |> Map.put_new("last_event_id", last_event_id)
     |> Subscription.changeset()
     |> Repo.insert()
-  end
-
-  @doc """
-  Updates a subscription.
-
-  ## Examples
-
-      iex> update_subscription(subscription, %{field: new_value})
-      {:ok, %Event{}}
-
-      iex> update_subscription(subscription, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_subscription(%Subscription{} = subscription, param) do
-    subscription
-    |> Subscription.changeset(param)
-    |> Repo.update()
-  end
-
-  def update_last_consumed_events_on_activation(
-        {:ok, %Configuration{settings: settings} = configuration}
-      ) do
-    if has_subscription_been_activated?(settings) do
-      update_last_consumed_events_by_event_type(
-        Map.get(configuration, :event),
-        DateTime.utc_now()
-      )
-    end
-  end
-
-  def update_last_consumed_events_on_activation(_) do
-  end
-
-  defp has_subscription_been_activated?(%{"generate_notification" => notification_settings}) do
-    has_active_notification_flag?(notification_settings)
-  end
-
-  defp has_subscription_been_activated?(_), do: false
-
-  defp has_active_notification_flag?(%{"active" => true}), do: true
-  defp has_active_notification_flag?(_), do: false
-
-  def update_last_consumed_events(
-        %{
-          "resource_id" => resource_id,
-          "resource_type" => resource_type,
-          "subscribers" => subscribers
-        },
-        last_consumed_event
-      ) do
-    from(p in Subscription,
-      update: [set: [last_consumed_event: ^last_consumed_event]],
-      where:
-        p.resource_id == ^resource_id and
-          p.resource_type == ^resource_type and
-          p.user_email in ^subscribers
-    )
-    |> Repo.update_all([])
-  end
-
-  def update_last_consumed_events_by_event_type(
-        event,
-        last_consumed_event
-      ) do
-    from(p in Subscription,
-      update: [set: [last_consumed_event: ^last_consumed_event]],
-      where: p.event == ^event
-    )
-    |> Repo.update_all([])
   end
 
   @doc """
@@ -176,60 +114,39 @@ defmodule TdAudit.Subscriptions do
     |> Repo.delete_all()
   end
 
-  def create_subscriptions(%{
-        "role" => role,
-        "event" => event,
-        "resource_type" => resource_type,
-        "periodicity" => periodicity
-      }) do
-    Repo.transaction(fn ->
-      role
-      |> get_resource_ids_by_subscriber(resource_type)
-      |> Enum.flat_map(&subscription_params(&1, resource_type, event))
-      |> Enum.reject(&Repo.get_by(Subscription, &1))
-      |> Enum.map(&Map.put(&1, :periodicity, periodicity))
-      |> Enum.map(&Subscription.changeset/1)
-      |> Enum.map(&Repo.insert!/1)
-    end)
-  rescue
-    e in Ecto.InvalidChangesetError -> {:error, e.changeset}
+  def get_recipients(%Subscription{subscriber: subscriber, scope: scope}) do
+    recipients(subscriber, scope)
   end
 
-  defp get_resource_ids_by_subscriber(role, "business_concept" = _resource_type) do
-    {:ok, ids} = ConceptCache.active_ids()
+  defp recipients({:ok, %{} = user}), do: recipients(user)
+  defp recipients(%{full_name: full_name, email: email}), do: [{full_name, email}]
+  defp recipients(%{email: email}), do: [email]
+  defp recipients(_), do: []
 
-    ids
-    |> Enum.flat_map(&subscribers_from_role(&1, role))
-    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
-    |> Enum.flat_map(fn {full_name, ids} ->
-      case UserCache.get_by_name(full_name) do
-        {:ok, %{email: email}} -> [{email, ids}]
-        _ -> []
-      end
-    end)
+  defp recipients(%{type: "email", identifier: email}, _scope) do
+    [email]
   end
 
-  defp subscription_params({email, resource_ids}, resource_type, event) do
-    Enum.map(resource_ids, fn resource_id ->
-      %{
-        user_email: email,
-        resource_type: resource_type,
-        resource_id: resource_id,
-        event: event
-      }
-    end)
+  defp recipients(%{type: "user", identifier: user_id}, _scope) do
+    user_id
+    |> UserCache.get()
+    |> recipients()
   end
 
-  defp subscribers_from_role(concept_id, role) do
-    case ConceptCache.get(concept_id, :content) do
-      {:ok, nil} ->
-        []
-
-      {:ok, content} ->
-        case Map.get(content, role) do
-          nil -> []
-          full_name -> [{full_name, concept_id}]
-        end
-    end
+  defp recipients(%{type: "role", identifier: role}, %{
+         resource_type: resource_type,
+         resource_id: domain_id
+       }) when resource_type in ["domain", "domains"] do
+    recipients_by_role(domain_id, role)
   end
+
+  defp recipients(_, _), do: []
+
+  defp recipients_by_role(domain_id, role_name) do
+    "domain"
+    |> AclCache.get_acl_role_users(domain_id, role_name)
+    |> Enum.map(&UserCache.get/1)
+    |> Enum.flat_map(&recipients/1)
+  end
+
 end

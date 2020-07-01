@@ -1,6 +1,10 @@
 defmodule TdAuditWeb.Router do
   use TdAuditWeb, :router
 
+  if Mix.env() == :dev do
+    forward "/sent_emails", Bamboo.SentEmailViewerPlug
+  end
+
   pipeline :api do
     plug(TdAudit.Auth.Pipeline.Unsecure)
     plug(:accepts, ["json"])
@@ -23,12 +27,8 @@ defmodule TdAuditWeb.Router do
   scope "/api", TdAuditWeb do
     pipe_through([:api, :api_secure])
     resources("/events", EventController, only: [:index, :show])
-    resources("/subscriptions", SubscriptionController, except: [:new, :edit])
-    resources("/subscriptions", SubscriptionsController, singleton: true, only: [:update])
-
-    resources("/notifications_system/configurations", ConfigurationController,
-      except: [:new, :edit]
-    )
+    resources("/subscribers", SubscriberController, except: [:new, :edit, :update])
+    resources("/subscriptions", SubscriptionController, except: [:new, :edit, :update])
   end
 
   def swagger_info do

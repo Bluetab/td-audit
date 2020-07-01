@@ -1,10 +1,11 @@
-# Truedat Data Audit
+# Truedat Audit
 
-TdAudit is a back-end service developed as part of Truedat project that supports the management of events
+TdAudit is a back-end service developed as part of the Truedat project that
+supports audit events and notifications.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
@@ -14,34 +15,29 @@ To start your Phoenix server:
 
 ### Installing
 
-  * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
-  * Start Phoenix endpoint with `mix phx.server`
+- Create and migrate your database with `mix ecto.create && mix ecto.migrate`
+- Start Phoenix endpoint with `mix phx.server`
 
-  * Now you can visit [`localhost:4007`](http://localhost:4007) from your browser.
+- Now you can visit [`localhost:4007`](http://localhost:4007) from your browser.
 
 ## Running the tests
 
 Run all aplication tests with `mix test`
 
-
-## Deployment
-
-Ready to run in production? Please [check deployment guides](http://www.phoenixframework.org/docs/deployment).
-
 ## Built With
 
-* [Phoenix](http://www.phoenixframework.org/) - Web framework
-* [Ecto](http://www.phoenixframework.org/) - Phoenix and Ecto integration
-* [Postgrex](http://hexdocs.pm/postgrex/) - PostgreSQL driver for Elixir
-* [Gettext](https://hexdocs.pm/gettext) - Internationalization and localization support for Elixir
-* [Cowboy](https://ninenines.eu) - HTTP server for Erlang/OTP
-* [credo](http://credo-ci.org/) - Static code analysis tool for the Elixir language
-* [guardian](https://github.com/ueberauth/guardian) - Authentication library
-* [phoenix_swagger](https://github.com/xerions/phoenix_swagger) - Swagger integration to Phoenix framework
+- [Phoenix](http://www.phoenixframework.org/) - Web framework
+- [Ecto](http://www.phoenixframework.org/) - Phoenix and Ecto integration
+- [Postgrex](http://hexdocs.pm/postgrex/) - PostgreSQL driver for Elixir
+- [Gettext](https://hexdocs.pm/gettext) - Internationalization and localization support for Elixir
+- [Cowboy](https://ninenines.eu) - HTTP server for Erlang/OTP
+- [credo](http://credo-ci.org/) - Static code analysis tool for the Elixir language
+- [guardian](https://github.com/ueberauth/guardian) - Authentication library
+- [phoenix_swagger](https://github.com/xerions/phoenix_swagger) - Swagger integration to Phoenix framework
 
 ## Authors
 
-* **Bluetab Solutions Group, SL** - *Initial work* - [Bluetab](http://www.bluetab.net)
+- **Bluetab Solutions Group, SL** - _Initial work_ - [Bluetab](http://www.bluetab.net)
 
 See also the list of [contributors](https://github.com/bluetab/td-audit) who participated in this project.
 

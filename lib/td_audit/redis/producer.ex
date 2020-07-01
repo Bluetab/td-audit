@@ -56,8 +56,6 @@ defmodule TdAudit.Redis.Producer do
           demand: demand
         } = state
       ) do
-    Logger.debug("Processing demand #{demand}...")
-
     {:ok, events} =
       Stream.read_group(redix, stream, consumer_group, consumer_id,
         count: demand,

@@ -8,13 +8,14 @@ defmodule TdAudit.QuerySupport do
   def filter(params, fields) do
     dynamic = true
 
-    Enum.reduce(Map.keys(params), dynamic, fn key, acc ->
-      key_as_atom = if is_binary(key), do: String.to_atom(key), else: key
-
-      case Enum.member?(fields, key_as_atom) do
-        true -> filter_by_type(key_as_atom, params[key], acc)
-        false -> acc
-      end
+    params
+    |> Enum.map(fn
+      {key, value} when is_binary(key) -> {String.to_atom(key), value}
+      kv -> kv
+    end)
+    |> Enum.filter(fn {key, _} -> Enum.member?(fields, key) end)
+    |> Enum.reduce(dynamic, fn {key, value}, acc ->
+      filter_by_type(key, value, acc)
     end)
   end
 

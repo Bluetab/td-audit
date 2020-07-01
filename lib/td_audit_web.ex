@@ -32,11 +32,8 @@ defmodule TdAuditWeb do
         root: "lib/td_audit_web/templates",
         namespace: TdAuditWeb
 
-      # Import convenience functions from controllers
-      import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
-      import TdAuditWeb.ErrorHelpers
-      import TdAuditWeb.Gettext
-      alias TdAuthWeb.Router.Helpers, as: Routes
+      # Include shared imports and aliases for views
+      unquote(view_helpers())
     end
   end
 
@@ -48,10 +45,17 @@ defmodule TdAuditWeb do
     end
   end
 
-  def channel do
+  defp view_helpers do
     quote do
-      use Phoenix.Channel
+      # Use all HTML functionality (forms, tags, etc)
+      use Phoenix.HTML
+
+      # Import basic rendering functionality (render, render_layout, etc)
+      import Phoenix.View
+
+      import TdAuditWeb.ErrorHelpers
       import TdAuditWeb.Gettext
+      alias TdAuditWeb.Router.Helpers, as: Routes
     end
   end
 
