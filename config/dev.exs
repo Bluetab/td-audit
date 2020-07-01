@@ -24,17 +24,8 @@ config :td_audit, TdAudit.Repo,
   hostname: "localhost",
   pool_size: 4
 
-config :td_audit, email_account: "no-reply@example.com"
-
-config :td_audit, TdAudit.Smtp.Mailer,
-  adapter: Bamboo.SMTPAdapter,
-  server: "smtp.example.com",
-  port: 587,
-  username: "auth_user",
-  password: "secret-pasword",
-  tls: :always,
-  ssl: false,
-  retries: 3
+config :td_audit, TdAudit.Notifications.Mailer,
+  adapter: Bamboo.LocalAdapter
 
 config :td_cache, redis_host: "localhost"
 config :td_audit, host_name: "http://localhost:8080"

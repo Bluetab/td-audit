@@ -24,8 +24,8 @@ defmodule TdAuditWeb.ConnCase do
 
   using do
     quote do
-      use Phoenix.ConnTest
-
+      import Plug.Conn
+      import Phoenix.ConnTest
       import TdAudit.Factory
 
       alias TdAuditWeb.Router.Helpers, as: Routes

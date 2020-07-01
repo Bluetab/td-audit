@@ -6,13 +6,16 @@ defmodule TdAudit.Subscriptions.Subscription do
 
   use Ecto.Schema
 
+  alias TdAudit.Subscriptions.Scope
+  alias TdAudit.Subscriptions.Subscriber
+
   schema "subscriptions" do
-    field(:event, :string)
-    field(:resource_id, :integer)
-    field(:resource_type, :string)
-    field(:user_email, :string)
     field(:periodicity, :string)
-    field(:last_consumed_event, :utc_datetime_usec)
+    field(:last_event_id, :integer)
+
+    embeds_one(:scope, Scope, on_replace: :delete)
+
+    belongs_to(:subscriber, Subscriber)
 
     timestamps()
   end
@@ -24,14 +27,13 @@ defmodule TdAudit.Subscriptions.Subscription do
   def changeset(%__MODULE__{} = subscription, attrs) do
     subscription
     |> cast(attrs, [
-      :event,
-      :resource_id,
-      :resource_type,
       :periodicity,
-      :user_email,
-      :last_consumed_event
+      :subscriber_id,
+      :last_event_id
     ])
-    |> validate_required([:resource_id, :resource_type, :event, :user_email])
-    |> unique_constraint(:unique_resource_subscription, name: :unique_resource_subscription)
+    |> cast_embed(:scope, with: &Scope.changeset/2)
+    |> validate_required([:scope, :subscriber_id, :periodicity, :last_event_id])
+    |> validate_inclusion(:periodicity, ["daily", "minutely", "hourly"])
+    |> unique_constraint([:scope, :subscriber_id])
   end
 end

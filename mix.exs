@@ -6,7 +6,7 @@ defmodule TdAudit.Mixfile do
       app: :td_audit,
       version:
         case System.get_env("APP_VERSION") do
-          nil -> "3.20.0-local"
+          nil -> "4.0.0-local"
           v -> v
         end,
       elixir: "~> 1.10",
@@ -49,9 +49,10 @@ defmodule TdAudit.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.16"},
-      {:plug_cowboy, "~> 2.0"},
+      {:phoenix, "~> 1.5.0"},
+      {:plug_cowboy, "~> 2.1"},
       {:phoenix_ecto, "~> 4.0"},
+      {:phoenix_html, "~> 2.11"},
       {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
@@ -63,9 +64,12 @@ defmodule TdAudit.Mixfile do
       {:ex_json_schema, "~> 0.7.3"},
       {:bamboo, "~> 1.4"},
       {:bamboo_smtp, "~> 2.1.0"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "3.24.3"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.0.0"},
       {:gen_stage, "~> 1.0"},
-      {:broadway, "~> 0.6.0"}
+      {:broadway, "~> 0.6.0"},
+      {:quantum, "~> 3.0"},
+      {:canada, "~> 2.0"},
+      {:number, "~> 1.0"}
     ]
   end
 

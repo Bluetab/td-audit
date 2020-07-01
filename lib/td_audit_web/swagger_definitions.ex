@@ -60,6 +60,54 @@ defmodule TdAuditWeb.SwaggerDefinitions do
     }
   end
 
+  def subscriber_swagger_definitions do
+    %{
+      SubscribersResponse:
+        swagger_schema do
+          properties do
+            data(Schema.ref(:Subscribers))
+          end
+        end,
+      Subscribers:
+        swagger_schema do
+          title("Subscribers")
+          description("A collection of subscribers")
+          type(:array)
+          items(Schema.ref(:Subscriber))
+        end,
+      Subscriber:
+        swagger_schema do
+          title("Subscriber")
+          description("A subscriber")
+
+          properties do
+            id(:integer, "Subscriber ID")
+            type(:string, "Subscriber type (email, user or role)")
+            identifier(:string, "Identifier of the subscriber")
+          end
+        end,
+      SubscriberCreate:
+        swagger_schema do
+          properties do
+            subscriber(
+              Schema.new do
+                properties do
+                  type(:string, "Subscriber type (email, user or role)", required: true)
+                  identifier(:string, "Identifier of the subscriber", required: true)
+                end
+              end
+            )
+          end
+        end,
+      SubscriberResponse:
+        swagger_schema do
+          properties do
+            data(Schema.ref(:Subscriber))
+          end
+        end
+    }
+  end
+
   def subscription_swagger_definitions do
     %{
       SubscriptionsResponse:
@@ -75,6 +123,16 @@ defmodule TdAuditWeb.SwaggerDefinitions do
           type(:array)
           items(Schema.ref(:Subscription))
         end,
+      Subscriber:
+        swagger_schema do
+          title("Subscriber")
+          description("A subscriber")
+
+          properties do
+            type(:string, "Subscriber type (email, user or role)")
+            identifier(:string, "Identifier of the subscriber")
+          end
+        end,
       Subscription:
         swagger_schema do
           title("Subscription")
@@ -85,9 +143,9 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             event(:string, "Event to subscribe")
             resource_id(:integer, "ID of the resource triggering the event")
             resource_type(:string, "Type of the resource triggering the event")
-            user_email(:string, "Email of the subscriber")
+            subscriber(Schema.ref(:Subscriber))
             periodicity(:string, "Periodicity of the subscription")
-            last_consumed_event(:string, "Timestamps", nullable: true)
+            last_event_id(:integer, "ID of last seen event")
           end
         end,
       SubscriptionCreate:
@@ -155,106 +213,6 @@ defmodule TdAuditWeb.SwaggerDefinitions do
               end
             )
           end
-        end
-    }
-  end
-
-  def configuration_swagger_definitions do
-    %{
-      ConfigurationsResponse:
-        swagger_schema do
-          properties do
-            data(Schema.ref(:Configurations))
-          end
-        end,
-      Configurations:
-        swagger_schema do
-          title("Configurations")
-          description("A collection of configurations")
-          type(:array)
-          items(Schema.ref(:Configuration))
-        end,
-      Configuration:
-        swagger_schema do
-          title("Configuration")
-          description("A configuration for our notifications system")
-
-          properties do
-            id(:integer, "Unique identifier")
-            event(:string, "Event to generate a configuration")
-            settings(:object, "Specifics of the configuration")
-          end
-
-          example(%{
-            configuration: %{
-              event: "create_concept_draft",
-              settings: %{
-                generate_subscription: %{
-                  roles: ["data_owner"]
-                },
-                generate_notification: %{
-                  active: false
-                }
-              }
-            }
-          })
-        end,
-      ConfigurationCreate:
-        swagger_schema do
-          properties do
-            configuration(
-              Schema.new do
-                properties do
-                  event(:string, "Event to create a configuration", required: true)
-                  settings(:object, "Specifics of the configuration", required: true)
-                end
-              end
-            )
-          end
-
-          example(%{
-            configuration: %{
-              event: "create_concept_draft",
-              settings: %{
-                generate_subscription: %{
-                  roles: ["data_owner"]
-                },
-                generate_notification: %{
-                  active: false
-                }
-              }
-            }
-          })
-        end,
-      ConfigurationResponse:
-        swagger_schema do
-          properties do
-            data(Schema.ref(:Configuration))
-          end
-        end,
-      ConfigurationUpdate:
-        swagger_schema do
-          properties do
-            configuration(
-              Schema.new do
-                properties do
-                  event(:string, "Event to create a configuration", required: true)
-                  settings(:object, "Specifics of the configuration", required: true)
-                end
-              end
-            )
-          end
-
-          example(%{
-            configuration: %{
-              event: "create_concept_draft",
-              settings: %{
-                generate_subscription: %{
-                  roles: ["data_officer"]
-                }
-              }
-            }
-          })
         end
     }
   end

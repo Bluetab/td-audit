@@ -55,7 +55,23 @@ config :td_audit, :phoenix_swagger,
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"
 
-config :td_audit, TdAudit.Smtp.Mailer, adapter: Bamboo.SMTPAdapter
+config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.SMTPAdapter
+
+config :td_audit, TdAudit.Notifications.Email,
+  sender: {"Truedat Notifications", "no-reply@truedat.io"},
+  subjects: [
+    ingests_pending: "📬 Alert: Data requests pending approval",
+    rule_results: "👓 Alert: Data quality issues detected",
+    comments: "🖋 Alert: New comments added",
+    default: "⚡ Alert: New notifications"
+  ],
+  headers: [
+    ingests_pending: "The following data requests require approval:",
+    rule_results: "The following data quality issues have been detected:",
+    comments: "The following comments have been added:",
+    default: "New notifications have been generated:"
+  ],
+  footer: "This message was sent by Truedat"
 
 config :td_audit, TdAudit.Broadway,
   producer_module: TdAudit.Redis.Producer,
@@ -64,6 +80,28 @@ config :td_audit, TdAudit.Broadway,
   stream: "audit:events",
   redis_host: "localhost",
   port: 6379
+
+config :td_audit, TdAudit.Scheduler,
+  jobs: [
+    [
+      schedule: "@minutely",
+      task: {TdAudit.Notifications.Dispatcher, :dispatch, ["minutely"]},
+      run_strategy: Quantum.RunStrategy.Local
+    ],
+    [
+      schedule: "@hourly",
+      task: {TdAudit.Notifications.Dispatcher, :dispatch, ["hourly"]},
+      run_strategy: Quantum.RunStrategy.Local
+    ],
+    [
+      schedule: "@daily",
+      task: {TdAudit.Notifications.Dispatcher, :dispatch, ["daily"]},
+      run_strategy: Quantum.RunStrategy.Local
+    ]
+  ]
+
+config :number, delimit: [delimiter: " ", separator: ",", precision: 0]
+config :number, percentage: [delimiter: " ", separator: ",", precision: 2]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

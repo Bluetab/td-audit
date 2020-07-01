@@ -1,24 +1,26 @@
 defmodule TdAuditWeb.SubscriptionView do
   use TdAuditWeb, :view
-  alias TdAuditWeb.SubscriptionView
+
+  alias TdAuditWeb.ScopeView
+  alias TdAuditWeb.SubscriberView
 
   def render("index.json", %{subscriptions: subscriptions}) do
-    %{data: render_many(subscriptions, SubscriptionView, "subscription.json")}
+    %{data: render_many(subscriptions, __MODULE__, "subscription.json")}
   end
 
   def render("show.json", %{subscription: subscription}) do
-    %{data: render_one(subscription, SubscriptionView, "subscription.json")}
+    %{data: render_one(subscription, __MODULE__, "subscription.json")}
   end
 
-  def render("subscription.json", %{subscription: subscription}) do
-    %{
-      id: subscription.id,
-      resource_id: subscription.resource_id,
-      resource_type: subscription.resource_type,
-      event: subscription.event,
-      user_email: subscription.user_email,
-      periodicity: subscription.periodicity,
-      last_consumed_event: subscription.last_consumed_event
-    }
+  def render("subscription.json", %{
+        subscription: %{scope: scope, subscriber: subscriber} = subscription
+      }) do
+    scope = render_one(scope, ScopeView, "scope.json")
+    subscriber = render_one(subscriber, SubscriberView, "subscriber.json")
+
+    subscription
+    |> Map.take([:id, :periodicity, :last_event_id])
+    |> Map.put(:subscriber, subscriber)
+    |> Map.put(:scope, scope)
   end
 end

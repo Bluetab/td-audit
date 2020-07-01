@@ -23,7 +23,7 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   def index(conn, params) do
-    subscriptions = Subscriptions.list_subscriptions_by_filter(params)
+    subscriptions = Subscriptions.list_subscriptions(params)
     render(conn, "index.json", subscriptions: subscriptions)
   end
 
@@ -42,8 +42,8 @@ defmodule TdAuditWeb.SubscriptionController do
   def create(conn, %{"subscription" => subscription_params}) do
     subscription_params = with_email(subscription_params)
 
-    with {:ok, %Subscription{} = subscription} <-
-           Subscriptions.create_subscription(subscription_params) do
+    with {:ok, %{id: id}} <- Subscriptions.create_subscription(subscription_params),
+         subscription <- Subscriptions.get_subscription!(id) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.subscription_path(conn, :show, subscription))
@@ -66,28 +66,6 @@ defmodule TdAuditWeb.SubscriptionController do
   def show(conn, %{"id" => id}) do
     subscription = Subscriptions.get_subscription!(id)
     render(conn, "show.json", subscription: subscription)
-  end
-
-  swagger_path :update do
-    description("Update Subscription")
-    produces("application/json")
-
-    parameters do
-      id(:path, :integer, "Subscription ID", required: true)
-      event(:body, Schema.ref(:SubscriptionUpdate), "Subscription update attrs")
-    end
-
-    response(201, "OK", Schema.ref(:SubscriptionResponse))
-    response(400, "Client Error")
-  end
-
-  def update(conn, %{"id" => id, "subscription" => subscription_params}) do
-    subscription = Subscriptions.get_subscription!(id)
-
-    with {:ok, %Subscription{} = subscription} <-
-           Subscriptions.update_subscription(subscription, subscription_params) do
-      render(conn, "show.json", subscription: subscription)
-    end
   end
 
   swagger_path :delete do

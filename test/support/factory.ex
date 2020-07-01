@@ -6,6 +6,7 @@ defmodule TdAudit.Factory do
   use ExMachina.Ecto, repo: TdAudit.Repo
 
   alias TdAudit.Audit.Event
+  alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
 
   def concept_factory do
@@ -26,29 +27,102 @@ defmodule TdAudit.Factory do
     }
   end
 
-  def subscription_factory do
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+  def subscription_factory(attrs) do
+    attrs = default_assoc(attrs, :subscriber_id, :subscriber)
 
     %Subscription{
-      event: "comment_created",
-      resource_type: "business_concept",
-      resource_id: sequence(:subscription_resource_id, &(&1 + 1)),
-      user_email: sequence(:subscription_email, &"username_#{&1}@example.com"),
       periodicity: "daily",
-      last_consumed_event: now
+      last_event_id: 0,
+      scope: build(:scope)
+    }
+    |> merge_attributes(attrs)
+  end
+
+  def scope_factory do
+    %TdAudit.Subscriptions.Scope{
+      events: ["ingest_sent_for_approval"],
+      resource_type: sequence(:scope_resource_type, ["domains", "domain", "concept", "ingest"]),
+      resource_id: 62
     }
   end
 
-  def event_factory do
+  def event_factory(attrs) do
+    payload = string_params_for(:payload, Map.take(attrs, [:event]))
+    resource_type = resource_type(attrs)
+
     %Event{
       event: "some_event",
-      payload: %{},
+      payload: payload,
       resource_id: 42,
-      resource_type: "some resource_type",
+      resource_type: resource_type,
       service: "some service",
       ts: DateTime.utc_now(),
       user_id: 42,
       user_name: "some name"
     }
+    |> merge_attributes(attrs)
+  end
+
+  def payload_factory(%{event: "comment_created"} = attrs) do
+    %{
+      content: "a comment",
+      resource_type: "business_concept",
+      resource_id: 1
+    }
+    |> merge_attributes(Map.delete(attrs, :event))
+  end
+
+  def payload_factory(%{event: "rule_result_created"} = attrs) do
+    %{
+      date: "2020-02-02T00:00:00Z",
+      goal: 100,
+      name: "rule_name",
+      params: %{"foo" => "bar"},
+      result: "70.00",
+      minimum: 80,
+      status: "error",
+      rule_id: 28_280,
+      result_type: "percentage",
+      implementation_key: "ri123",
+      implementation_id: 19_188,
+      id: 123,
+      business_concept_id: "62"
+    }
+    |> merge_attributes(Map.delete(attrs, :event))
+  end
+
+  def payload_factory(%{event: "ingest_sent_for_approval"} = attrs) do
+    %{
+      id: 123,
+      name: "My ingest",
+      ingest: %{"id" => 11_885, "domain_id" => 65},
+      version: 1,
+      domain_ids: [65, 4, 1]
+    }
+    |> merge_attributes(Map.delete(attrs, :event))
+  end
+
+  def payload_factory(%{} = attrs) do
+    merge_attributes(%{}, Map.delete(attrs, :event))
+  end
+
+  defp resource_type(%{event: "comment_created"}), do: "comment"
+  defp resource_type(%{event: "rule_result_created"}), do: "rule_result"
+  defp resource_type(%{event: "ingest_sent_for_approval"}), do: "ingest"
+  defp resource_type(_), do: "some resource_type"
+
+  def subscriber_factory do
+    %Subscriber{
+      type: "email",
+      identifier: sequence(:subscriber_identifier, &"username_#{&1}@example.com")
+    }
+  end
+
+  defp default_assoc(attrs, id_key, key) do
+    if Enum.any?([key, id_key], &Map.has_key?(attrs, &1)) do
+      attrs
+    else
+      Map.put(attrs, key, build(key))
+    end
   end
 end

@@ -22,7 +22,7 @@ defmodule TdAuditWeb.EventController do
     events =
       case Map.take(params, @filters_availables) do
         empty when empty == %{} -> Audit.list_events()
-        params_filtered -> Audit.list_events_by_filter(params_filtered)
+        params_filtered -> Audit.list_events(params_filtered)
       end
 
     render(conn, "index.json", events: events)

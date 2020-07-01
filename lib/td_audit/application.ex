@@ -33,9 +33,9 @@ defmodule TdAudit.Application do
 
   defp children(_env) do
     [
-      TdAudit.Notifications.Loader,
-      TdAudit.Subscriptions.EventHandler,
-      {TdAudit.Broadway, broadway_config()}
+      {TdAudit.Broadway, broadway_config()},
+      TdAudit.Scheduler,
+      TdAudit.Notifications.Dispatcher
     ]
   end
 

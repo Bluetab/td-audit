@@ -19,43 +19,51 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       swagger_schema: schema,
       subscription: subscription
     } do
+      %{id: id, subscriber_id: subscriber_id} = subscription
+
       assert %{"data" => [data]} =
                conn
                |> get(Routes.subscription_path(conn, :index))
                |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
-      assert data["id"] == subscription.id
-      assert data["event"] == subscription.event
-      assert data["resource_type"] == subscription.resource_type
-      assert data["resource_id"] == subscription.resource_id
-      assert data["user_email"] == subscription.user_email
-      assert data["periodicity"] == subscription.periodicity
+      assert %{"id" => ^id, "subscriber" => %{"id" => ^subscriber_id}} = data
     end
 
     @tag authenticated_user: @admin_user_name
     test "lists all subscriptions filtered", %{conn: conn, swagger_schema: schema} do
-      %{id: id, event: event, resource_id: resource_id, resource_type: resource_type} =
-        100_000..100_005
-        |> Enum.map(&insert(:subscription, resource_id: &1))
+      %{id: id, subscriber_id: subscriber_id} =
+        1..5
+        |> Enum.map(fn _ -> insert(:subscription) end)
         |> Enum.random()
 
       assert %{"data" => [data]} =
                conn
-               |> get(
-                 Routes.subscription_path(conn, :index,
-                   resource_id: resource_id,
-                   resource_type: resource_type
-                 )
-               )
+               |> get(Routes.subscription_path(conn, :index, subscriber_id: subscriber_id))
                |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
+      assert %{"id" => ^id, "subscriber" => %{"id" => ^subscriber_id}} = data
+    end
+  end
+
+  describe "show subscription" do
+    @tag authenticated_user: @admin_user_name
+    test "renders a subscription", %{conn: conn, swagger_schema: schema} do
+      %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} = insert(:subscription)
+
+      assert %{"data" => data} =
+               conn
+               |> get(Routes.subscription_path(conn, :show, id))
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:ok)
+
       assert %{
-               "event" => ^event,
                "id" => ^id,
-               "resource_type" => ^resource_type,
-               "resource_id" => ^resource_id
+               "last_event_id" => _last_event_id,
+               "periodicity" => ^periodicity,
+               "subscriber" => %{"id" => ^subscriber_id},
+               "scope" => _scope
              } = data
     end
   end
@@ -63,14 +71,10 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   describe "create subscription" do
     @tag authenticated_user: @admin_user_name
     test "renders a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
-      params = %{
-        "event" => "foo",
-        "resource_type" => "bar",
-        "resource_id" => 123,
-        "user_email" => "user@example.com",
-        "periodicity" => "daily",
-        "last_consumed_event" => "2020-02-02T01:23:45.000000Z"
-      }
+      %{id: subscriber_id} = insert(:subscriber)
+
+      params =
+        string_params_for(:subscription, subscriber_id: subscriber_id)
 
       assert %{"data" => data} =
                conn
@@ -78,74 +82,27 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
                |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:created)
 
-      assert %{"id" => id} = data
-
-      assert %{"data" => data} =
-               conn
-               |> get(Routes.subscription_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriptionResponse")
-               |> json_response(:ok)
-
-      assert Map.delete(data, "id") == params
+      assert %{
+               "id" => _id,
+               "last_event_id" => _last_event_id,
+               "periodicity" => _periodicity,
+               "subscriber" => %{"id" => ^subscriber_id},
+               "scope" => _scope
+             } = data
     end
 
     @tag authenticated_user: @admin_user_name
     test "renders errors when data is invalid", %{conn: conn} do
-      missing_email = %{
-        event: "some_event",
-        resource_type: "some resource type",
-        resource_id: 123,
-        periodicity: "daily"
-      }
-
       assert %{"errors" => errors} =
                conn
-               |> post(Routes.subscription_path(conn, :create), subscription: missing_email)
+               |> post(Routes.subscription_path(conn, :create), subscription: %{})
                |> json_response(:unprocessable_entity)
 
-      assert %{"user_email" => ["can't be blank"]} = errors
-    end
-  end
-
-  describe "update subscription" do
-    @tag authenticated_user: @admin_user_name
-    test "renders subscription when data is valid", %{
-      conn: conn,
-      subscription: %{id: id} = subscription,
-      swagger_schema: schema
-    } do
-      params = %{
-        "event" => "foo",
-        "resource_type" => "bar",
-        "resource_id" => 123,
-        "user_email" => "user@example.com",
-        "periodicity" => "daily"
-      }
-
-      assert conn
-             |> put(Routes.subscription_path(conn, :update, subscription), subscription: params)
-             |> validate_resp_schema(schema, "SubscriptionResponse")
-             |> json_response(:ok)
-
-      assert %{"data" => data} =
-               conn
-               |> get(Routes.subscription_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriptionResponse")
-               |> json_response(:ok)
-
-      assert Map.take(data, Map.keys(params)) == params
-    end
-
-    @tag authenticated_user: @admin_user_name
-    test "renders errors when data is invalid", %{conn: conn, subscription: subscription} do
-      params = %{user_email: nil, periodicity: "monthly"}
-
-      assert %{"errors" => errors} =
-               conn
-               |> put(Routes.subscription_path(conn, :update, subscription), subscription: params)
-               |> json_response(:unprocessable_entity)
-
-      assert %{"user_email" => ["can't be blank"]} = errors
+      assert %{
+               "periodicity" => ["can't be blank"],
+               "scope" => ["can't be blank"],
+               "subscriber_id" => ["can't be blank"]
+             } = errors
     end
   end
 
