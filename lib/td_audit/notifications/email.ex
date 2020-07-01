@@ -17,7 +17,7 @@ defmodule TdAudit.Notifications.Email do
     |> assign(:footer, footer())
     |> assign(:events, events)
     |> subject(subj(template))
-    |> bcc(recipients)
+    |> to(recipients)
     |> from(sender())
     |> render("events.html")
   end
