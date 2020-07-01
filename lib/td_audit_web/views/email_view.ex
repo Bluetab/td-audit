@@ -1,8 +1,6 @@
 defmodule TdAuditWeb.EmailView do
   use TdAuditWeb, :view
 
-  @host_name Application.get_env(:td_audit, :host_name, "https://example.com")
-
   require Logger
 
   def render("ingest_sent_for_approval.html", %{event: event}) do
@@ -100,18 +98,18 @@ defmodule TdAuditWeb.EmailView do
          resource_type: "comment",
          payload: %{"resource_type" => "ingest", "version_id" => id}
        }) do
-    Enum.join([@host_name, "ingests", id], "/")
+    Enum.join([host_name(), "ingests", id], "/")
   end
 
   defp uri(%{
          resource_type: "comment",
          payload: %{"resource_type" => "business_concept", "version_id" => id}
        }) do
-    Enum.join([@host_name, "concepts", id], "/")
+    Enum.join([host_name(), "concepts", id], "/")
   end
 
   defp uri(%{resource_type: "ingest", payload: %{"id" => id}}) do
-    Enum.join([@host_name, "ingests", id], "/")
+    Enum.join([host_name(), "ingests", id], "/")
   end
 
   defp uri(%{
@@ -119,7 +117,7 @@ defmodule TdAuditWeb.EmailView do
          payload: %{"rule_id" => rule_id, "implementation_id" => implementation_id}
        }) do
     Enum.join(
-      [@host_name, "rules", rule_id, "implementations", implementation_id, "results"],
+      [host_name(), "rules", rule_id, "implementations", implementation_id, "results"],
       "/"
     )
   end
@@ -131,4 +129,8 @@ defmodule TdAuditWeb.EmailView do
   defp translate("records"), do: "Record Count"
   defp translate("errors"), do: "Error Count"
   defp translate("result"), do: "Result"
+
+  defp host_name do
+    Application.fetch_env!(:td_audit, :host_name)
+  end
 end
