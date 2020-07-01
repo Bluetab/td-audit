@@ -7,7 +7,7 @@ config :td_audit, TdAudit.Repo,
   hostname: System.fetch_env!("DB_HOST"),
   pool_size: System.get_env("DB_POOL_SIZE", "4") |> String.to_integer()
 
-config :td_audit, TdAudit.Smtp.Mailer,
+config :td_audit, TdAudit.Notifications.Mailer,
   server: System.get_env("SMTP_SERVER"),
   port: System.get_env("SMTP_PORT"),
   username: System.get_env("SMTP_USERNAME"),
