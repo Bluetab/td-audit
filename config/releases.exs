@@ -33,24 +33,29 @@ config :td_audit, TdAudit.Notifications.Email,
     {System.get_env("SMTP_SENDER_NAME"), System.get_env("SMTP_SENDER", "no-reply@example.com")},
   subjects: [
     ingests_pending:
-      System.get_env("NOTIFICATION_SUBJECT_INGEST_PENDING", "Ingestas pendientes de aprobar"),
-    rule_results: System.get_env("NOTIFICATION_SUBJECT_RULE_RESULTS", "Resultados de calidad"),
-    comments: System.get_env("NOTIFICATION_SUBJECT_COMMENTS", "Comentarios añadidos"),
-    default: System.get_env("NOTIFICATION_SUBJECT_DEFAULT", "Notificaciones nuevas")
+      System.get_env(
+        "NOTIFICATION_SUBJECT_INGEST_PENDING",
+        "📬 Alert: Data requests pending approval"
+      ),
+    rule_results:
+      System.get_env("NOTIFICATION_SUBJECT_RULE_RESULTS", "👓 Alert: Data quality issues detected"),
+    comments: System.get_env("NOTIFICATION_SUBJECT_COMMENTS", "🖋 Alert: New comments added"),
+    default: System.get_env("NOTIFICATION_SUBJECT_DEFAULT", "⚡ Alert: New notifications")
   ],
   headers: [
     ingests_pending:
       System.get_env(
         "NOTIFICATION_HEADER_INGEST_PENDING",
-        "Las siguientes ingestas quedan pendientes de aprobar:"
+        "The following data requests require approval:"
       ),
     rule_results:
       System.get_env(
         "NOTIFICATION_HEADER_RULE_RESULTS",
-        "Se han cargado los siguientes resultados de calidad:"
+        "The following data quality issues have been detected:"
       ),
     comments:
-      System.get_env("NOTIFICATION_HEADER_COMMENTS", "Se han añadido los siguientes comentarios:"),
-    default: System.get_env("NOTIFICATION_HEADER_DEFAULT", "Existen nuevas notificaciones:")
+      System.get_env("NOTIFICATION_HEADER_COMMENTS", "The following comments have been added:"),
+    default:
+      System.get_env("NOTIFICATION_HEADER_DEFAULT", "New notifications have been generated:")
   ],
   footer: System.get_env("NOTIFICATION_FOOTER", "This message was sent by Truedat")
