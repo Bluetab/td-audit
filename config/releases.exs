@@ -12,7 +12,7 @@ config :td_audit, TdAudit.Notifications.Mailer,
   port: System.get_env("SMTP_PORT"),
   username: System.get_env("SMTP_USERNAME"),
   password: System.get_env("SMTP_PASSWORD"),
-  tls: :always,
+  tls: System.get_env("SMTP_TLS", "always") |> String.to_atom(),
   ssl: false,
   retries: 3
 
