@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.1.0] 2020-07-23
+
+### Fixed
+
+- [TD-2846] Subscriptions with notifications could not be deleted
+
 ## [4.0.0] 2020-07-01
 
 ### Added
