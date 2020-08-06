@@ -16,7 +16,7 @@ defmodule TdAudit.SubscriptionsTest do
       assert Subscriptions.list_subscriptions() <|> [subscription]
     end
 
-    test "list_subscriptions/1 returns all subscriptions filtered by resource_id" do
+    test "list_subscriptions/1 returns all subscriptions filtered by subscriber_id" do
       %{id: subscriber_id} = insert(:subscriber)
 
       insert(:subscription)
@@ -24,6 +24,18 @@ defmodule TdAudit.SubscriptionsTest do
       s2 = insert(:subscription, subscriber_id: subscriber_id)
 
       assert Subscriptions.list_subscriptions(subscriber_id: subscriber_id) <|> [s1, s2]
+    end
+
+    test "list_subscriptions/1 returns subscriptions filtered by events" do
+      %{id: subscriber_id} = insert(:subscriber)
+
+      insert(:subscription)
+      s1 = insert(:subscription, subscriber_id: subscriber_id, scope: %{resource_id: 1, resource_type: "rec", events: ["event1", "event2"]})
+      s2 = insert(:subscription, subscriber_id: subscriber_id, scope: %{resource_id: 2, resource_type: "rec", events: ["event3"]})
+      s3 = insert(:subscription, subscriber_id: subscriber_id, scope: %{resource_id: 3, resource_type: "rec", events: ["event1", "event2"]})
+
+      assert Subscriptions.list_subscriptions(scope: %{ events: ["event1", "event2"]}) <|> [s1, s3]
+      assert Subscriptions.list_subscriptions(scope: %{ events: ["event3"]}) <|> [s2]
     end
 
     test "get_subscription!/1 returns the subscription with given id" do

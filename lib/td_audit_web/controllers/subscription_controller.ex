@@ -5,9 +5,14 @@ defmodule TdAuditWeb.SubscriptionController do
   use TdAuditWeb, :controller
   use PhoenixSwagger
 
+  import Canada, only: [can?: 2]
+
   alias TdAudit.Subscriptions
+  alias TdAudit.Subscriptions.Subscriber
+  alias TdAudit.Subscriptions.Subscribers
   alias TdAudit.Subscriptions.Subscription
   alias TdAuditWeb.SwaggerDefinitions
+  alias TdAudit.Map.Helpers
 
   alias TdCache.UserCache
 
@@ -25,6 +30,48 @@ defmodule TdAuditWeb.SubscriptionController do
   def index(conn, params) do
     subscriptions = Subscriptions.list_subscriptions(params)
     render(conn, "index.json", subscriptions: subscriptions)
+  end
+
+  def index_by_user(conn, params) do
+    with user <- conn.assigns[:current_resource],
+         {:subscriber, %Subscriber{} = subscriber} <-
+           {:subscriber, Subscribers.get_subscriber_by_user(user.id)},
+         filters <- params |> Map.get("filters") |> Map.put("subscriber_id", subscriber.id),
+         filters <- Helpers.atomize_keys(filters),
+         subscriptions <- Subscriptions.list_subscriptions(filters) do
+      render(conn, "index.json", subscriptions: subscriptions)
+    else
+      {:subscriber, nil} ->
+        render(conn, "index.json", subscriptions: [])
+    end
+  end
+
+  def create(
+        conn,
+        %{"subscription" => %{"subscriber" => subscriber_params} = subscription_params}
+      ) do
+    user = conn.assigns[:current_resource]
+    subscription_params = with_email(subscription_params)
+
+    subscriber_params =
+      case Map.get(subscriber_params, "identifier") do
+        nil -> Map.put(subscriber_params, "identifier", "#{user.id}")
+        _ -> subscriber_params
+      end
+
+    with {:can, true} <- {:can, can?(user, create(subscription_params))},
+         {:ok, %{id: subscriber_id}} <- Subscribers.get_or_create_subscriber(subscriber_params),
+         subscription_params <-
+           subscription_params
+           |> Map.put("subscriber_id", subscriber_id)
+           |> Map.delete("subscriber"),
+         {:ok, %{id: id}} <- Subscriptions.create_subscription(subscription_params),
+         subscription <- Subscriptions.get_subscription!(id) do
+      conn
+      |> put_status(:created)
+      |> put_resp_header("location", Routes.subscription_path(conn, :show, subscription))
+      |> render("show.json", subscription: subscription)
+    end
   end
 
   swagger_path :create do
@@ -78,6 +125,39 @@ defmodule TdAuditWeb.SubscriptionController do
 
     response(204, "No Content")
     response(400, "Client Error")
+  end
+
+  def update(conn, %{"id" => id, "subscription" => subscription_params}) do
+    with user <- conn.assigns[:current_resource],
+         id <- String.to_integer(id),
+         subscription <- Subscriptions.get_subscription!(id),
+         {:can, true} <- {:can, can?(user, update(subscription))},
+         subscription_params <- filter_subscription_params(subscription, subscription_params),
+         {:ok, %{id: id}} <- Subscriptions.update_subscription(subscription, subscription_params),
+         subscription <- Subscriptions.get_subscription!(id) do
+      conn
+      |> put_resp_header("location", Routes.subscription_path(conn, :show, subscription))
+      |> render("show.json", subscription: subscription)
+    end
+  end
+
+  defp filter_subscription_params(subscription, subscription_params) do
+    params =
+      subscription_params
+      |> Map.take(["periodicity", "scope"])
+
+    case get_in(params, ["scope", "status"]) do
+      nil ->
+        Map.delete(params, "scope")
+
+      status ->
+        scope =
+          Map.merge(Helpers.stringify_keys(Map.from_struct(subscription.scope)), %{
+            "status" => status
+          })
+
+        Map.put(params, "scope", scope)
+    end
   end
 
   def delete(conn, %{"id" => id}) do

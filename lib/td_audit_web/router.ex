@@ -28,7 +28,8 @@ defmodule TdAuditWeb.Router do
     pipe_through([:api, :api_secure])
     resources("/events", EventController, only: [:index, :show])
     resources("/subscribers", SubscriberController, except: [:new, :edit, :update])
-    resources("/subscriptions", SubscriptionController, except: [:new, :edit, :update])
+    resources("/subscriptions", SubscriptionController, except: [:new, :edit])
+    post("/subscriptions/user/me/search", SubscriptionController, :index_by_user)
   end
 
   def swagger_info do

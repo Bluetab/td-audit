@@ -83,6 +83,27 @@ defmodule TdAudit.Subscriptions do
   end
 
   @doc """
+  Updates a subscription.
+
+  ## Examples
+
+      iex> update_subscription(subscription, %{field: value})
+      {:ok, %Subscription{}}
+
+      iex> update_subscription(subscription, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_subscription(%Subscription{} = subscription, attrs) do
+    last_event_id = Audit.max_event_id() || 0
+    attrs = Map.put_new(attrs, "last_event_id", last_event_id)
+
+    subscription
+    |> Subscription.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Deletes a Subscription.
 
   ## Examples
