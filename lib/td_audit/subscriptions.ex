@@ -95,9 +95,6 @@ defmodule TdAudit.Subscriptions do
 
   """
   def update_subscription(%Subscription{} = subscription, attrs) do
-    last_event_id = Audit.max_event_id() || 0
-    attrs = Map.put_new(attrs, "last_event_id", last_event_id)
-
     subscription
     |> Subscription.changeset(attrs)
     |> Repo.update()

@@ -30,12 +30,27 @@ defmodule TdAudit.SubscriptionsTest do
       %{id: subscriber_id} = insert(:subscriber)
 
       insert(:subscription)
-      s1 = insert(:subscription, subscriber_id: subscriber_id, scope: %{resource_id: 1, resource_type: "rec", events: ["event1", "event2"]})
-      s2 = insert(:subscription, subscriber_id: subscriber_id, scope: %{resource_id: 2, resource_type: "rec", events: ["event3"]})
-      s3 = insert(:subscription, subscriber_id: subscriber_id, scope: %{resource_id: 3, resource_type: "rec", events: ["event1", "event2"]})
 
-      assert Subscriptions.list_subscriptions(scope: %{ events: ["event1", "event2"]}) <|> [s1, s3]
-      assert Subscriptions.list_subscriptions(scope: %{ events: ["event3"]}) <|> [s2]
+      s1 =
+        insert(:subscription,
+          subscriber_id: subscriber_id,
+          scope: %{resource_id: 1, resource_type: "rec", events: ["event1", "event2"]}
+        )
+
+      s2 =
+        insert(:subscription,
+          subscriber_id: subscriber_id,
+          scope: %{resource_id: 2, resource_type: "rec", events: ["event3"]}
+        )
+
+      s3 =
+        insert(:subscription,
+          subscriber_id: subscriber_id,
+          scope: %{resource_id: 3, resource_type: "rec", events: ["event1", "event2"]}
+        )
+
+      assert Subscriptions.list_subscriptions(scope: %{events: ["event1", "event2"]}) <|> [s1, s3]
+      assert Subscriptions.list_subscriptions(scope: %{events: ["event3"]}) <|> [s2]
     end
 
     test "get_subscription!/1 returns the subscription with given id" do

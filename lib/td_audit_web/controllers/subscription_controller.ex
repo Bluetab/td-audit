@@ -7,12 +7,12 @@ defmodule TdAuditWeb.SubscriptionController do
 
   import Canada, only: [can?: 2]
 
+  alias TdAudit.Map.Helpers
   alias TdAudit.Subscriptions
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscribers
   alias TdAudit.Subscriptions.Subscription
   alias TdAuditWeb.SwaggerDefinitions
-  alias TdAudit.Map.Helpers
 
   alias TdCache.UserCache
 
@@ -59,7 +59,7 @@ defmodule TdAuditWeb.SubscriptionController do
         _ -> subscriber_params
       end
 
-    with {:can, true} <- {:can, can?(user, create(subscription_params))},
+    with {:can, true} <- {:can, can?(user, create(subscriber_params))},
          {:ok, %{id: subscriber_id}} <- Subscribers.get_or_create_subscriber(subscriber_params),
          subscription_params <-
            subscription_params
@@ -163,7 +163,9 @@ defmodule TdAuditWeb.SubscriptionController do
   def delete(conn, %{"id" => id}) do
     subscription = Subscriptions.get_subscription!(id)
 
-    with {:ok, %Subscription{}} <- Subscriptions.delete_subscription(subscription) do
+    with user <- conn.assigns[:current_resource],
+         {:can, true} <- {:can, can?(user, delete(subscription))},
+         {:ok, %Subscription{}} <- Subscriptions.delete_subscription(subscription) do
       send_resp(conn, :no_content, "")
     end
   end
