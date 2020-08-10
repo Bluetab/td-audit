@@ -69,7 +69,9 @@ defmodule TdAudit.Subscriptions.EventsTest do
     test "returns new event ids", %{subscription: subscription} do
       event_ids =
         1..3
-        |> Enum.map(fn _ -> insert(:event, event: "rule_result_created", resource_type: "rule") end)
+        |> Enum.map(fn _ ->
+          insert(:event, event: "rule_result_created", resource_type: "rule")
+        end)
         |> Enum.map(& &1.id)
 
       assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
@@ -143,7 +145,9 @@ defmodule TdAudit.Subscriptions.EventsTest do
     end
 
     test "returns event ids", %{subscription: subscription} do
-      %{id: event_id} = insert(:event, event: "some_event", resource_type: "some_resource_type", resource_id: 42)
+      %{id: event_id} =
+        insert(:event, event: "some_event", resource_type: "some_resource_type", resource_id: 42)
+
       assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
     end
   end

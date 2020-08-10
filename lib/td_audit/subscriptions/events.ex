@@ -54,11 +54,11 @@ defmodule TdAudit.Subscriptions.Events do
   end
 
   defp filter_by_scope(query, %{
-    events: ["rule_result_created"] = events,
+         events: ["rule_result_created"] = events,
          status: status,
          resource_type: "rule",
          resource_id: rule_id
-  }) do
+       }) do
     query
     |> where([e], e.event in ^events)
     |> where([e], e.payload["status"] in ^status)

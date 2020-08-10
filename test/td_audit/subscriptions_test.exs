@@ -89,8 +89,7 @@ defmodule TdAudit.SubscriptionsTest do
 
       params = %{"scope" => %{"resource_id" => 2}}
 
-      assert {:error, %Ecto.Changeset{}} =
-               Subscriptions.update_subscription(subscription, params)
+      assert {:error, %Ecto.Changeset{}} = Subscriptions.update_subscription(subscription, params)
     end
 
     test "delete_subscription/1 deletes the subscription" do
