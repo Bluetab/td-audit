@@ -5,6 +5,7 @@
 ### Changed
 
 - [TD-2810] `tls` as environment variable
+- [TD-2532] User-Rule Subscriptions
 
 ## [4.1.0] 2020-07-23
 

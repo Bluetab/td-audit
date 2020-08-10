@@ -32,6 +32,15 @@ defmodule TdAuditWeb.SubscriptionController do
     render(conn, "index.json", subscriptions: subscriptions)
   end
 
+  swagger_path :index_by_user do
+    description("List of user subscriptions")
+    response(200, "OK", Schema.ref(:SubscriptionsResponse))
+
+    parameters do
+      filters(:body, Schema.ref(:SubscriptionSearchFilters), "Subscription update attrs")
+    end
+  end
+
   def index_by_user(conn, params) do
     with user <- conn.assigns[:current_resource],
          {:subscriber, %Subscriber{} = subscriber} <-
@@ -115,15 +124,15 @@ defmodule TdAuditWeb.SubscriptionController do
     render(conn, "show.json", subscription: subscription)
   end
 
-  swagger_path :delete do
-    description("Delete Subscription")
+  swagger_path :update do
+    description("update a Subscription")
     produces("application/json")
 
     parameters do
-      id(:path, :integer, "Subscription ID", required: true)
+      subscription(:body, Schema.ref(:SubscriptionUpdate), "Subscription update attrs")
     end
 
-    response(204, "No Content")
+    response(200, "OK", Schema.ref(:SubscriptionResponse))
     response(400, "Client Error")
   end
 
@@ -158,6 +167,18 @@ defmodule TdAuditWeb.SubscriptionController do
 
         Map.put(params, "scope", scope)
     end
+  end
+
+  swagger_path :delete do
+    description("Delete Subscription")
+    produces("application/json")
+
+    parameters do
+      id(:path, :integer, "Subscription ID", required: true)
+    end
+
+    response(204, "No Content")
+    response(400, "Client Error")
   end
 
   def delete(conn, %{"id" => id}) do

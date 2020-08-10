@@ -73,6 +73,26 @@ defmodule TdAudit.SubscriptionsTest do
       assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(%{})
     end
 
+    test "update_subscription/1 with valid data updates a subscription" do
+      subscription = insert(:subscription)
+
+      params = %{"periodicity" => "hourly"}
+
+      assert {:ok, %Subscription{} = updated} =
+               Subscriptions.update_subscription(subscription, params)
+
+      assert updated.periodicity == "hourly"
+    end
+
+    test "update_subscription/1 with invalid data returns changeset error" do
+      subscription = insert(:subscription)
+
+      params = %{"scope" => %{"resource_id" => 2}}
+
+      assert {:error, %Ecto.Changeset{}} =
+               Subscriptions.update_subscription(subscription, params)
+    end
+
     test "delete_subscription/1 deletes the subscription" do
       subscription = insert(:subscription)
       assert {:ok, %Subscription{}} = Subscriptions.delete_subscription(subscription)
