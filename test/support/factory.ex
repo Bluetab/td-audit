@@ -106,6 +106,7 @@ defmodule TdAudit.Factory do
     merge_attributes(%{}, Map.delete(attrs, :event))
   end
 
+  defp resource_type(%{resource_tye: resource_type}), do: resource_type
   defp resource_type(%{event: "comment_created"}), do: "comment"
   defp resource_type(%{event: "rule_result_created"}), do: "rule_result"
   defp resource_type(%{event: "ingest_sent_for_approval"}), do: "ingest"

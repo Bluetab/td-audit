@@ -83,6 +83,24 @@ defmodule TdAudit.Subscriptions do
   end
 
   @doc """
+  Updates a subscription.
+
+  ## Examples
+
+      iex> update_subscription(subscription, %{field: value})
+      {:ok, %Subscription{}}
+
+      iex> update_subscription(subscription, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_subscription(%Subscription{} = subscription, attrs) do
+    subscription
+    |> Subscription.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Deletes a Subscription.
 
   ## Examples
@@ -136,7 +154,8 @@ defmodule TdAudit.Subscriptions do
   defp recipients(%{type: "role", identifier: role}, %{
          resource_type: resource_type,
          resource_id: domain_id
-       }) when resource_type in ["domain", "domains"] do
+       })
+       when resource_type in ["domain", "domains"] do
     recipients_by_role(domain_id, role)
   end
 
@@ -148,5 +167,4 @@ defmodule TdAudit.Subscriptions do
     |> Enum.map(&UserCache.get/1)
     |> Enum.flat_map(&recipients/1)
   end
-
 end

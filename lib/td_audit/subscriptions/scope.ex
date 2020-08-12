@@ -26,7 +26,7 @@ defmodule TdAudit.Subscriptions.Scope do
     scope
     |> cast(params, [:events, :resource_type, :resource_id])
     |> validate_length(:events, min: 1)
-    |> validate_inclusion(:resource_type, ["domain", "domains", "ingest", "concept"])
+    |> validate_inclusion(:resource_type, ["domain", "domains", "ingest", "concept", "rule"])
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)
     |> validate_status(params)

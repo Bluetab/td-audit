@@ -148,6 +148,33 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             last_event_id(:integer, "ID of last seen event")
           end
         end,
+      ScopeUpdate:
+        swagger_schema do
+          title("Subscription Scope Update params")
+          description("Scope with updateable scope subscription information")
+
+          properties do
+            status(:array, "Status array: warn, fail, ok")
+          end
+        end,
+      SubscriptionSearchFilters:
+        swagger_schema do
+          title("Subscription search filters")
+
+          properties do
+            filters(:object, "json filters")
+          end
+
+          example(%{
+            filters: %{
+              scope: %{
+                events: ["rule_result_created"],
+                resource_id: "3",
+                resource_type: "rule"
+              }
+            }
+          })
+        end,
       SubscriptionCreate:
         swagger_schema do
           properties do
@@ -200,15 +227,8 @@ defmodule TdAuditWeb.SwaggerDefinitions do
             subscription(
               Schema.new do
                 properties do
-                  event(:string, "Event to subscribe", required: true)
-                  resource_id(:integer, "ID of the resource triggering the event", required: true)
-
-                  resource_type(:string, "Type of the resource triggering the event",
-                    required: true
-                  )
-
-                  user_email(:string, "Email of the subscriber", required: true)
                   periodicity(:string, "Periodicity of the subscription")
+                  scope(Schema.ref(:ScopeUpdate))
                 end
               end
             )
