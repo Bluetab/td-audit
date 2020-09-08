@@ -28,10 +28,9 @@ defmodule TdAudit.Notifications.Dispatcher do
   end
 
   def send_email(email) do
-    with {email, {:ok, response}} <- Mailer.deliver_now(email, response: true) do 
-      Logger.info("Email sent: Obtained #{response} from server")
-    else
-      error -> Logger.error("Error sending email to #{email.to}")
+    case Mailer.deliver_now(email, response: true) do
+      {email, {:ok, response}} -> Logger.info("Email sent: Obtained #{response} from server")
+      {email} -> Logger.error("Error sending email to #{email.to}")
     end
   end
 
