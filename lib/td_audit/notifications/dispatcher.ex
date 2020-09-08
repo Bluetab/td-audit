@@ -27,13 +27,19 @@ defmodule TdAudit.Notifications.Dispatcher do
     {:ok, :no_state}
   end
 
+  def send_email(email) do
+    response = Mailer.deliver_now(email, response: true)
+    Logger.info("Obtained #{response} from deliver function")
+  end
+
   @impl GenServer
   def handle_call(periodicity, _from, state) do
     Logger.debug("Triggering #{periodicity} notifications...")
 
+    # TO-DO: send emails sequentially
     with {:ok, _} <- Notifications.create(periodicity: periodicity),
          {:ok, %{emails: emails}} when emails != [] <- Notifications.send_pending() do
-      Enum.each(emails, &Mailer.deliver_later/1)
+      Enum.each(emails, &send_email/1)
       {:reply, :ok, state}
     else
       {:ok, _} -> {:reply, :ok, state}
