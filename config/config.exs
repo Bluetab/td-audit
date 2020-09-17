@@ -82,7 +82,6 @@ config :td_audit, TdAudit.Broadway,
   port: 6379
 
 config :td_audit, TdAudit.Scheduler,
-  timeout: 20_000
   jobs: [
     [
       schedule: "@minutely",
