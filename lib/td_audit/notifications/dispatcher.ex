@@ -20,24 +20,16 @@ defmodule TdAudit.Notifications.Dispatcher do
     GenServer.call(__MODULE__, periodicity)
   end
 
-  ## GenServer callbacks
+  ## Private functions
 
-  @impl GenServer
-  def init(_init_arg) do
-    {:ok, :no_state}
-  end
-
-  def send_email(email) do
+  defp send_email(email) do
     case Mailer.deliver_now(email, response: true) do
       {email, {:ok, response}} -> Logger.info("Email sent: Obtained #{response} from server")
       {email} -> Logger.error("Error sending email to #{email.to}")
     end
   end
 
-  @impl GenServer
-  def handle_call(periodicity, _from, state) do
-    Logger.debug("Triggering #{periodicity} notifications...")
-
+  defp dispatch_pending(periodicity, state) do
     with {:ok, _} <- Notifications.create(periodicity: periodicity),
          {:ok, %{emails: emails}} when emails != [] <- Notifications.send_pending() do
       Enum.each(emails, &send_email/1)
@@ -47,5 +39,21 @@ defmodule TdAudit.Notifications.Dispatcher do
       {:error, failed_operation, _value, _changes} -> {:reply, {:error, failed_operation}, state}
       error -> {:reply, error, state}
     end
+  end
+
+  ## GenServer callbacks
+
+  @impl GenServer
+  def init(_init_arg) do
+    {:ok, :no_state}
+  end
+
+  @impl GenServer
+  def handle_call(periodicity, _from, state) do
+    Logger.debug("Triggering #{periodicity} notifications...")
+
+    Task.Supervisor.async_nolink(TdDd.TaskSupervisor, fn ->
+        dispatch_pending(periodicity, state)
+      end)
   end
 end
