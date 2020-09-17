@@ -52,7 +52,7 @@ defmodule TdAudit.Notifications.Dispatcher do
   def handle_call(periodicity, _from, state) do
     Logger.debug("Triggering #{periodicity} notifications...")
 
-    Task.Supervisor.async_nolink(TdDd.TaskSupervisor, fn ->
+    Task.Supervisor.async_nolink(TdAudit.TaskSupervisor, fn ->
         dispatch_pending(periodicity, state)
       end)
   end
