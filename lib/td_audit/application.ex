@@ -33,7 +33,6 @@ defmodule TdAudit.Application do
 
   defp children(_env) do
     [
-      {Task.Supervisor, name: TdAudit.TaskSupervisor},
       {TdAudit.Broadway, broadway_config()},
       TdAudit.Scheduler,
       TdAudit.Notifications.Dispatcher
