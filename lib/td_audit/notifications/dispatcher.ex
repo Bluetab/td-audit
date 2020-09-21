@@ -55,5 +55,6 @@ defmodule TdAudit.Notifications.Dispatcher do
     Task.Supervisor.async_nolink(TdAudit.TaskSupervisor, fn ->
         dispatch_pending(periodicity, state)
       end)
+    {:noreply, state}
   end
 end
