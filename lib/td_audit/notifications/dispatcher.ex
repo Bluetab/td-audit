@@ -17,7 +17,7 @@ defmodule TdAudit.Notifications.Dispatcher do
   end
 
   def dispatch(periodicity) do
-    GenServer.call(__MODULE__, periodicity)
+    GenServer.cast(__MODULE__, periodicity)
   end
 
   def send_email(email) do
