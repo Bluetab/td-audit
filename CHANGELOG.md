@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.2.1] 2020-09-25
+
+### Changed
+
+- [TD-2939] Limit simultaneous sending of emails
+
 ## [4.2.0] 2020-08-17
 
 ### Changed
