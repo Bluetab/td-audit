@@ -23,8 +23,8 @@ defmodule TdAudit.Notifications.Dispatcher do
   def send_email(email) do
     case Mailer.deliver_now(email, response: true) do
       {_email, {:ok, response}} -> Logger.info("Email sent: Obtained #{response} from server")
-      {_email, _response} -> Logger.info("Email sent")
       {error, _, {:error, cause}} -> Logger.error("Error: #{error} - #{cause}")
+      {_email, _response} -> Logger.info("Email sent")
     end
   end
 
