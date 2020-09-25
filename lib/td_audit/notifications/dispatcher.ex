@@ -22,7 +22,8 @@ defmodule TdAudit.Notifications.Dispatcher do
 
   def send_email(email) do
     case Mailer.deliver_now(email, response: true) do
-      {email, {:ok, response}} -> Logger.info("Email sent: Obtained #{response} from server")
+      {_email, {:ok, response}} -> Logger.info("Email sent: Obtained #{response} from server")
+      {_email, _response} -> Logger.info("Email sent")
       {email} -> Logger.error("Error sending email to #{email.to}")
     end
   end
@@ -42,6 +43,7 @@ defmodule TdAudit.Notifications.Dispatcher do
          {:ok, %{emails: emails}} when emails != [] <- Notifications.send_pending() do
       Enum.each(emails, &send_email/1)
     end
+
     {:noreply, state}
   end
 end
