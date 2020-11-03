@@ -6,7 +6,7 @@ defmodule TdAudit.K8sMock do
 
   @base_url "https://localhost:6443"
 
-  def request(:get, @base_url <> "/apis/batch/v1beta1/cronjobs", _, _,
+  def request(:get, @base_url <> "/apis/batch/v1beta1/namespaces/default/cronjobs", _, _,
         ssl: _ssl,
         params: %{labelSelector: "truedat/connector-engine=Glue-Athena,truedat/connector-type=DQ"}
       ) do
@@ -52,7 +52,7 @@ defmodule TdAudit.K8sMock do
     {:ok, %HTTPoison.Response{status_code: 200, body: body}}
   end
 
-  def request(:get, @base_url <> "/apis/batch/v1beta1/cronjobs", _, _,
+  def request(:get, @base_url <> "/apis/batch/v1beta1/namespaces/default/cronjobs", _, _,
         ssl: _ssl,
         params: %{labelSelector: "truedat/connector-engine=Empty,truedat/connector-type=DQ"}
       ) do
