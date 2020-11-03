@@ -74,9 +74,9 @@ defmodule TdAudit.Cache.ExecutionConsumer do
 
   defp read_results(result) do
     implementations =
-    result
-    |> elem(1)
-    |> List.flatten()
+      result
+      |> elem(1)
+      |> List.flatten()
 
     {elem(result, 0), implementations}
   end
