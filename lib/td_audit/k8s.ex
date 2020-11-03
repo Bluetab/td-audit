@@ -93,11 +93,7 @@ defmodule TdAudit.K8s do
   end
 
   defp get_connection(%{default: default}) when default == %{} do
-<<<<<<< HEAD
     {:ok, K8s.Conn.from_service_account(:default)}
-=======
-    K8s.Conn.from_service_account(:default)
->>>>>>> decdf19d3cb5dcc11e8752e6a4ff449832a23ef5
   end
 
   defp get_connection(_) do
