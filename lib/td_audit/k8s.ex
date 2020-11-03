@@ -73,7 +73,7 @@ defmodule TdAudit.K8s do
 
   defp get_cronjobs(engine, conn) do
     "batch/v1beta1"
-    |> K8s.Client.list("CronJob")
+    |> K8s.Client.list("CronJob", namespace: "default")
     |> K8s.Selector.label({"truedat/connector-type", "DQ"})
     |> K8s.Selector.label({"truedat/connector-engine", engine})
     |> K8s.Client.run(conn)
