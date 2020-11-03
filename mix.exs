@@ -64,12 +64,14 @@ defmodule TdAudit.Mixfile do
       {:ex_json_schema, "~> 0.7.3"},
       {:bamboo, "~> 1.4"},
       {:bamboo_smtp, "~> 2.1.0"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.0.0"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.7.1"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},
       {:quantum, "~> 3.0"},
       {:canada, "~> 2.0"},
-      {:number, "~> 1.0"}
+      {:number, "~> 1.0"},
+      {:k8s, "~> 0.5.1"},
+      {:uuid, "~> 1.1"}
     ]
   end
 

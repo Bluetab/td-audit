@@ -35,7 +35,8 @@ defmodule TdAudit.Application do
     [
       {TdAudit.Broadway, broadway_config()},
       TdAudit.Scheduler,
-      TdAudit.Notifications.Dispatcher
+      TdAudit.Notifications.Dispatcher,
+      TdAudit.Cache.ExecutionConsumer
     ]
   end
 

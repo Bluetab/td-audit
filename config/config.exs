@@ -55,6 +55,13 @@ config :td_audit, :phoenix_swagger,
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"
 
+config :td_cache, :event_stream,
+  consumer_id: "default",
+  consumer_group: "td_audit",
+  streams: [
+    [key: "cx:events", consumer: TdAudit.Cache.ExecutionConsumer]
+  ]
+
 config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.SMTPAdapter
 
 config :td_audit, TdAudit.Notifications.Email,
