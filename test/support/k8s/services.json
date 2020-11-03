@@ -1,0 +1,36 @@
+{
+  "batch/v1beta1": [
+    {
+      "kind": "CronJob",
+      "name": "cronjobs",
+      "namespaced": true,
+      "verbs": [
+        "create",
+        "delete",
+        "deletecollection",
+        "get",
+        "list",
+        "patch",
+        "update",
+        "watch"
+      ]
+    }
+  ],
+  "batch/v1": [
+    {
+      "kind": "Job",
+      "name": "jobs",
+      "namespaced": true,
+      "verbs": [
+        "create",
+        "delete",
+        "deletecollection",
+        "get",
+        "list",
+        "patch",
+        "update",
+        "watch"
+      ]
+    }
+  ]
+}
