@@ -57,7 +57,7 @@ config :td_audit, rules_path: "/rules"
 
 config :td_cache, :event_stream,
   consumer_id: "default",
-  consumer_group: "dd",
+  consumer_group: "td_audit",
   streams: [
     [key: "cx:events", consumer: TdAudit.Cache.ExecutionConsumer]
   ]
