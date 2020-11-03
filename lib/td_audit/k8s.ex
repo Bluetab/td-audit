@@ -78,8 +78,12 @@ defmodule TdAudit.K8s do
     |> K8s.Selector.label({"truedat/connector-engine", engine})
     |> K8s.Client.run(conn)
     |> case do
-      {:error, error} ->
-        {:error, error}
+      {:error, response} ->
+        response
+        |> Map.get(:body)
+        |> Logger.error()
+
+        {:error, response}
 
       {:ok, cronjobs} ->
         {:ok, Map.fetch!(cronjobs, "items")}
