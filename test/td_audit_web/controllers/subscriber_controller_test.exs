@@ -54,7 +54,7 @@ defmodule TdAuditWeb.SubscriberControllerTest do
                |> validate_resp_schema(schema, "SubscriberResponse")
                |> json_response(:created)
 
-      assert %{"id" => id} = data
+      assert %{"id" => _id} = data
     end
 
     @tag :admin_authenticated
