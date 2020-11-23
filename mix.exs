@@ -63,7 +63,7 @@ defmodule TdAudit.Mixfile do
       {:phoenix_swagger, "~> 0.8.2"},
       {:ex_json_schema, "~> 0.7.3"},
       {:bamboo, "~> 1.4"},
-      {:bamboo_smtp, "~> 2.1.0"},
+      {:bamboo_smtp, "~> 3.0.0"},
       {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.7.1"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},

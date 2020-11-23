@@ -1,11 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3124] Update dependencies (quantum 3.3.0 and others)
+
 ## [4.7.0] 2020-11-03
 
 ### Added
 
-- [TD-2952] As a user with permission to execute rules I want to run implementations manually
-  from the implementations screen for Kubernetes Cluster.
+- [TD-2952] Support for launching data quality jobs in Kubernetes
 
 ## [4.5.0] 2020-10-05
 
