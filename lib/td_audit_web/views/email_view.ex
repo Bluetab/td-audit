@@ -6,7 +6,7 @@ defmodule TdAuditWeb.EmailView do
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
-      name: ingest_name(event),
+      name: resource_name(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -38,6 +38,26 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("concept_rejected.html", event), do: render_concepts(event)
+  def render("concept_submitted.html", event), do: render_concepts(event)
+  def render("concept_rejection_canceled.html", event), do: render_concepts(event)
+  def render("concept_deprecated.html", event), do: render_concepts(event)
+  def render("concept_published.html", event), do: render_concepts(event)
+  def render("delete_concept_draft.html", event), do: render_concepts(event)
+  def render("new_concept_draft.html", event), do: render_concepts(event)
+  def render("relation_created.html", event), do: render_concepts(event)
+  def render("relation_deleted.html", event), do: render_concepts(event)
+  def render("update_concept_draft.html", event), do: render_concepts(event)
+
+  defp render_concepts(%{event: event}) do
+    render("concepts.html",
+      user: user_name(event),
+      name: resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
   def render(template, %{event: event}) do
     Logger.warn("Template #{template} not supported")
 
@@ -46,8 +66,8 @@ defmodule TdAuditWeb.EmailView do
     |> Jason.encode!()
   end
 
-  defp ingest_name(%{payload: %{"name" => name}}), do: name
-  defp ingest_name(_), do: nil
+  defp resource_name(%{payload: %{"name" => name}}), do: name
+  defp resource_name(_), do: nil
 
   defp rule_implementation_name(%{
          payload: %{"name" => name, "implementation_key" => implementation_key}
@@ -110,6 +130,10 @@ defmodule TdAuditWeb.EmailView do
 
   defp uri(%{resource_type: "ingest", payload: %{"id" => id}}) do
     Enum.join([host_name(), "ingests", id], "/")
+  end
+
+  defp uri(%{resource_type: "concept", payload: %{"id" => id}}) do
+    Enum.join([host_name(), "concepts", id], "/")
   end
 
   defp uri(%{

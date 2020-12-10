@@ -32,6 +32,7 @@ defmodule TdAudit.Notifications.Email do
   defp template(["ingest_sent_for_approval"]), do: :ingests_pending
   defp template(["rule_result_created"]), do: :rule_results
   defp template(["comment_created"]), do: :comments
+  defp template(["concept_submitted"]), do: :concept_submitted
   defp template(_), do: :default
 
   defp config, do: Application.fetch_env!(:td_audit, __MODULE__)

@@ -68,6 +68,7 @@ config :td_audit, TdAudit.Notifications.Email,
   sender: {"Truedat Notifications", "no-reply@truedat.io"},
   subjects: [
     ingests_pending: "📬 Alert: Data requests pending approval",
+    concept_rejection_canceled: "Alert:",
     rule_results: "👓 Alert: Data quality issues detected",
     comments: "🖋 Alert: New comments added",
     default: "⚡ Alert: New notifications"
