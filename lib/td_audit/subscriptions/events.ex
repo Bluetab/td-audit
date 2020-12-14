@@ -9,19 +9,6 @@ defmodule TdAudit.Subscriptions.Events do
   alias TdAudit.Repo
   alias TdAudit.Subscriptions.Subscription
 
-  @events [
-    "concept_deprecated",
-    "concept_published",
-    "concept_rejected",
-    "concept_rejection_canceled",
-    "concept_submitted",
-    "delete_concept_draft",
-    "new_concept_draft",
-    "relation_created",
-    "relation_deleted",
-    "update_concept_draft"
-  ]
-
   @doc """
   Returns a list of event identifiers matching the given subscription, with `id`
   less than or equal to the specified `max_id`.
@@ -80,16 +67,17 @@ defmodule TdAudit.Subscriptions.Events do
 
   # filter for concepts
   defp filter_by_scope(query, %{
-         events: @events = events,
+         events: events,
          resource_type: "concept",
          resource_id: concept_id
        }) do
+    resource_types = ["business_concept", "concept"]
     concept_id = to_string(concept_id)
 
     query
     |> where([e], e.event in ^events)
-    |> where([e], fragment("? \\?& ?", e.payload, ["business_concept_id"]))
-    |> where([e], e.payload["business_concept_id"] == ^concept_id)
+    |> where([e], e.resource_id == ^concept_id)
+    |> where([e], e.resource_type in ^resource_types)
   end
 
   # filter for domain-scoped events, excluding subdomains

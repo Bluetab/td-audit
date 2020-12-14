@@ -49,6 +49,14 @@ defmodule TdAuditWeb.EmailView do
   def render("relation_deleted.html", event), do: render_concepts(event)
   def render("update_concept_draft.html", event), do: render_concepts(event)
 
+  def render(template, %{event: event}) do
+    Logger.warn("Template #{template} not supported")
+
+    event
+    |> Map.take([:event, :payload])
+    |> Jason.encode!()
+  end
+
   defp render_concepts(%{event: event}) do
     render("concepts.html",
       user: user_name(event),
@@ -56,14 +64,6 @@ defmodule TdAuditWeb.EmailView do
       domains: domain_path(event),
       uri: uri(event)
     )
-  end
-
-  def render(template, %{event: event}) do
-    Logger.warn("Template #{template} not supported")
-
-    event
-    |> Map.take([:event, :payload])
-    |> Jason.encode!()
   end
 
   defp resource_name(%{payload: %{"name" => name}}), do: name
