@@ -29,6 +29,14 @@
           <tbody>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
+                Evento:
+              </th>
+              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= @event_name %>
+              </td>
+            </tr>
+            <tr>
+              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
                 Dominio:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">

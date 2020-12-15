@@ -61,6 +61,7 @@ defmodule TdAuditWeb.EmailView do
     render("concepts.html",
       user: user_name(event),
       name: resource_name(event),
+      event_name: event_name(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -147,6 +148,17 @@ defmodule TdAuditWeb.EmailView do
   end
 
   defp uri(_), do: nil
+
+  defp event_name(%{event: "concept_rejected"}), do: "Rejected Concept"
+  defp event_name(%{event: "concept_submitted"}), do: "Sended For Approval Concept"
+  defp event_name(%{event: "concept_rejection_canceled"}), do: "Rectified Concept"
+  defp event_name(%{event: "concept_deprecated"}), do: "Deprecated Concept"
+  defp event_name(%{event: "concept_published"}), do: "Published Concept"
+  defp event_name(%{event: "delete_concept_draft"}), do: "Deleted Draft"
+  defp event_name(%{event: "new_concept_draft"}), do: "New Concept Draft"
+  defp event_name(%{event: "relation_created"}), do: "Created Relation"
+  defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
+  defp event_name(%{event: "update_concept_draft"}), do: "Updated Concept Draft"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"
