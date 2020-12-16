@@ -65,6 +65,21 @@ defmodule TdAudit.Subscriptions.Events do
     |> where([e], e.payload["rule_id"] == ^rule_id)
   end
 
+  # filter for concepts
+  defp filter_by_scope(query, %{
+         events: events,
+         resource_type: "concept",
+         resource_id: concept_id
+       }) do
+    resource_types = ["business_concept", "concept"]
+    concept_id = to_string(concept_id)
+
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], e.resource_id == ^concept_id)
+    |> where([e], e.resource_type in ^resource_types)
+  end
+
   # filter for domain-scoped events, excluding subdomains
   defp filter_by_scope(query, %{events: events, resource_type: "domain", resource_id: resource_id}) do
     query

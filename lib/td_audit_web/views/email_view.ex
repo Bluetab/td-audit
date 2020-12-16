@@ -6,7 +6,7 @@ defmodule TdAuditWeb.EmailView do
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
-      name: ingest_name(event),
+      name: resource_name(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -38,6 +38,17 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("concept_rejected.html", event), do: render_concepts(event)
+  def render("concept_submitted.html", event), do: render_concepts(event)
+  def render("concept_rejection_canceled.html", event), do: render_concepts(event)
+  def render("concept_deprecated.html", event), do: render_concepts(event)
+  def render("concept_published.html", event), do: render_concepts(event)
+  def render("delete_concept_draft.html", event), do: render_concepts(event)
+  def render("new_concept_draft.html", event), do: render_concepts(event)
+  def render("relation_created.html", event), do: render_concepts(event)
+  def render("relation_deleted.html", event), do: render_concepts(event)
+  def render("update_concept_draft.html", event), do: render_concepts(event)
+
   def render(template, %{event: event}) do
     Logger.warn("Template #{template} not supported")
 
@@ -46,8 +57,26 @@ defmodule TdAuditWeb.EmailView do
     |> Jason.encode!()
   end
 
-  defp ingest_name(%{payload: %{"name" => name}}), do: name
-  defp ingest_name(_), do: nil
+  defp render_concepts(%{event: event}) do
+    render("concepts.html",
+      user: user_name(event),
+      name: resource_name(event),
+      event_name: event_name(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
+  defp resource_name(%{payload: %{"name" => name}}), do: name
+
+  defp resource_name(%{resource_id: resource_id, resource_type: "concept"}) do
+    case TdCache.ConceptCache.get(resource_id, :name) do
+      {:ok, name} -> name
+      _ -> nil
+    end
+  end
+
+  defp resource_name(_), do: nil
 
   defp rule_implementation_name(%{
          payload: %{"name" => name, "implementation_key" => implementation_key}
@@ -84,6 +113,19 @@ defmodule TdAuditWeb.EmailView do
   defp user_name(_), do: nil
 
   defp domain_path(%{payload: %{"domain_ids" => domain_ids}}) do
+    buid_domain_path(domain_ids)
+  end
+
+  defp domain_path(%{resource_id: resource_id, resource_type: "concept"}) do
+    case TdCache.ConceptCache.get(resource_id, :domain_ids) do
+      {:ok, [_ | _] = domain_ids} -> buid_domain_path(domain_ids)
+      _ -> nil
+    end
+  end
+
+  defp domain_path(_), do: nil
+
+  defp buid_domain_path(domain_ids) do
     domain_ids
     |> Enum.reverse()
     |> Enum.map(&TdCache.TaxonomyCache.get_domain/1)
@@ -91,8 +133,6 @@ defmodule TdAuditWeb.EmailView do
     |> Enum.map(& &1.name)
     |> Enum.join(" › ")
   end
-
-  defp domain_path(_), do: nil
 
   defp uri(%{
          resource_type: "comment",
@@ -112,6 +152,18 @@ defmodule TdAuditWeb.EmailView do
     Enum.join([host_name(), "ingests", id], "/")
   end
 
+  defp uri(%{resource_type: "concept", event: event, resource_id: resource_id})
+       when event in ["relation_created", "relation_deleted"] do
+    case TdCache.ConceptCache.get(resource_id, :business_concept_version_id) do
+      {:ok, version} -> Enum.join([host_name(), "concepts", version], "/")
+      _ -> nil
+    end
+  end
+
+  defp uri(%{resource_type: "concept", payload: %{"id" => id}}) do
+    Enum.join([host_name(), "concepts", id], "/")
+  end
+
   defp uri(%{
          resource_type: "rule_result",
          payload: %{"rule_id" => rule_id, "implementation_id" => implementation_id}
@@ -123,6 +175,17 @@ defmodule TdAuditWeb.EmailView do
   end
 
   defp uri(_), do: nil
+
+  defp event_name(%{event: "concept_rejected"}), do: "Concept Rejected"
+  defp event_name(%{event: "concept_submitted"}), do: "Concept Sent For Approval"
+  defp event_name(%{event: "concept_rejection_canceled"}), do: "Rejection Canceled"
+  defp event_name(%{event: "concept_deprecated"}), do: "Concept Deprecated"
+  defp event_name(%{event: "concept_published"}), do: "Concept Published"
+  defp event_name(%{event: "delete_concept_draft"}), do: "Draft Deleted"
+  defp event_name(%{event: "new_concept_draft"}), do: "New Concept Draft"
+  defp event_name(%{event: "relation_created"}), do: "Created Relation"
+  defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
+  defp event_name(%{event: "update_concept_draft"}), do: "Concept Draft Updated"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"

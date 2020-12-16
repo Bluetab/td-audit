@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-2865] Notifications for concept related events
+
 ## [4.9.0] 2020-11-30
 
 ### Changed

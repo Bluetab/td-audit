@@ -41,12 +41,6 @@ config :td_audit, TdAudit.Auth.Guardian,
   ttl: {1, :hours},
   secret_key: "SuperSecretTruedat"
 
-config :td_audit, :notification_load_frequency,
-  events: %{
-    comment_created: 60_000,
-    failed_rule_results: 86_400_000
-  }
-
 config :td_audit, :phoenix_swagger,
   swagger_files: %{
     "priv/static/swagger.json" => [router: TdAuditWeb.Router]
@@ -68,12 +62,14 @@ config :td_audit, TdAudit.Notifications.Email,
   sender: {"Truedat Notifications", "no-reply@truedat.io"},
   subjects: [
     ingests_pending: "📬 Alert: Data requests pending approval",
+    concepts: "🖋 Alert: New event in Business Glosary",
     rule_results: "👓 Alert: Data quality issues detected",
     comments: "🖋 Alert: New comments added",
     default: "⚡ Alert: New notifications"
   ],
   headers: [
     ingests_pending: "The following data requests require approval:",
+    concepts: "The following concepts have been changed:",
     rule_results: "The following data quality issues have been detected:",
     comments: "The following comments have been added:",
     default: "New notifications have been generated:"

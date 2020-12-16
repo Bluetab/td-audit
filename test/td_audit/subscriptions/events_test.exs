@@ -3,6 +3,19 @@ defmodule TdAudit.Subscriptions.EventsTest do
 
   alias TdAudit.Subscriptions.Events
 
+  @concept_events [
+    "concept_deprecated",
+    "concept_published",
+    "concept_rejected",
+    "concept_rejection_canceled",
+    "concept_submitted",
+    "delete_concept_draft",
+    "new_concept_draft",
+    "relation_created",
+    "relation_deleted",
+    "update_concept_draft"
+  ]
+
   describe "subscription_event_ids/1 for comment_created subscription" do
     setup do
       scope =
@@ -129,6 +142,29 @@ defmodule TdAudit.Subscriptions.EventsTest do
       %{id: event_id} = insert(:event, event: "ingest_sent_for_approval", payload: payload)
 
       assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+    end
+  end
+
+  describe "subscription_event_ids/1 for concept related actions" do
+    setup do
+      scope =
+        build(:scope,
+          events: @concept_events,
+          resource_type: "concept",
+          resource_id: 1
+        )
+
+      %{id: last_event_id} = _old_event = insert(:event, event: "new_concept_draft")
+      [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
+    end
+
+    test "returns new event ids", %{subscription: subscription} do
+      event_ids =
+        @concept_events
+        |> Enum.map(&insert(:event, event: &1, resource_id: 1, resource_type: "concept"))
+        |> Enum.map(& &1.id)
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
     end
   end
 
