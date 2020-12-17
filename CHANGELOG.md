@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- [TD-3170] Build docker image which runs with non-root user
+
 ### Added
 
 - [TD-2865] Notifications for concept related events
