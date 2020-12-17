@@ -20,7 +20,7 @@ RUN apk --no-cache update && \
     tar -xzf *.tar.gz && \
     rm *.tar.gz && \
     adduser -h /app -D app && \
-    chwon -Rapp: /app
+    chown -R app: /app
 
 ENV APP_NAME ${APP_NAME}
 ENTRYPOINT ["/bin/bash", "-c", "bin/start.sh"]
