@@ -17,3 +17,4 @@ erl_crash.dump
 # variables.
 priv/static/swagger.json
 local
+config/local.exs
