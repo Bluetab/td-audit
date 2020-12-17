@@ -22,5 +22,7 @@ RUN apk --no-cache update && \
     adduser -h /app -D app && \
     chown -R app: /app
 
+USER app
+
 ENV APP_NAME ${APP_NAME}
 ENTRYPOINT ["/bin/bash", "-c", "bin/start.sh"]
