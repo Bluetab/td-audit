@@ -159,6 +159,17 @@ defmodule TdAudit.Subscriptions do
     recipients_by_role(domain_id, role)
   end
 
+  defp recipients(%{type: "role", identifier: role}, %{
+         resource_type: "concept",
+         resource_id: concept_id
+       }) do
+    concept_id
+    |> domains()
+    |> Enum.map(&recipients_by_role(&1, role))
+    |> List.flatten()
+    |> Enum.uniq_by(fn {email, _name} -> email end)
+  end
+
   defp recipients(_, _), do: []
 
   defp recipients_by_role(domain_id, role_name) do
@@ -166,5 +177,12 @@ defmodule TdAudit.Subscriptions do
     |> AclCache.get_acl_role_users(domain_id, role_name)
     |> Enum.map(&UserCache.get/1)
     |> Enum.flat_map(&recipients/1)
+  end
+
+  defp domains(resource_id) do
+    case TdCache.ConceptCache.get(resource_id, :domain_ids) do
+      {:ok, [_ | _] = domain_ids} -> domain_ids
+      _ -> []
+    end
   end
 end

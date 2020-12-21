@@ -26,7 +26,6 @@ defmodule TdAudit.Notifications.Email do
     events
     |> Enum.map(& &1.event)
     |> Enum.uniq()
-    |> Enum.slice(0, 1)
     |> template()
   end
 
@@ -43,6 +42,15 @@ defmodule TdAudit.Notifications.Email do
   defp template(["relation_created"]), do: :concepts
   defp template(["relation_deleted"]), do: :concepts
   defp template(["update_concept_draft"]), do: :concepts
+  defp template(["relation_deprecated"]), do: :relations
+
+  defp template(events) when length(events) > 1 do
+    events
+    |> List.delete("relation_deprecated")
+    |> Enum.slice(0, 1)
+    |> template()
+  end
+
   defp template(_), do: :default
 
   defp config, do: Application.fetch_env!(:td_audit, __MODULE__)

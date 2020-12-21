@@ -63,6 +63,7 @@ config :td_audit, TdAudit.Notifications.Email,
   subjects: [
     ingests_pending: "📬 Alert: Data requests pending approval",
     concepts: "🖋 Alert: New event in Business Glosary",
+    relations: "👓 Alert: Relations changed",
     rule_results: "👓 Alert: Data quality issues detected",
     comments: "🖋 Alert: New comments added",
     default: "⚡ Alert: New notifications"
@@ -70,6 +71,7 @@ config :td_audit, TdAudit.Notifications.Email,
   headers: [
     ingests_pending: "The following data requests require approval:",
     concepts: "The following concepts have been changed:",
+    relations: "The following relations have been deprecated due to the deletion of its target",
     rule_results: "The following data quality issues have been detected:",
     comments: "The following comments have been added:",
     default: "New notifications have been generated:"

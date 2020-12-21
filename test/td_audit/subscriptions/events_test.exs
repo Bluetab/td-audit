@@ -168,6 +168,34 @@ defmodule TdAudit.Subscriptions.EventsTest do
     end
   end
 
+  describe "subscription_event_ids/1 for action relation_deprecated" do
+    setup do
+      scope =
+        build(:scope,
+          events: ["relation_deprecated"],
+          resource_type: "concept",
+          resource_id: 1
+        )
+
+      %{id: last_event_id} =
+        _old_event =
+        insert(:event, event: "relation_deprecated", resource_type: "concept", resource_id: 1)
+
+      [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
+    end
+
+    test "returns new event ids", %{subscription: subscription} do
+      event_ids =
+        1..3
+        |> Enum.map(fn _ ->
+          insert(:event, event: "relation_deprecated", resource_type: "concept", resource_id: 1)
+        end)
+        |> Enum.map(& &1.id)
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+    end
+  end
+
   describe "subscription_event_ids/1 for arbitrary events and resource" do
     setup do
       scope =

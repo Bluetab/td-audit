@@ -49,6 +49,17 @@ defmodule TdAuditWeb.EmailView do
   def render("relation_deleted.html", event), do: render_concepts(event)
   def render("update_concept_draft.html", event), do: render_concepts(event)
 
+  def render("relation_deprecated.html", %{event: event}) do
+    render("relation_deprecated.html",
+      name: resource_name(event),
+      event_name: event_name(event),
+      target: relation_side(event),
+      domains: domain_path(event),
+      target_uri: target_uri(event),
+      uri: uri(event)
+    )
+  end
+
   def render(template, %{event: event}) do
     Logger.warn("Template #{template} not supported")
 
@@ -153,7 +164,7 @@ defmodule TdAuditWeb.EmailView do
   end
 
   defp uri(%{resource_type: "concept", event: event, resource_id: resource_id})
-       when event in ["relation_created", "relation_deleted"] do
+       when event in ["relation_created", "relation_deleted", "relation_deprecated"] do
     case TdCache.ConceptCache.get(resource_id, :business_concept_version_id) do
       {:ok, version} -> Enum.join([host_name(), "concepts", version], "/")
       _ -> nil
@@ -176,6 +187,12 @@ defmodule TdAuditWeb.EmailView do
 
   defp uri(_), do: nil
 
+  defp target_uri(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
+    Enum.join([host_name(), "structures", id], "/")
+  end
+
+  defp target_uri(_), do: nil
+
   defp event_name(%{event: "concept_rejected"}), do: "Concept Rejected"
   defp event_name(%{event: "concept_submitted"}), do: "Concept Sent For Approval"
   defp event_name(%{event: "concept_rejection_canceled"}), do: "Rejection Canceled"
@@ -186,6 +203,7 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "relation_created"}), do: "Created Relation"
   defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
   defp event_name(%{event: "update_concept_draft"}), do: "Concept Draft Updated"
+  defp event_name(%{event: "relation_deprecated"}), do: "Relation deprecated"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"
@@ -196,4 +214,13 @@ defmodule TdAuditWeb.EmailView do
   defp host_name do
     Application.fetch_env!(:td_audit, :host_name)
   end
+
+  defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
+    case TdCache.StructureCache.get(id) do
+      {:ok, structure} -> Map.get(structure, :external_id)
+      _ -> nil
+    end
+  end
+
+  defp relation_side(_), do: nil
 end
