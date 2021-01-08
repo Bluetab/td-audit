@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-2301] Subscription under `relation_deprecated` event
+
 ### Changed
 
 - [TD-3170] Build docker image which runs with non-root user
