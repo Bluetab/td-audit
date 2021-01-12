@@ -41,17 +41,15 @@ defmodule TdAuditWeb.ConnCase do
       Sandbox.mode(TdAudit.Repo, {:shared, self()})
     end
 
-    {:ok, conn: ConnTest.build_conn()}
-
     cond do
       tags[:admin_authenticated] ->
         @admin_user_name
-        |> find_or_create_user(is_admin: true)
+        |> create_session(role: "admin")
         |> create_user_auth_conn()
 
       tags[:authenticated_user] ->
         @admin_user_name
-        |> find_or_create_user(is_admin: false)
+        |> create_session()
         |> create_user_auth_conn()
 
       true ->

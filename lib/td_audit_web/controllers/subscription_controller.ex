@@ -42,9 +42,9 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   def index_by_user(conn, params) do
-    with user <- conn.assigns[:current_resource],
+    with %{user_id: user_id} <- conn.assigns[:current_resource],
          {:subscriber, %Subscriber{} = subscriber} <-
-           {:subscriber, Subscribers.get_subscriber_by_user(user.id)},
+           {:subscriber, Subscribers.get_subscriber_by_user(user_id)},
          filters <- params |> Map.get("filters") |> Map.put("subscriber_id", subscriber.id),
          filters <- Helpers.atomize_keys(filters),
          subscriptions <- Subscriptions.list_subscriptions(filters) do
@@ -59,16 +59,16 @@ defmodule TdAuditWeb.SubscriptionController do
         conn,
         %{"subscription" => %{"subscriber" => subscriber_params} = subscription_params}
       ) do
-    user = conn.assigns[:current_resource]
+    %{user_id: user_id} = session = conn.assigns[:current_resource]
     subscription_params = with_email(subscription_params)
 
     subscriber_params =
       case Map.get(subscriber_params, "identifier") do
-        nil -> Map.put(subscriber_params, "identifier", "#{user.id}")
+        nil -> Map.put(subscriber_params, "identifier", "#{user_id}")
         _ -> subscriber_params
       end
 
-    with {:can, true} <- {:can, can?(user, create(subscriber_params))},
+    with {:can, true} <- {:can, can?(session, create(subscriber_params))},
          {:ok, %{id: subscriber_id}} <- Subscribers.get_or_create_subscriber(subscriber_params),
          subscription_params <-
            subscription_params
@@ -137,10 +137,10 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   def update(conn, %{"id" => id, "subscription" => subscription_params}) do
-    with user <- conn.assigns[:current_resource],
+    with session <- conn.assigns[:current_resource],
          id <- String.to_integer(id),
          subscription <- Subscriptions.get_subscription!(id),
-         {:can, true} <- {:can, can?(user, update(subscription))},
+         {:can, true} <- {:can, can?(session, update(subscription))},
          subscription_params <- filter_subscription_params(subscription, subscription_params),
          {:ok, %{id: id}} <- Subscriptions.update_subscription(subscription, subscription_params),
          subscription <- Subscriptions.get_subscription!(id) do
@@ -184,8 +184,8 @@ defmodule TdAuditWeb.SubscriptionController do
   def delete(conn, %{"id" => id}) do
     subscription = Subscriptions.get_subscription!(id)
 
-    with user <- conn.assigns[:current_resource],
-         {:can, true} <- {:can, can?(user, delete(subscription))},
+    with session <- conn.assigns[:current_resource],
+         {:can, true} <- {:can, can?(session, delete(subscription))},
          {:ok, %Subscription{}} <- Subscriptions.delete_subscription(subscription) do
       send_resp(conn, :no_content, "")
     end
