@@ -48,7 +48,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag authenticated_user: @admin_user_name
     test "lists all user subscriptions", %{
       conn: conn,
-      session: %{user_id: user_id},
+      claims: %{user_id: user_id},
       swagger_schema: schema
     } do
       %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
@@ -145,7 +145,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag authenticated_user: @admin_user_name
     test "updates a subscription when data is valid", %{
       conn: conn,
-      session: %{user_id: user_id},
+      claims: %{user_id: user_id},
       swagger_schema: schema
     } do
       %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
@@ -197,7 +197,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
   describe "delete subscription" do
     @tag authenticated_user: @admin_user_name
-    test "deletes chosen subscription", %{conn: conn, session: %{user_id: user_id}} do
+    test "deletes chosen subscription", %{conn: conn, claims: %{user_id: user_id}} do
       %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
       subscription = insert(:subscription, subscriber_id: subscriber_id)
 

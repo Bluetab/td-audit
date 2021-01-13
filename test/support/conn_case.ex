@@ -44,12 +44,12 @@ defmodule TdAuditWeb.ConnCase do
     cond do
       tags[:admin_authenticated] ->
         @admin_user_name
-        |> create_session(role: "admin")
+        |> create_claims(role: "admin")
         |> create_user_auth_conn()
 
       tags[:authenticated_user] ->
         @admin_user_name
-        |> create_session()
+        |> create_claims()
         |> create_user_auth_conn()
 
       true ->

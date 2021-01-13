@@ -22,8 +22,8 @@ defmodule TdAuditWeb.SubscriberController do
   end
 
   def index(conn, _params) do
-    with session <- conn.assigns[:current_resource],
-         {:can, true} <- {:can, can?(session, list(Subscriber))},
+    with claims <- conn.assigns[:current_resource],
+         {:can, true} <- {:can, can?(claims, list(Subscriber))},
          subscribers <- Subscribers.list_subscribers() do
       render(conn, "index.json", subscribers: subscribers)
     end
@@ -42,8 +42,8 @@ defmodule TdAuditWeb.SubscriberController do
   end
 
   def create(conn, %{"subscriber" => subscriber_params}) do
-    with session <- conn.assigns[:current_resource],
-         {:can, true} <- {:can, can?(session, create(Subscriber))},
+    with claims <- conn.assigns[:current_resource],
+         {:can, true} <- {:can, can?(claims, create(Subscriber))},
          {:ok, subscriber} <- Subscribers.create_subscriber(subscriber_params) do
       conn
       |> put_status(:created)
@@ -65,9 +65,9 @@ defmodule TdAuditWeb.SubscriberController do
   end
 
   def show(conn, %{"id" => id}) do
-    with session <- conn.assigns[:current_resource],
+    with claims <- conn.assigns[:current_resource],
          subscriber <- Subscribers.get_subscriber!(id),
-         {:can, true} <- {:can, can?(session, view(subscriber))} do
+         {:can, true} <- {:can, can?(claims, view(subscriber))} do
       render(conn, "show.json", subscriber: subscriber)
     end
   end
@@ -85,9 +85,9 @@ defmodule TdAuditWeb.SubscriberController do
   end
 
   def delete(conn, %{"id" => id}) do
-    with session <- conn.assigns[:current_resource],
+    with claims <- conn.assigns[:current_resource],
          subscriber <- Subscribers.get_subscriber!(id),
-         {:can, true} <- {:can, can?(session, delete(subscriber))},
+         {:can, true} <- {:can, can?(claims, delete(subscriber))},
          {:ok, _} <- Subscribers.delete_subscriber(subscriber) do
       send_resp(conn, :no_content, "")
     end

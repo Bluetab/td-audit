@@ -7,6 +7,7 @@ defmodule TdAuditWeb.SubscriptionController do
 
   import Canada, only: [can?: 2]
 
+  alias TdAudit.Auth.Claims
   alias TdAudit.Map.Helpers
   alias TdAudit.Subscriptions
   alias TdAudit.Subscriptions.Subscriber
@@ -59,7 +60,7 @@ defmodule TdAuditWeb.SubscriptionController do
         conn,
         %{"subscription" => %{"subscriber" => subscriber_params} = subscription_params}
       ) do
-    %{user_id: user_id} = session = conn.assigns[:current_resource]
+    %Claims{user_id: user_id} = claims = conn.assigns[:current_resource]
     subscription_params = with_email(subscription_params)
 
     subscriber_params =
@@ -68,7 +69,7 @@ defmodule TdAuditWeb.SubscriptionController do
         _ -> subscriber_params
       end
 
-    with {:can, true} <- {:can, can?(session, create(subscriber_params))},
+    with {:can, true} <- {:can, can?(claims, create(subscriber_params))},
          {:ok, %{id: subscriber_id}} <- Subscribers.get_or_create_subscriber(subscriber_params),
          subscription_params <-
            subscription_params
@@ -137,10 +138,10 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   def update(conn, %{"id" => id, "subscription" => subscription_params}) do
-    with session <- conn.assigns[:current_resource],
+    with claims <- conn.assigns[:current_resource],
          id <- String.to_integer(id),
          subscription <- Subscriptions.get_subscription!(id),
-         {:can, true} <- {:can, can?(session, update(subscription))},
+         {:can, true} <- {:can, can?(claims, update(subscription))},
          subscription_params <- filter_subscription_params(subscription, subscription_params),
          {:ok, %{id: id}} <- Subscriptions.update_subscription(subscription, subscription_params),
          subscription <- Subscriptions.get_subscription!(id) do
@@ -184,8 +185,8 @@ defmodule TdAuditWeb.SubscriptionController do
   def delete(conn, %{"id" => id}) do
     subscription = Subscriptions.get_subscription!(id)
 
-    with session <- conn.assigns[:current_resource],
-         {:can, true} <- {:can, can?(session, delete(subscription))},
+    with claims <- conn.assigns[:current_resource],
+         {:can, true} <- {:can, can?(claims, delete(subscription))},
          {:ok, %Subscription{}} <- Subscriptions.delete_subscription(subscription) do
       send_resp(conn, :no_content, "")
     end

@@ -3,29 +3,29 @@ defmodule TdAudit.Canada.Abilities do
   Permissions for Audit operations
   """
 
-  alias TdAudit.Auth.Session
+  alias TdAudit.Auth.Claims
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
 
-  defimpl Canada.Can, for: Session do
-    def can?(%Session{is_admin: true}, _action, _domain), do: true
+  defimpl Canada.Can, for: Claims do
+    def can?(%Claims{is_admin: true}, _action, _domain), do: true
 
-    def can?(%Session{user_id: user_id}, :create, %{"type" => "user", "identifier" => identifier}) do
+    def can?(%Claims{user_id: user_id}, :create, %{"type" => "user", "identifier" => identifier}) do
       to_string(user_id) == to_string(identifier)
     end
 
-    def can?(%Session{user_id: user_id}, :update, %Subscription{
+    def can?(%Claims{user_id: user_id}, :update, %Subscription{
           subscriber: %Subscriber{identifier: identifier, type: "user"}
         }) do
       to_string(user_id) == to_string(identifier)
     end
 
-    def can?(%Session{user_id: user_id}, :delete, %Subscription{
+    def can?(%Claims{user_id: user_id}, :delete, %Subscription{
           subscriber: %Subscriber{identifier: identifier, type: "user"}
         }) do
       to_string(user_id) == to_string(identifier)
     end
 
-    def can?(%Session{}, _action, _entity), do: false
+    def can?(%Claims{}, _action, _entity), do: false
   end
 end
