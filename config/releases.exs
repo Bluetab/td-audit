@@ -18,7 +18,8 @@ config :td_audit, TdAudit.Notifications.Mailer,
 
 config :td_cache,
   redis_host: System.fetch_env!("REDIS_HOST"),
-  port: System.get_env("REDIS_PORT", "6379") |> String.to_integer()
+  port: System.get_env("REDIS_PORT", "6379") |> String.to_integer(),
+  password: System.get_env("REDIS_PASSWORD")
 
 config :td_audit, TdAudit.Auth.Guardian, secret_key: System.fetch_env!("GUARDIAN_SECRET_KEY")
 config :td_audit, host_name: System.get_env("WEB_HOST")
@@ -28,7 +29,8 @@ config :k8s, clusters: %{default: %{}}
 config :td_audit, TdAudit.Broadway,
   consumer_id: System.fetch_env!("HOSTNAME"),
   redis_host: System.fetch_env!("REDIS_HOST"),
-  port: System.get_env("REDIS_PORT", "6379") |> String.to_integer()
+  port: System.get_env("REDIS_PORT", "6379") |> String.to_integer(),
+  password: System.get_env("REDIS_PASSWORD")
 
 config :td_audit, TdAudit.Notifications.Email,
   sender:
