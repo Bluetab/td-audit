@@ -1,4 +1,4 @@
-defmodule TdAudit.Accounts.Session do
+defmodule TdAudit.Auth.Session do
   @moduledoc "A user session"
 
   @derive {Jason.Encoder, only: [:user_id, :user_name]}

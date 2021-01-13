@@ -6,8 +6,8 @@ defmodule TdAuditWeb.Authentication do
   import Plug.Conn
 
   alias Phoenix.ConnTest
-  alias TdAudit.Accounts.Session
   alias TdAudit.Auth.Guardian
+  alias TdAudit.Auth.Session
 
   @headers {"Content-type", "application/json"}
 

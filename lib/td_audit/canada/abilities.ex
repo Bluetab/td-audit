@@ -3,7 +3,7 @@ defmodule TdAudit.Canada.Abilities do
   Permissions for Audit operations
   """
 
-  alias TdAudit.Accounts.Session
+  alias TdAudit.Auth.Session
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
 
