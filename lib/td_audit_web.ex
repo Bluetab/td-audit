@@ -66,9 +66,7 @@ defmodule TdAuditWeb do
     apply(__MODULE__, which, [])
   end
 
-  @doc """
-  Custom log level for controllers
-  """
+  # Custom log level for controllers
   defmacro __using__([:controller = which, log]) do
     apply(__MODULE__, which, [log])
   end
