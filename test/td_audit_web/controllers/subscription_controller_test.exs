@@ -1,11 +1,6 @@
 defmodule TdAuditWeb.SubscriptionControllerTest do
-  @moduledoc """
-  New test for the subscription controller
-  """
   use TdAuditWeb.ConnCase
   use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
-
-  alias TdAudit.Accounts.User
 
   @admin_user_name "app-admin"
 
@@ -53,10 +48,10 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag authenticated_user: @admin_user_name
     test "lists all user subscriptions", %{
       conn: conn,
+      claims: %{user_id: user_id},
       swagger_schema: schema
     } do
-      id = User.gen_id_from_user_name(@admin_user_name)
-      %{id: subscriber_id} = insert(:subscriber, identifier: "#{id}", type: "user")
+      %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
 
       scope =
         build(:scope,
@@ -148,9 +143,12 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
   describe "update subscription" do
     @tag authenticated_user: @admin_user_name
-    test "updates a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
-      id = User.gen_id_from_user_name(@admin_user_name)
-      %{id: subscriber_id} = insert(:subscriber, identifier: "#{id}", type: "user")
+    test "updates a subscription when data is valid", %{
+      conn: conn,
+      claims: %{user_id: user_id},
+      swagger_schema: schema
+    } do
+      %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
 
       scope =
         build(:scope,
@@ -199,10 +197,8 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
   describe "delete subscription" do
     @tag authenticated_user: @admin_user_name
-    test "deletes chosen subscription", %{conn: conn} do
-      id = User.gen_id_from_user_name(@admin_user_name)
-
-      %{id: subscriber_id} = insert(:subscriber, identifier: "#{id}", type: "user")
+    test "deletes chosen subscription", %{conn: conn, claims: %{user_id: user_id}} do
+      %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
       subscription = insert(:subscription, subscriber_id: subscriber_id)
 
       assert conn

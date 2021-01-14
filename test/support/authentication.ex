@@ -6,10 +6,8 @@ defmodule TdAuditWeb.Authentication do
   import Plug.Conn
 
   alias Phoenix.ConnTest
-  alias TdAudit.Accounts.User
+  alias TdAudit.Auth.Claims
   alias TdAudit.Auth.Guardian
-
-  @headers {"Content-type", "application/json"}
 
   def put_auth_headers(conn, jwt) do
     conn
@@ -17,22 +15,26 @@ defmodule TdAuditWeb.Authentication do
     |> put_req_header("authorization", "Bearer #{jwt}")
   end
 
-  def create_user_auth_conn(user) do
-    {:ok, jwt, full_claims} = Guardian.encode_and_sign(user)
-    conn = ConnTest.build_conn()
-    conn = put_auth_headers(conn, jwt)
-    {:ok, %{conn: conn, jwt: jwt, claims: full_claims}}
+  def create_user_auth_conn(%{role: role} = claims) do
+    {:ok, jwt, full_claims} = Guardian.encode_and_sign(claims, %{role: role})
+    {:ok, claims} = Guardian.resource_from_claims(full_claims)
+
+    conn =
+      ConnTest.build_conn()
+      |> put_auth_headers(jwt)
+
+    [conn: conn, jwt: jwt, claims: claims]
   end
 
-  def get_header(token) do
-    [@headers, {"authorization", "Bearer #{token}"}]
-  end
+  def create_claims(user_name, opts \\ []) do
+    role = Keyword.get(opts, :role, "user")
+    is_admin = role === "admin"
 
-  def find_or_create_user(user_name, opts \\ []) do
-    %User{
-      id: User.gen_id_from_user_name(user_name),
+    %Claims{
+      user_id: Integer.mod(:binary.decode_unsigned(user_name), 100_000),
       user_name: user_name,
-      is_admin: Keyword.get(opts, :is_admin, false)
+      role: role,
+      is_admin: is_admin
     }
   end
 end
