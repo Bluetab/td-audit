@@ -22,6 +22,23 @@ defmodule TdAudit.Notifications.Email do
     |> render("events.html")
   end
 
+  def create(%{recipients: recipients, who: who, url: url, name: name} = message) do
+    headers = Map.get(message, :headers)
+
+    new_email()
+    |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
+    |> assign(:header, Map.get(headers, :header))
+    |> assign(:url, url)
+    |> assign(:name, name)
+    |> assign(:footer, footer())
+    |> assign(:who, who)
+    |> assign(:message, Map.get(message, :message))
+    |> assign(:message_header, Map.get(headers, :message_header))
+    |> to(recipients)
+    |> from(sender())
+    |> render("share.html")
+  end
+
   defp template(%Notification{events: events}) do
     events
     |> Enum.map(& &1.event)

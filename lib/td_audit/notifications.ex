@@ -74,6 +74,21 @@ defmodule TdAudit.Notifications do
     end
   end
 
+  @doc """
+  Generate a notification when a resource is shared.
+  """
+  def share(%{recipients: recipients} = message) do
+    recipients =
+      Enum.map(recipients, fn
+        %{email: email} -> email
+        %{user: user} -> Map.get(user, :email)
+      end)
+
+    message
+    |> Map.put(:recipients, recipients)
+    |> Email.create()
+  end
+
   defp list_subscriptions(_repo, _changes, clauses) do
     {:ok, Subscriptions.list_subscriptions(clauses)}
   end
