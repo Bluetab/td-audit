@@ -78,7 +78,7 @@ defmodule TdAudit.Notifications do
   Generate a notification when a resource is shared.
   """
   def share(%{recipients: recipients, user_id: user_id} = message) do
-    who = 
+    who =
       UserCache.map()
       |> Map.get(user_id, %{})
       |> Map.get(:full_name, "deleted")

@@ -41,7 +41,6 @@ defmodule TdAudit.Notifications.Email do
     |> assign(:message_header, Map.get(headers, "message_header"))
     |> to(recipients)
     |> from(sender())
-    |> IO.inspect
     |> render("share.html")
   end
 
