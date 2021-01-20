@@ -43,9 +43,9 @@ defmodule TdAudit.Notifications.Dispatcher do
   def handle_cast({:share, message}, state) do
     Logger.debug("Triggering message...")
 
-    with {:ok, email} <- Notifications.share(message) do
-      send_email(email)
-    end
+    message
+    |> Notifications.share()
+    |> send_email()
 
     {:noreply, state}
   end

@@ -81,7 +81,7 @@ defmodule TdAudit.Notifications do
     who =
       UserCache.map()
       |> Map.get(user_id, %{})
-      |> Map.get(:full_name, "deleted")
+      |> Map.take([:full_name, :email])
 
     recipients =
       recipients

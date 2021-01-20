@@ -32,7 +32,7 @@ defmodule TdAuditWeb.NotificationController do
           "uri" => uri,
           "message" => message,
           "headers" => headers,
-          "name" => name
+          "resource" => resource
         }
       }) do
     with %{user_id: user_id} <- conn.assigns[:current_resource] do
@@ -42,7 +42,7 @@ defmodule TdAuditWeb.NotificationController do
       |> Map.put(:message, message)
       |> Map.put(:user_id, user_id)
       |> Map.put(:headers, headers)
-      |> Map.put(:name, name)
+      |> Map.put(:resource, resource)
       |> Dispatcher.dispatch()
 
       send_resp(conn, :accepted, "")
