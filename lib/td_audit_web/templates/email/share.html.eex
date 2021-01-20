@@ -13,7 +13,7 @@
             <tr>
               <td style="vertical-align: top; padding: 0px; border-collapse: collapse; padding-right: 5px; font-size: 20px; line-height: 30px; mso-line-height-rule: exactly;">
                 <span style="font-family: Arial, sans-serif; padding: 0; font-size: 20px; line-height: 30px; mso-text-raise: 2px; mso-line-height-rule: exactly; vertical-align: middle;">
-                  <a href="<%= @url %>" style="color: #3b73af; text-decoration: none;">
+                  <a href="<%= @uri %>" style="color: #3b73af; text-decoration: none;">
                     <%= @name %>
                   </a>
                 </span>

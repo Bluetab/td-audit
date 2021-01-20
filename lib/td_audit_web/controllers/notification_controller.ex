@@ -11,7 +11,7 @@ defmodule TdAuditWeb.NotificationController do
   action_fallback(TdAuditWeb.FallbackController)
 
   def swagger_definitions do
-    SwaggerDefinitions.subscriber_swagger_definitions()
+    SwaggerDefinitions.notification_swagger_definitions()
   end
 
   swagger_path :create do
@@ -19,7 +19,7 @@ defmodule TdAuditWeb.NotificationController do
     produces("application/json")
 
     parameters do
-      subscription(:body, Schema.ref(:NotificationCreate), "Creation attrs of a Notification")
+      notification(:body, Schema.ref(:NotificationCreate), "Creation attrs of a Notification")
     end
 
     response(202, "Accepted")
@@ -29,18 +29,18 @@ defmodule TdAuditWeb.NotificationController do
   def create(conn, %{
         "notification" => %{
           "recipients" => recipients,
-          "url" => url,
+          "uri" => uri,
           "message" => message,
           "headers" => headers,
           "name" => name
         }
       }) do
-    with %{user_name: user_name} <- conn.assigns[:current_resource] do
+    with %{user_id: user_id} <- conn.assigns[:current_resource] do
       %{}
       |> Map.put(:recipients, recipients)
-      |> Map.put(:url, url)
+      |> Map.put(:uri, uri)
       |> Map.put(:message, message)
-      |> Map.put(:who, user_name)
+      |> Map.put(:user_id, user_id)
       |> Map.put(:headers, headers)
       |> Map.put(:name, name)
       |> Dispatcher.dispatch()

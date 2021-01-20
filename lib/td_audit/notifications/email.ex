@@ -22,20 +22,26 @@ defmodule TdAudit.Notifications.Email do
     |> render("events.html")
   end
 
-  def create(%{recipients: recipients, who: who, url: url, name: name} = message) do
+  def create(%{recipients: recipients, who: who, uri: uri, name: name} = message) do
     headers = Map.get(message, :headers)
+
+    header =
+      headers
+      |> Map.get("header")
+      |> String.replace("{user}", who)
+      |> String.replace("{name}", name)
 
     new_email()
     |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
-    |> assign(:header, Map.get(headers, :header))
-    |> assign(:url, url)
+    |> assign(:header, header)
+    |> assign(:uri, uri)
     |> assign(:name, name)
     |> assign(:footer, footer())
-    |> assign(:who, who)
     |> assign(:message, Map.get(message, :message))
-    |> assign(:message_header, Map.get(headers, :message_header))
+    |> assign(:message_header, Map.get(headers, "message_header"))
     |> to(recipients)
     |> from(sender())
+    |> IO.inspect
     |> render("share.html")
   end
 
