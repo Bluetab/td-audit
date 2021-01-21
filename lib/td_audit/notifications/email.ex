@@ -34,13 +34,12 @@ defmodule TdAudit.Notifications.Email do
       headers
       |> Map.get("subject")
       |> String.replace("(user)", user)
-      |> String.replace("(name)", name)
-    
+      |> String.replace("(name)", "\"#{name}\"")
+
     header =
       headers
       |> Map.get("header")
       |> String.replace("(user)", user)
-    
 
     new_email()
     |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
@@ -122,7 +121,7 @@ defmodule TdAudit.Notifications.Email do
     |> truncate()
   end
 
-  defp description(description = "") do
+  defp description("" = description) do
     truncate(description)
   end
 
