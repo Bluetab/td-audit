@@ -24,7 +24,7 @@ defmodule TdAudit.Notifications.Email do
   end
 
   def create(%{recipients: recipients, who: who, uri: uri, resource: resource} = message) do
-    headers = Map.get(message, :headers)
+    headers = Map.get(message, :headers, %{})
     user = Map.get(who, :full_name, "deleted")
     reply_to = Map.get(who, :email, "deleted")
     name = Map.get(resource, "name")
@@ -33,13 +33,12 @@ defmodule TdAudit.Notifications.Email do
     subject =
       headers
       |> Map.get("subject")
-      |> String.replace("(user)", user)
-      |> String.replace("(name)", "\"#{name}\"")
+      |> subject_from_headers(user, name)
 
     header =
       headers
       |> Map.get("header")
-      |> String.replace("(user)", user)
+      |> header_from_headers(user)
 
     new_email()
     |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
@@ -48,10 +47,10 @@ defmodule TdAudit.Notifications.Email do
     |> assign(:uri, uri)
     |> assign(:name, name)
     |> assign(:description, description(description))
-    |> assign(:description_header, Map.get(headers, "description_header"))
+    |> assign(:description_header, Map.get(headers, "description_header", "Description"))
     |> assign(:footer, footer())
     |> assign(:message, Map.get(message, :message))
-    |> assign(:message_header, Map.get(headers, "message_header"))
+    |> assign(:message_header, Map.get(headers, "message_header", "Message"))
     |> subject(subject)
     |> to(recipients)
     |> from(sender())
@@ -115,14 +114,30 @@ defmodule TdAudit.Notifications.Email do
     |> Keyword.fetch!(:sender)
   end
 
-  defp description(description = %{}) do
+  defp description(%{} = description) do
     description
     |> RichText.to_plain_text()
     |> truncate()
   end
 
-  defp description("" = description) do
+  defp description(description) when is_binary(description) do
     truncate(description)
+  end
+
+  defp description(description), do: description
+
+  defp subject_from_headers(nil, user, name), do: "#{user} has shared \"#{name}\" with you"
+
+  defp subject_from_headers(subject, user, name) do
+    subject
+    |> String.replace("(user)", user)
+    |> String.replace("(name)", "\"#{name}\"")
+  end
+
+  defp header_from_headers(nil, user), do: "#{user} has shared a page with you"
+
+  defp header_from_headers(header, user) do
+    String.replace(header, "(user)", user)
   end
 
   defp truncate(text, size \\ 90) do
