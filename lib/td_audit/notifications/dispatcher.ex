@@ -16,6 +16,10 @@ defmodule TdAudit.Notifications.Dispatcher do
     GenServer.start_link(__MODULE__, :unused, name: __MODULE__)
   end
 
+  def dispatch(%{} = message) do
+    GenServer.cast(__MODULE__, {:share, message})
+  end
+
   def dispatch(periodicity) do
     GenServer.cast(__MODULE__, periodicity)
   end
@@ -33,6 +37,17 @@ defmodule TdAudit.Notifications.Dispatcher do
   @impl GenServer
   def init(_init_arg) do
     {:ok, :no_state}
+  end
+
+  @impl GenServer
+  def handle_cast({:share, message}, state) do
+    Logger.debug("Triggering message...")
+
+    message
+    |> Notifications.share()
+    |> send_email()
+
+    {:noreply, state}
   end
 
   @impl GenServer

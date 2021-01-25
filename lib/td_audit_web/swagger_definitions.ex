@@ -60,6 +60,27 @@ defmodule TdAuditWeb.SwaggerDefinitions do
     }
   end
 
+  def notification_swagger_definitions do
+    %{
+      NotificationCreate:
+        swagger_schema do
+          properties do
+            notification(
+              Schema.new do
+                properties do
+                  recipients(:array, "List of recipients of the notification", required: true)
+                  uri(:string, "Resource uri", required: true)
+                  message(:string, "Message sent to a recipient", required: true)
+                  name(:string, "Resource name", required: true)
+                  headers(:object, "i18n headers")
+                end
+              end
+            )
+          end
+        end
+    }
+  end
+
   def subscriber_swagger_definitions do
     %{
       SubscribersResponse:

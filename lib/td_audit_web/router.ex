@@ -30,6 +30,7 @@ defmodule TdAuditWeb.Router do
     resources("/subscribers", SubscriberController, except: [:new, :edit, :update])
     resources("/subscriptions", SubscriptionController, except: [:new, :edit])
     post("/subscriptions/user/me/search", SubscriptionController, :index_by_user)
+    resources("/notifications", NotificationController, only: [:create])
   end
 
   def swagger_info do
