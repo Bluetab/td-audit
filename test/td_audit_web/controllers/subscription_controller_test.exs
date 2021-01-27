@@ -5,34 +5,69 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   @admin_user_name "app-admin"
 
   setup %{conn: conn} do
-    subscription = insert(:subscription)
-    [conn: put_req_header(conn, "accept", "application/json"), subscription: subscription]
+    [conn: put_req_header(conn, "accept", "application/json")]
   end
 
   describe "index" do
     @tag authenticated_user: @admin_user_name
     test "lists all subscriptions", %{
       conn: conn,
-      swagger_schema: schema,
-      subscription: subscription
+      swagger_schema: schema
     } do
-      %{id: id, subscriber_id: subscriber_id} = subscription
+      concept_id = 3
+      %{id: concept_subscription_id, subscriber_id: concept_subscriber_id} =
+        insert(:concept_subscription, resource_id: concept_id)
 
-      assert %{"data" => [data]} =
+      domain_id = 6
+      %{id: domains_subscription_id, subscriber_id: domains_subscriber_id} =
+        insert(:domains_subscription, resource_id: domain_id)
+
+      rule_id = 9
+      %{id: rule_subscription_id, subscriber_id: rule_subscriber_id} =
+        insert(:rule_subscription, resource_id: rule_id)
+
+      assert %{"data" => data} =
                conn
                |> get(Routes.subscription_path(conn, :index))
                |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
-      assert %{"id" => ^id, "subscriber" => %{"id" => ^subscriber_id}} = data
+      assert concept_subscription = Enum.find(data, & &1["id"] == concept_subscription_id)
+
+      assert %{
+        "subscriber" => %{"id" => ^concept_subscriber_id},
+        "resource" => %{
+          "id" => ^concept_id,
+          "name" => "concept",
+          "business_concept_version_id" => "4"
+        }
+      } = concept_subscription
+
+      assert domain_subscription = Enum.find(data, & &1["id"] == domains_subscription_id)
+
+      assert %{
+        "subscriber" => %{"id" => ^domains_subscriber_id},
+        "resource" => %{
+          "id" => ^domain_id,
+          "name" => "domain",
+        }
+      } = domain_subscription
+
+      assert rule_subscription = Enum.find(data, & &1["id"] == rule_subscription_id)
+
+      assert %{
+        "subscriber" => %{"id" => ^rule_subscriber_id},
+        "resource" => %{
+          "id" => ^rule_id,
+          "name" => "rule",
+        }
+      } = rule_subscription
     end
 
     @tag authenticated_user: @admin_user_name
     test "lists all subscriptions filtered", %{conn: conn, swagger_schema: schema} do
-      %{id: id, subscriber_id: subscriber_id} =
-        1..5
-        |> Enum.map(fn _ -> insert(:subscription) end)
-        |> Enum.random()
+      %{id: id, subscriber_id: subscriber_id} = insert(:subscription)
+      _other = insert(:subscription)
 
       assert %{"data" => [data]} =
                conn
@@ -42,6 +77,8 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
       assert %{"id" => ^id, "subscriber" => %{"id" => ^subscriber_id}} = data
     end
+
+
   end
 
   describe "index_by_user" do
