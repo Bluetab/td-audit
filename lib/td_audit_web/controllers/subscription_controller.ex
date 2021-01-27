@@ -39,24 +39,42 @@ defmodule TdAuditWeb.SubscriptionController do
     render(conn, "index.json", subscriptions: subscriptions)
   end
 
-  defp with_resource(%{scope: %{resource_type: "concept", resource_id: resource_id}} = subscription) do
+  defp with_resource(
+         %{scope: %{resource_type: "concept", resource_id: resource_id}} = subscription
+       ) do
     case ConceptCache.get(resource_id) do
-      {:ok, resource} when not is_nil(resource) -> Map.put(subscription, :resource, Map.take(resource, [:id, :name, :business_concept_version_id]))
-      _ -> subscription
+      {:ok, resource} when not is_nil(resource) ->
+        Map.put(
+          subscription,
+          :resource,
+          Map.take(resource, [:id, :name, :business_concept_version_id])
+        )
+
+      _ ->
+        subscription
     end
   end
 
-  defp with_resource(%{scope: %{resource_type: domain_type, resource_id: resource_id}} = subscription) when domain_type in ~w(domain domains) do
+  defp with_resource(
+         %{scope: %{resource_type: domain_type, resource_id: resource_id}} = subscription
+       )
+       when domain_type in ~w(domain domains) do
     case DomainCache.get(resource_id) do
-      {:ok, resource} when not is_nil(resource) -> Map.put(subscription, :resource, Map.take(resource, [:id, :name]))
-      _ -> subscription
+      {:ok, resource} when not is_nil(resource) ->
+        Map.put(subscription, :resource, Map.take(resource, [:id, :name]))
+
+      _ ->
+        subscription
     end
   end
 
   defp with_resource(%{scope: %{resource_type: "rule", resource_id: resource_id}} = subscription) do
     case RuleCache.get(resource_id) do
-      {:ok, resource} when not is_nil(resource) -> Map.put(subscription, :resource, Map.take(resource, [:id, :name]))
-      _ -> subscription
+      {:ok, resource} when not is_nil(resource) ->
+        Map.put(subscription, :resource, Map.take(resource, [:id, :name]))
+
+      _ ->
+        subscription
     end
   end
 
