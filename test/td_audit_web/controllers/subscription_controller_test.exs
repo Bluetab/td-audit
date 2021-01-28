@@ -14,51 +14,15 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       conn: conn,
       swagger_schema: schema
     } do
-      %{id: concept_subscription_id, subscriber_id: concept_subscriber_id} =
-        insert(:concept_subscription, resource_id: 1)
+      %{id: subscription_id} = insert(:subscription)
 
-      %{id: domains_subscription_id, subscriber_id: domains_subscriber_id} =
-        insert(:domains_subscription, resource_id: 2)
-
-      %{id: rule_subscription_id, subscriber_id: rule_subscriber_id} =
-        insert(:rule_subscription, resource_id: 3)
-
-      assert %{"data" => data} =
+      assert %{"data" => [data]} =
                conn
                |> get(Routes.subscription_path(conn, :index))
                |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
-      assert concept_subscription = Enum.find(data, &(&1["id"] == concept_subscription_id))
-
-      assert %{
-               "subscriber" => %{"id" => ^concept_subscriber_id},
-               "resource" => %{
-                 "id" => 1,
-                 "name" => "concept",
-                 "business_concept_version_id" => "4"
-               }
-             } = concept_subscription
-
-      assert domain_subscription = Enum.find(data, &(&1["id"] == domains_subscription_id))
-
-      assert %{
-               "subscriber" => %{"id" => ^domains_subscriber_id},
-               "resource" => %{
-                 "id" => 2,
-                 "name" => "domain"
-               }
-             } = domain_subscription
-
-      assert rule_subscription = Enum.find(data, &(&1["id"] == rule_subscription_id))
-
-      assert %{
-               "subscriber" => %{"id" => ^rule_subscriber_id},
-               "resource" => %{
-                 "id" => 3,
-                 "name" => "rule"
-               }
-             } = rule_subscription
+      assert %{"id" => ^subscription_id} = data
     end
 
     @tag authenticated_user: @admin_user_name
@@ -132,6 +96,73 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
                "periodicity" => ^periodicity,
                "subscriber" => %{"id" => ^subscriber_id},
                "scope" => _scope
+             } = data
+    end
+
+    @tag authenticated_user: @admin_user_name
+    test "renders a subscription with concept resource", %{conn: conn, swagger_schema: schema} do
+      %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
+        insert(:concept_subscription, resource_id: 1)
+
+      conn = get(conn, Routes.subscription_path(conn, :show, id))
+
+      assert validate_resp_schema(conn, schema, "SubscriptionResponse")
+
+      assert %{"data" => data} = json_response(conn, :ok)
+
+      assert %{
+               "id" => ^id,
+               "subscriber" => %{"id" => ^subscriber_id},
+               "periodicity" => ^periodicity,
+               "resource" => %{
+                 "id" => 1,
+                 "name" => "concept",
+                 "business_concept_version_id" => "4"
+               }
+             } = data
+    end
+
+    @tag authenticated_user: @admin_user_name
+    test "renders a subscription with domains resource", %{conn: conn, swagger_schema: schema} do
+      %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
+        insert(:domains_subscription, resource_id: 2)
+
+      conn = get(conn, Routes.subscription_path(conn, :show, id))
+
+      assert validate_resp_schema(conn, schema, "SubscriptionResponse")
+
+      assert %{"data" => data} = json_response(conn, :ok)
+
+      assert %{
+               "id" => ^id,
+               "subscriber" => %{"id" => ^subscriber_id},
+               "periodicity" => ^periodicity,
+               "resource" => %{
+                 "id" => 2,
+                 "name" => "domain"
+               }
+             } = data
+    end
+
+    @tag authenticated_user: @admin_user_name
+    test "renders a subscription with rule resource", %{conn: conn, swagger_schema: schema} do
+      %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
+        insert(:rule_subscription, resource_id: 3)
+
+      conn = get(conn, Routes.subscription_path(conn, :show, id))
+
+      assert validate_resp_schema(conn, schema, "SubscriptionResponse")
+
+      assert %{"data" => data} = json_response(conn, :ok)
+
+      assert %{
+               "id" => ^id,
+               "subscriber" => %{"id" => ^subscriber_id},
+               "periodicity" => ^periodicity,
+               "resource" => %{
+                 "id" => 3,
+                 "name" => "rule"
+               }
              } = data
     end
   end

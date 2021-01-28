@@ -168,7 +168,11 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   def show(conn, %{"id" => id}) do
-    subscription = Subscriptions.get_subscription!(id)
+    subscription =
+      id
+      |> Subscriptions.get_subscription!()
+      |> with_resource()
+
     render(conn, "show.json", subscription: subscription)
   end
 
