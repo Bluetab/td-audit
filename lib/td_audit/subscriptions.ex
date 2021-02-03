@@ -11,6 +11,7 @@ defmodule TdAudit.Subscriptions do
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.AclCache
   alias TdCache.UserCache
+  alias Ecto.Changeset
 
   @doc """
   Returns the list of subscriptions.
@@ -66,21 +67,27 @@ defmodule TdAudit.Subscriptions do
 
   ## Examples
 
-      iex> create_subscription(%{field: value})
-      {:ok, %Event{}}
+      iex> create_subscription(subscriber, %{field: value})
+      {:ok, %Subscription{}}
 
-      iex> create_subscription(%{field: bad_value})
+      iex> create_subscription(subscriber, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_subscription(params \\ %{}) do
+  def create_subscription(subscriber, params) do
     last_event_id = Audit.max_event_id() || 0
 
-    params
-    |> Map.put_new("last_event_id", last_event_id)
-    |> Subscription.changeset()
+    %Subscription{last_event_id: last_event_id}
+    |> Subscription.changeset(params)
+    |> Changeset.put_assoc(:subscriber, subscriber)
+    |> Changeset.validate_required([:subscriber])
     |> Repo.insert()
+    |> preload_subscriber()
   end
+
+  defp preload_subscriber({:ok, subscription}), do: {:ok, Repo.preload(subscription, :subscriber)
+
+  defp preload_subscriber(error), do: error
 
   @doc """
   Updates a subscription.
@@ -96,8 +103,9 @@ defmodule TdAudit.Subscriptions do
   """
   def update_subscription(%Subscription{} = subscription, attrs) do
     subscription
-    |> Subscription.changeset(attrs)
+    |> Subscription.update_changeset(attrs)
     |> Repo.update()
+    |> preload_subscriber()
   end
 
   @doc """

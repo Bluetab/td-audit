@@ -2,14 +2,12 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   use TdAuditWeb.ConnCase
   use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
-  @admin_user_name "app-admin"
-
   setup %{conn: conn} do
     [conn: put_req_header(conn, "accept", "application/json")]
   end
 
   describe "index" do
-    @tag authenticated_user: @admin_user_name
+    @tag :admin_authenticated
     test "lists all subscriptions", %{
       conn: conn,
       swagger_schema: schema
@@ -25,7 +23,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{"id" => ^subscription_id} = data
     end
 
-    @tag authenticated_user: @admin_user_name
+    @tag :authenticated_user
+    test "index requires admin users", %{conn: conn} do
+      conn = get(conn, Routes.subscription_path(conn, :index))
+      assert json_response(conn, :forbidden)
+    end
+
+    @tag :admin_authenticated
     test "lists all subscriptions filtered", %{conn: conn, swagger_schema: schema} do
       %{id: id, subscriber_id: subscriber_id} = insert(:subscription)
       _other = insert(:subscription)
@@ -41,7 +45,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   end
 
   describe "index_by_user" do
-    @tag authenticated_user: @admin_user_name
+    @tag :authenticated_user
     test "lists all user subscriptions", %{
       conn: conn,
       claims: %{user_id: user_id},
@@ -80,7 +84,14 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   end
 
   describe "show subscription" do
-    @tag authenticated_user: @admin_user_name
+    @tag :authenticated_user
+    test "show requires admin users", %{conn: conn} do
+      subscription = insert(:subscription)
+      conn = get(conn, Routes.subscription_path(conn, :show, subscription))
+      assert json_response(conn, :forbidden)
+    end
+
+    @tag :admin_authenticated
     test "renders a subscription", %{conn: conn, swagger_schema: schema} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} = insert(:subscription)
 
@@ -99,16 +110,16 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
              } = data
     end
 
-    @tag authenticated_user: @admin_user_name
+    @tag :admin_authenticated
     test "renders a subscription with concept resource", %{conn: conn, swagger_schema: schema} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:concept_subscription, resource_id: 1)
 
-      conn = get(conn, Routes.subscription_path(conn, :show, id))
-
-      assert validate_resp_schema(conn, schema, "SubscriptionResponse")
-
-      assert %{"data" => data} = json_response(conn, :ok)
+      assert %{"data" => data} =
+        conn
+        |> get(Routes.subscription_path(conn, :show, id))
+        |> validate_resp_schema(schema, "SubscriptionResponse")
+        |> json_response(:ok)
 
       assert %{
                "id" => ^id,
@@ -122,16 +133,16 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
              } = data
     end
 
-    @tag authenticated_user: @admin_user_name
+    @tag :admin_authenticated
     test "renders a subscription with domains resource", %{conn: conn, swagger_schema: schema} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:domains_subscription, resource_id: 2)
 
-      conn = get(conn, Routes.subscription_path(conn, :show, id))
-
-      assert validate_resp_schema(conn, schema, "SubscriptionResponse")
-
-      assert %{"data" => data} = json_response(conn, :ok)
+        assert %{"data" => data} =
+          conn
+          |> get(Routes.subscription_path(conn, :show, id))
+          |> validate_resp_schema(schema, "SubscriptionResponse")
+          |> json_response(:ok)
 
       assert %{
                "id" => ^id,
@@ -144,16 +155,16 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
              } = data
     end
 
-    @tag authenticated_user: @admin_user_name
+    @tag :admin_authenticated
     test "renders a subscription with rule resource", %{conn: conn, swagger_schema: schema} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:rule_subscription, resource_id: 3)
 
-      conn = get(conn, Routes.subscription_path(conn, :show, id))
-
-      assert validate_resp_schema(conn, schema, "SubscriptionResponse")
-
-      assert %{"data" => data} = json_response(conn, :ok)
+        assert %{"data" => data} =
+          conn
+          |> get(Routes.subscription_path(conn, :show, id))
+          |> validate_resp_schema(schema, "SubscriptionResponse")
+          |> json_response(:ok)
 
       assert %{
                "id" => ^id,
@@ -168,7 +179,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   end
 
   describe "create subscription" do
-    @tag authenticated_user: @admin_user_name
+    @tag :admin_authenticated
     test "renders a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
       %{id: subscriber_id} = insert(:subscriber)
 
@@ -189,7 +200,48 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
              } = data
     end
 
-    @tag authenticated_user: @admin_user_name
+    @tag :authenticated_user
+    test "creating a subscription without subscriber identifier will use current user", %{conn: conn, claims: claims, swagger_schema: schema} do
+      params =
+        :subscription
+        |> string_params_for()
+        |> Map.put("subscriber", %{"type" => "user"})
+
+      assert %{"data" => data} =
+        conn
+        |> post(Routes.subscription_path(conn, :create), subscription: params)
+        |> validate_resp_schema(schema, "SubscriptionResponse")
+        |> json_response(:created)
+
+      subscriber_id = "#{claims.user_id}"
+      assert %{"subscriber" => %{"identifier" => ^subscriber_id}} = data
+    end
+
+    @tag :admin_authenticated
+    test "creating a subscription without subscriber will return unprocessable entity", %{conn: conn} do
+      params = string_params_for(:subscription)
+
+      assert %{"errors" => errors} =
+        conn
+        |> post(Routes.subscription_path(conn, :create), subscription: params)
+        |> json_response(:unprocessable_entity)
+
+      assert %{"subscriber" => ["can't be blank"]} = errors
+    end
+
+    @tag :authenticated_user
+    test "normal user cannot create a subscription with subscriber type different from user", %{conn: conn} do
+      params =
+        :subscription
+        |> string_params_for()
+        |> Map.put("subscriber", %{"type" => "role", "identifier" => "Data Owner"})
+
+      assert conn
+        |> post(Routes.subscription_path(conn, :create), subscription: params)
+        |> json_response(:forbidden)
+    end
+
+    @tag :admin_authenticated
     test "renders errors when data is invalid", %{conn: conn} do
       assert %{"errors" => errors} =
                conn
@@ -199,13 +251,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{
                "periodicity" => ["can't be blank"],
                "scope" => ["can't be blank"],
-               "subscriber_id" => ["can't be blank"]
+               "subscriber" => ["can't be blank"]
              } = errors
     end
   end
 
   describe "update subscription" do
-    @tag authenticated_user: @admin_user_name
+    @tag :authenticated_user
     test "updates a subscription when data is valid", %{
       conn: conn,
       claims: %{user_id: user_id},
@@ -243,7 +295,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert Map.get(scope, "status") == ["fail", "warn"]
     end
 
-    @tag authenticated_user: @admin_user_name
+    @tag :admin_authenticated
     test "renders errors when data is invalid", %{conn: conn} do
       assert %{"errors" => errors} =
                conn
@@ -253,13 +305,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{
                "periodicity" => ["can't be blank"],
                "scope" => ["can't be blank"],
-               "subscriber_id" => ["can't be blank"]
+               "subscriber" => ["can't be blank"]
              } = errors
     end
   end
 
   describe "delete subscription" do
-    @tag authenticated_user: @admin_user_name
+    @tag :authenticated_user
     test "deletes chosen subscription", %{conn: conn, claims: %{user_id: user_id}} do
       %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
       subscription = insert(:subscription, subscriber_id: subscriber_id)
