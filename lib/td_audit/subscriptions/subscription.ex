@@ -28,17 +28,16 @@ defmodule TdAudit.Subscriptions.Subscription do
     subscription
     |> cast(attrs, [:periodicity, :last_event_id])
     |> cast_embed(:scope, with: &Scope.changeset/2)
-    |> validate_subscription()
+    |> common_changeset()
   end
 
   def update_changeset(%__MODULE__{} = subscription, attrs) do
     subscription
     |> cast(attrs, [:periodicity])
-    |> cast_embed(:scope, with: &Scope.update_changeset/2)
-    |> validate_subscription()
+    |> common_changeset()
   end
 
-  defp validate_subscription(changeset) do
+  defp common_changeset(changeset) do
     changeset
     |> validate_required([:scope, :periodicity, :last_event_id])
     |> validate_inclusion(:periodicity, ["daily", "minutely", "hourly"])

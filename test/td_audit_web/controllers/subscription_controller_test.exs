@@ -25,8 +25,9 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
     @tag :authenticated_user
     test "index requires admin users", %{conn: conn} do
-      conn = get(conn, Routes.subscription_path(conn, :index))
-      assert json_response(conn, :forbidden)
+      assert conn
+             |> get(Routes.subscription_path(conn, :index))
+             |> json_response(:forbidden)
     end
 
     @tag :admin_authenticated
@@ -116,10 +117,10 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
         insert(:concept_subscription, resource_id: 1)
 
       assert %{"data" => data} =
-        conn
-        |> get(Routes.subscription_path(conn, :show, id))
-        |> validate_resp_schema(schema, "SubscriptionResponse")
-        |> json_response(:ok)
+               conn
+               |> get(Routes.subscription_path(conn, :show, id))
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:ok)
 
       assert %{
                "id" => ^id,
@@ -138,11 +139,11 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:domains_subscription, resource_id: 2)
 
-        assert %{"data" => data} =
-          conn
-          |> get(Routes.subscription_path(conn, :show, id))
-          |> validate_resp_schema(schema, "SubscriptionResponse")
-          |> json_response(:ok)
+      assert %{"data" => data} =
+               conn
+               |> get(Routes.subscription_path(conn, :show, id))
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:ok)
 
       assert %{
                "id" => ^id,
@@ -160,11 +161,11 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:rule_subscription, resource_id: 3)
 
-        assert %{"data" => data} =
-          conn
-          |> get(Routes.subscription_path(conn, :show, id))
-          |> validate_resp_schema(schema, "SubscriptionResponse")
-          |> json_response(:ok)
+      assert %{"data" => data} =
+               conn
+               |> get(Routes.subscription_path(conn, :show, id))
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:ok)
 
       assert %{
                "id" => ^id,
@@ -201,44 +202,64 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :authenticated_user
-    test "creating a subscription without subscriber identifier will use current user", %{conn: conn, claims: claims, swagger_schema: schema} do
+    test "creating a subscription without subscriber identifier will use current user", %{
+      conn: conn,
+      claims: claims,
+      swagger_schema: schema
+    } do
       params =
         :subscription
         |> string_params_for()
         |> Map.put("subscriber", %{"type" => "user"})
 
       assert %{"data" => data} =
-        conn
-        |> post(Routes.subscription_path(conn, :create), subscription: params)
-        |> validate_resp_schema(schema, "SubscriptionResponse")
-        |> json_response(:created)
+               conn
+               |> post(Routes.subscription_path(conn, :create), subscription: params)
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:created)
 
       subscriber_id = "#{claims.user_id}"
       assert %{"subscriber" => %{"identifier" => ^subscriber_id}} = data
     end
 
     @tag :admin_authenticated
-    test "creating a subscription without subscriber will return unprocessable entity", %{conn: conn} do
+    test "creating a subscription without subscriber will return unprocessable entity", %{
+      conn: conn
+    } do
       params = string_params_for(:subscription)
 
       assert %{"errors" => errors} =
-        conn
-        |> post(Routes.subscription_path(conn, :create), subscription: params)
-        |> json_response(:unprocessable_entity)
+               conn
+               |> post(Routes.subscription_path(conn, :create), subscription: params)
+               |> json_response(:unprocessable_entity)
+
+      assert %{"subscriber" => ["can't be blank"]} = errors
+    end
+
+    @tag :admin_authenticated
+    test "creating a subscription with invalid subscriber id", %{conn: conn} do
+      params = string_params_for(:subscription, subscriber_id: -1)
+
+      assert %{"errors" => errors} =
+               conn
+               |> post(Routes.subscription_path(conn, :create), subscription: params)
+               |> json_response(:unprocessable_entity)
 
       assert %{"subscriber" => ["can't be blank"]} = errors
     end
 
     @tag :authenticated_user
-    test "normal user cannot create a subscription with subscriber type different from user", %{conn: conn} do
+    test "normal user cannot create a subscription with subscriber type different from user", %{
+      conn: conn
+    } do
       params =
         :subscription
         |> string_params_for()
         |> Map.put("subscriber", %{"type" => "role", "identifier" => "Data Owner"})
 
       assert conn
-        |> post(Routes.subscription_path(conn, :create), subscription: params)
-        |> json_response(:forbidden)
+             |> post(Routes.subscription_path(conn, :create), subscription: params)
+             |> json_response(:forbidden)
     end
 
     @tag :admin_authenticated
@@ -272,9 +293,18 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
           resource_id: 28_280
         )
 
-      subscription = insert(:subscription, subscriber_id: subscriber_id, scope: scope)
+      subscription =
+        insert(:subscription, subscriber_id: subscriber_id, last_event_id: 1, scope: scope)
 
-      update_params = %{"periodicity" => "hourly", "scope" => %{"status" => ["fail", "warn"]}}
+      update_params = %{
+        "periodicity" => "hourly",
+        "last_event_id" => 2,
+        "scope" => %{
+          "status" => ["fail", "warn"],
+          "resource_type" => "not_rule",
+          "resource_id" => 999
+        }
+      }
 
       assert %{"data" => data} =
                conn
@@ -286,13 +316,83 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
       assert %{
                "id" => _id,
-               "last_event_id" => _last_event_id,
+               "last_event_id" => 1,
                "periodicity" => "hourly",
                "subscriber" => %{"id" => ^subscriber_id},
                "scope" => scope
              } = data
 
-      assert Map.get(scope, "status") == ["fail", "warn"]
+      assert %{
+               "status" => ["fail", "warn"],
+               "resource_type" => "rule",
+               "resource_id" => 28_280
+             } = scope
+    end
+
+    @tag :authenticated_user
+    test "normal user cannot update a subscription with subscriber type different from user", %{
+      conn: conn
+    } do
+      %{id: subscriber_id} = insert(:subscriber, type: "role", identifier: "Data Owner")
+      subscription = insert(:subscription, subscriber_id: subscriber_id)
+
+      update_params = %{"periodicity" => "hourly"}
+
+      assert conn
+             |> put(Routes.subscription_path(conn, :update, subscription),
+               subscription: update_params
+             )
+             |> json_response(:forbidden)
+    end
+
+    @tag :admin_authenticated
+    test "admin updates a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
+      %{id: subscriber_id} = insert(:subscriber, identifier: "Data Owner", type: "role")
+
+      scope =
+        build(:scope,
+          events: ["rule_result_created"],
+          resource_type: "rule",
+          resource_id: 28_280
+        )
+
+      %{id: another_subscriber_id} = insert(:subscriber, identifier: "Another Role", type: "role")
+
+      subscription =
+        insert(:subscription, subscriber_id: subscriber_id, last_event_id: 1, scope: scope)
+
+      update_params = %{
+        "periodicity" => "hourly",
+        "last_event_id" => 2,
+        "subscriber_id" => another_subscriber_id,
+        "scope" => %{
+          "status" => ["fail", "warn"],
+          "resource_type" => "not_rule",
+          "resource_id" => 999
+        }
+      }
+
+      assert %{"data" => data} =
+               conn
+               |> put(Routes.subscription_path(conn, :update, subscription),
+                 subscription: update_params
+               )
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:ok)
+
+      assert %{
+               "id" => _id,
+               "last_event_id" => 1,
+               "periodicity" => "hourly",
+               "subscriber" => %{"id" => ^subscriber_id},
+               "scope" => scope
+             } = data
+
+      assert %{
+               "status" => ["fail", "warn"],
+               "resource_type" => "rule",
+               "resource_id" => 28_280
+             } = scope
     end
 
     @tag :admin_authenticated

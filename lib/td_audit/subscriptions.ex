@@ -5,13 +5,14 @@ defmodule TdAudit.Subscriptions do
 
   import Ecto.Query, warn: false
 
+  alias Ecto.Changeset
   alias TdAudit.Audit
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
+  alias TdAudit.Subscriptions.Scope
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.AclCache
   alias TdCache.UserCache
-  alias Ecto.Changeset
 
   @doc """
   Returns the list of subscriptions.
@@ -85,10 +86,6 @@ defmodule TdAudit.Subscriptions do
     |> preload_subscriber()
   end
 
-  defp preload_subscriber({:ok, subscription}), do: {:ok, Repo.preload(subscription, :subscriber)
-
-  defp preload_subscriber(error), do: error
-
   @doc """
   Updates a subscription.
 
@@ -102,11 +99,18 @@ defmodule TdAudit.Subscriptions do
 
   """
   def update_subscription(%Subscription{} = subscription, attrs) do
+    scope = Map.get(attrs, "scope", %{})
+    scope_changeset = Scope.update_changeset(subscription.scope, scope)
+
     subscription
     |> Subscription.update_changeset(attrs)
+    |> Changeset.put_change(:scope, scope_changeset)
     |> Repo.update()
     |> preload_subscriber()
   end
+
+  defp preload_subscriber({:ok, subscription}), do: {:ok, Repo.preload(subscription, :subscriber)}
+  defp preload_subscriber(error), do: error
 
   @doc """
   Deletes a Subscription.

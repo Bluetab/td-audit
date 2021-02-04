@@ -7,7 +7,6 @@ defmodule TdAuditWeb.SubscriptionController do
 
   import Canada, only: [can?: 2]
 
-  alias TdAudit.Auth.Claims
   alias TdAudit.Map.Helpers
   alias TdAudit.Subscriptions
   alias TdAudit.Subscriptions.Subscriber
@@ -17,7 +16,6 @@ defmodule TdAuditWeb.SubscriptionController do
   alias TdCache.ConceptCache
   alias TdCache.DomainCache
   alias TdCache.RuleCache
-  alias TdCache.UserCache
 
   action_fallback(TdAuditWeb.FallbackController)
 
@@ -68,35 +66,9 @@ defmodule TdAuditWeb.SubscriptionController do
     response(400, "Client Error")
   end
 
-  # def create(
-  #       conn,
-  #       %{"subscription" => %{"subscriber" => subscriber_params} = subscription_params}
-  #     ) do
-  #   %Claims{user_id: user_id} = claims = conn.assigns[:current_resource]
-  #   subscriber_params =
-  #     case Map.get(subscriber_params, "identifier") do
-  #       nil -> Map.put(subscriber_params, "identifier", "#{user_id}")
-  #       _ -> subscriber_params
-  #     end
-
-  #   with {:can, true} <- {:can, can?(claims, create(subscriber_params))},
-  #        {:ok, %{id: subscriber_id}} <- Subscribers.get_or_create_subscriber(subscriber_params),
-  #        subscription_params <-
-  #          subscription_params
-  #          |> Map.put("subscriber_id", subscriber_id)
-  #          |> Map.delete("subscriber"),
-  #        {:ok, %{id: id}} <- Subscriptions.create_subscription(subscription_params),
-  #        subscription <- Subscriptions.get_subscription!(id) do
-  #     conn
-  #     |> put_status(:created)
-  #     |> put_resp_header("location", Routes.subscription_path(conn, :show, subscription))
-  #     |> render("show.json", subscription: subscription)
-  #   end
-  # end
-
   def create(conn, %{"subscription" => subscription_params}) do
     with claims <- conn.assigns[:current_resource],
-         {:ok, subscriber} <- get_subscriber(claims, subscription_params),
+         {:ok, subscriber} <- get_or_create_subscriber(claims, subscription_params),
          {:can, true} <- {:can, can?(claims, create(subscriber))},
          {:ok, subscription} <- Subscriptions.create_subscription(subscriber, subscription_params) do
       conn
@@ -106,11 +78,11 @@ defmodule TdAuditWeb.SubscriptionController do
     end
   end
 
-  defp get_subscriber(_claims, %{"subscriber_id" => subscriber_id}) do
-    {:ok, Subscribers.get_subscriber!(subscriber_id)}
+  defp get_or_create_subscriber(_claims, %{"subscriber_id" => subscriber_id}) do
+    {:ok, Subscribers.get_subscriber(subscriber_id)}
   end
 
-  defp get_subscriber(claims, %{"subscriber" => subscriber_params}) do
+  defp get_or_create_subscriber(claims, %{"subscriber" => subscriber_params}) do
     subscriber_params =
       case Map.get(subscriber_params, "identifier") do
         nil -> Map.put(subscriber_params, "identifier", "#{claims.user_id}")
@@ -122,7 +94,7 @@ defmodule TdAuditWeb.SubscriptionController do
     end
   end
 
-  defp get_subscriber(_claims, _subscriber_params) do
+  defp get_or_create_subscriber(_claims, _subscriber_params) do
     {:ok, nil}
   end
 
@@ -162,31 +134,13 @@ defmodule TdAuditWeb.SubscriptionController do
     with claims <- conn.assigns[:current_resource],
          subscription <- Subscriptions.get_subscription!(id),
          {:can, true} <- {:can, can?(claims, update(subscription))},
-         {:ok, subscription} <- Subscriptions.update_subscription(subscription, subscription_params) do
+         {:ok, subscription} <-
+           Subscriptions.update_subscription(subscription, subscription_params) do
       conn
       |> put_resp_header("location", Routes.subscription_path(conn, :show, subscription))
       |> render("show.json", subscription: subscription)
     end
   end
-
-  # defp filter_subscription_params(subscription, subscription_params) do
-  #   params =
-  #     subscription_params
-  #     |> Map.take(["periodicity", "scope"])
-
-  #   case get_in(params, ["scope", "status"]) do
-  #     nil ->
-  #       Map.delete(params, "scope")
-
-  #     status ->
-  #       scope =
-  #         Map.merge(Helpers.stringify_keys(Map.from_struct(subscription.scope)), %{
-  #           "status" => status
-  #         })
-
-  #       Map.put(params, "scope", scope)
-  #   end
-  # end
 
   swagger_path :delete do
     description("Delete Subscription")
