@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3262] Secure Subscription API and add resources
+
 ## [4.12.0] 2021-01-25
 
 ### Added
