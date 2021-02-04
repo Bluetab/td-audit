@@ -19,7 +19,7 @@ defmodule TdAuditWeb.SubscriptionView do
     subscriber = render_one(subscriber, SubscriberView, "subscriber.json")
 
     subscription
-    |> Map.take([:id, :periodicity, :last_event_id])
+    |> Map.take([:id, :periodicity, :last_event_id, :resource])
     |> Map.put(:subscriber, subscriber)
     |> Map.put(:scope, scope)
   end
