@@ -15,8 +15,12 @@ defmodule TdAudit.Subscriptions.Subscribers do
     Repo.get!(Subscriber, id)
   end
 
+  def get_subscriber(id) do
+    Repo.get(Subscriber, id)
+  end
+
   def get_or_create_subscriber(subscriber_params) do
-    case get_subscriber(subscriber_params) do
+    case get_subscriber_from_params(subscriber_params) do
       nil ->
         create_subscriber(subscriber_params)
 
@@ -25,7 +29,7 @@ defmodule TdAudit.Subscriptions.Subscribers do
     end
   end
 
-  def get_subscriber(%{"type" => type, "identifier" => identifier}) do
+  defp get_subscriber_from_params(%{"type" => type, "identifier" => identifier}) do
     Subscriber
     |> where([s], s.identifier == ^identifier)
     |> where([s], s.type == ^type)
@@ -33,7 +37,7 @@ defmodule TdAudit.Subscriptions.Subscribers do
   end
 
   def get_subscriber_by_user(user_id) do
-    get_subscriber(%{"type" => "user", "identifier" => "#{user_id}"})
+    get_subscriber_from_params(%{"type" => "user", "identifier" => "#{user_id}"})
   end
 
   def create_subscriber(%{} = params) do

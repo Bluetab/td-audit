@@ -8,6 +8,9 @@ defmodule TdAudit.Factory do
   alias TdAudit.Audit.Event
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
+  alias TdCache.ConceptCache
+  alias TdCache.DomainCache
+  alias TdCache.RuleCache
 
   def subscription_factory(attrs) do
     attrs = default_assoc(attrs, :subscriber_id, :subscriber)
@@ -18,6 +21,34 @@ defmodule TdAudit.Factory do
       scope: build(:scope)
     }
     |> merge_attributes(attrs)
+  end
+
+  def concept_subscription_factory(attrs) do
+    concept_id = Map.get(attrs, :resource_id, 42)
+    concept = %{id: concept_id, name: "concept", business_concept_version_id: "4"}
+    {:ok, _} = ConceptCache.put(concept)
+    build(:subscription, scope: %{resource_type: "concept", resource_id: concept_id})
+  end
+
+  def domains_subscription_factory(attrs) do
+    domain_id = Map.get(attrs, :resource_id, 42)
+    domain = %{id: domain_id, name: "domain", updated_at: ~N[2021-01-26 14:41:14]}
+    {:ok, _} = DomainCache.put(domain)
+    build(:subscription, scope: %{resource_type: "domains", resource_id: domain_id})
+  end
+
+  def domain_subscription_factory(attrs) do
+    domain_id = Map.get(attrs, :resource_id, 42)
+    domain = %{id: domain_id, name: "domain", updated_at: ~N[2021-01-26 14:41:14]}
+    {:ok, _} = DomainCache.put(domain)
+    build(:subscription, scope: %{resource_type: "domain", resource_id: domain_id})
+  end
+
+  def rule_subscription_factory(attrs) do
+    rule_id = Map.get(attrs, :resource_id, 42)
+    rule = %{id: rule_id, name: "rule", updated_at: ~N[2021-01-26 14:41:14]}
+    {:ok, _} = RuleCache.put(rule)
+    build(:subscription, scope: %{resource_type: "rule", resource_id: rule_id})
   end
 
   def scope_factory do

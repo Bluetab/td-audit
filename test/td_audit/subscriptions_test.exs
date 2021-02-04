@@ -59,22 +59,24 @@ defmodule TdAudit.SubscriptionsTest do
     end
 
     test "create_subscription/1 with valid data creates a subscription" do
-      %{id: subscriber_id} = insert(:subscriber)
+      subscriber = insert(:subscriber)
 
       params =
         :subscription
-        |> string_params_for(subscriber_id: subscriber_id)
-        |> Map.take(["subscriber_id", "scope", "periodicity"])
+        |> string_params_for()
+        |> Map.take(["scope", "periodicity"])
 
-      assert {:ok, %Subscription{} = _subscription} = Subscriptions.create_subscription(params)
+      assert {:ok, %Subscription{} = _subscription} =
+               Subscriptions.create_subscription(subscriber, params)
     end
 
     test "create_subscription/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(%{})
+      subscriber = insert(:subscriber)
+      assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(subscriber, %{})
     end
 
     test "update_subscription/1 with valid data updates a subscription" do
-      subscription = insert(:subscription)
+      subscription = insert(:subscription, periodicity: "daily")
 
       params = %{"periodicity" => "hourly"}
 
@@ -87,7 +89,7 @@ defmodule TdAudit.SubscriptionsTest do
     test "update_subscription/1 with invalid data returns changeset error" do
       subscription = insert(:subscription)
 
-      params = %{"scope" => %{"resource_id" => 2}}
+      params = %{"scope" => %{"events" => []}}
 
       assert {:error, %Ecto.Changeset{}} = Subscriptions.update_subscription(subscription, params)
     end

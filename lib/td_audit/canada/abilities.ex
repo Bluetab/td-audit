@@ -10,7 +10,11 @@ defmodule TdAudit.Canada.Abilities do
   defimpl Canada.Can, for: Claims do
     def can?(%Claims{is_admin: true}, _action, _domain), do: true
 
-    def can?(%Claims{user_id: user_id}, :create, %{"type" => "user", "identifier" => identifier}) do
+    def can?(%Claims{user_id: user_id}, :create_subscriber, %{"type" => "user", "identifier" => identifier}) do
+      to_string(user_id) == to_string(identifier)
+    end
+
+    def can?(%Claims{user_id: user_id}, :create, %{type: "user", identifier: identifier}) do
       to_string(user_id) == to_string(identifier)
     end
 
@@ -21,6 +25,12 @@ defmodule TdAudit.Canada.Abilities do
     end
 
     def can?(%Claims{user_id: user_id}, :delete, %Subscription{
+          subscriber: %Subscriber{identifier: identifier, type: "user"}
+        }) do
+      to_string(user_id) == to_string(identifier)
+    end
+
+    def can?(%Claims{user_id: user_id}, :show, %Subscription{
           subscriber: %Subscriber{identifier: identifier, type: "user"}
         }) do
       to_string(user_id) == to_string(identifier)

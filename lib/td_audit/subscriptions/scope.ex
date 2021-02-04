@@ -25,6 +25,17 @@ defmodule TdAudit.Subscriptions.Scope do
   def changeset(%__MODULE__{} = scope, %{} = params) do
     scope
     |> cast(params, [:events, :resource_type, :resource_id])
+    |> common_changeset(params)
+  end
+
+  def update_changeset(%__MODULE__{} = scope, %{} = params) do
+    scope
+    |> cast(params, [:events])
+    |> common_changeset(params)
+  end
+
+  defp common_changeset(changeset, params) do
+    changeset
     |> validate_length(:events, min: 1)
     |> validate_inclusion(:resource_type, ["domain", "domains", "ingest", "concept", "rule"])
     |> validate_required([:events, :resource_type, :resource_id])
