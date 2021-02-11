@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3265] Url for concept resources in notifications
+
 ## [4.13.0] 2021-02-08
 
 ### Changed
