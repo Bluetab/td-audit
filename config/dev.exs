@@ -29,14 +29,3 @@ config :td_audit, TdAudit.Notifications.Mailer,
 
 config :td_cache, redis_host: "localhost"
 config :td_audit, host_name: "http://localhost:8080"
-
-config :k8s,
-  clusters: %{
-    default: %{ # <- this can be any name, used to load connections later
-      # Path to kube config
-      conn: "~/.kube/config",
-      # By default current context will be used, you can change the user or cluster
-      conn_opts: [cluster: "minikube"]
-    }
-  }
-
