@@ -70,9 +70,7 @@ defmodule TdAudit.Mixfile do
       {:broadway, "~> 0.6.0"},
       {:quantum, "~> 3.0"},
       {:canada, "~> 2.0"},
-      {:number, "~> 1.0"},
-      {:k8s, "~> 0.5.1"},
-      {:uuid, "~> 1.1"}
+      {:number, "~> 1.0"}
     ]
   end
 

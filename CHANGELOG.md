@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+
+- [TD-3171] Kubernetes jobs are no longer launched by `td-audit`
+
 ## [4.13.0] 2021-02-08
 
 ### Changed
