@@ -35,11 +35,6 @@ defmodule TdAudit.DataCase do
 
     unless tags[:async] do
       Sandbox.mode(Repo, {:shared, self()})
-      parent = self()
-
-      allow(parent, [
-        K8s.Client.DynamicHTTPProvider
-      ])
     end
 
     :ok
@@ -58,17 +53,6 @@ defmodule TdAudit.DataCase do
       Enum.reduce(opts, message, fn {key, value}, acc ->
         String.replace(acc, "%{#{key}}", to_string(value))
       end)
-    end)
-  end
-
-  defp allow(parent, workers) do
-    Enum.each(workers, fn worker ->
-      case Process.whereis(worker) do
-        nil ->
-          nil
-
-        pid -> Sandbox.allow(TdAudit.Repo, parent, pid)
-      end
     end)
   end
 end

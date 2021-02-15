@@ -28,13 +28,3 @@ config :td_audit, TdAudit.Broadway,
   stream: "audit:events:test",
   redis_host: "redis",
   port: 6380
-
-config :k8s,
-  discovery_driver: K8s.Discovery.Driver.File,
-  discovery_opts: [config: "test/support/k8s/services.json"],
-  http_provider: K8s.Client.DynamicHTTPProvider,
-  clusters: %{
-    default: %{
-      conn: "test/support/k8s/kube-config.yaml"
-    }
-  }

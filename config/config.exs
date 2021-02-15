@@ -52,6 +52,8 @@ config :td_cache, :event_stream,
   streams: [
     [key: "cx:events", consumer: TdAudit.Cache.ExecutionConsumer]
   ]
+config :td_audit, concepts_path: "/concepts"
+config :td_audit, rules_path: "/rules"
 
 config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.SMTPAdapter
 
