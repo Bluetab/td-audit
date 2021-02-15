@@ -46,6 +46,12 @@ config :td_audit, :phoenix_swagger,
     "priv/static/swagger.json" => [router: TdAuditWeb.Router]
   }
 
+config :td_cache, :event_stream,
+  consumer_id: "default",
+  consumer_group: "td_audit",
+  streams: [
+    [key: "cx:events", consumer: TdAudit.Cache.ExecutionConsumer]
+  ]
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"
 

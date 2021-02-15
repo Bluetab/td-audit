@@ -154,9 +154,13 @@ defmodule TdAuditWeb.EmailView do
 
   defp uri(%{
          resource_type: "comment",
-         payload: %{"resource_type" => "business_concept", "version_id" => id}
+         payload: %{
+           "resource_type" => "business_concept",
+           "resource_id" => resource_id,
+           "version_id" => id
+         }
        }) do
-    Enum.join([host_name(), "concepts", id], "/")
+    Enum.join([host_name(), "concepts", resource_id, "versions", id], "/")
   end
 
   defp uri(%{resource_type: "ingest", payload: %{"id" => id}}) do
@@ -166,13 +170,16 @@ defmodule TdAuditWeb.EmailView do
   defp uri(%{resource_type: "concept", event: event, resource_id: resource_id})
        when event in ["relation_created", "relation_deleted", "relation_deprecated"] do
     case TdCache.ConceptCache.get(resource_id, :business_concept_version_id) do
-      {:ok, version} -> Enum.join([host_name(), "concepts", version], "/")
-      _ -> nil
+      {:ok, version} ->
+        Enum.join([host_name(), "concepts", resource_id, "versions", version], "/")
+
+      _ ->
+        nil
     end
   end
 
-  defp uri(%{resource_type: "concept", payload: %{"id" => id}}) do
-    Enum.join([host_name(), "concepts", id], "/")
+  defp uri(%{resource_type: "concept", resource_id: resource_id, payload: %{"id" => id}}) do
+    Enum.join([host_name(), "concepts", resource_id, "versions", id], "/")
   end
 
   defp uri(%{
