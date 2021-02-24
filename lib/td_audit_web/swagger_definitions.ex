@@ -62,6 +62,34 @@ defmodule TdAuditWeb.SwaggerDefinitions do
 
   def notification_swagger_definitions do
     %{
+      Notification:
+        swagger_schema do
+          title("Notification")
+          description("A Notification")
+
+          properties do
+            id(:integer, "Unique identifier", required: true)
+            events(:array, "Event array")
+          end
+
+          example(%{
+            id: 12,
+            events: []
+          })
+        end,
+      NotificationsResponse:
+        swagger_schema do
+          properties do
+            data(Schema.ref(:Notifications))
+          end
+        end,
+      Notifications:
+        swagger_schema do
+          title("Notifications")
+          description("A collection of Notifications")
+          type(:array)
+          items(Schema.ref(:Notification))
+        end,
       NotificationCreate:
         swagger_schema do
           properties do

@@ -7,6 +7,9 @@ defmodule TdAudit.SubscriptionsTest do
   import TdAudit.TestOperators
 
   alias TdAudit.Subscriptions
+  alias TdCache.AclCache
+  alias TdCache.ConceptCache
+  alias TdCache.DomainCache
 
   describe "subscriptions" do
     alias TdAudit.Subscriptions.Subscription
@@ -98,6 +101,43 @@ defmodule TdAudit.SubscriptionsTest do
       subscription = insert(:subscription)
       assert {:ok, %Subscription{}} = Subscriptions.delete_subscription(subscription)
       assert_raise Ecto.NoResultsError, fn -> Subscriptions.get_subscription!(subscription.id) end
+    end
+
+    test "list_recipient_ids/1 gets user id for user subscription" do
+      subscriber = build(:subscriber, type: "user", identifier: "42")
+      subscription = insert(:subscription, subscriber: subscriber)
+
+      assert [42] = Subscriptions.list_recipient_ids(subscription)
+    end
+
+    test "list_recipient_ids/1 gets user ids for domain role subscription" do
+      AclCache.set_acl_role_users("domain", 42, "Domain", [1, 2])
+
+      on_exit(fn ->
+        {:ok, _} = DomainCache.delete("Domain")
+      end)
+
+      subscriber = build(:subscriber, type: "role", identifier: "Domain")
+      scope = build(:scope, resource_type: "domain", resource_id: "42")
+      subscription = insert(:subscription, subscriber: subscriber, scope: scope)
+
+      assert [1, 2] = Subscriptions.list_recipient_ids(subscription)
+    end
+
+    test "list_recipient_ids/1 gets user ids for concept role subscription" do
+      AclCache.set_acl_role_users("domain", 7, "Domain", [1, 2])
+      ConceptCache.put(%{id: 42, name: "Concept", domain_id: 7})
+
+      on_exit(fn ->
+        {:ok, _} = DomainCache.delete("Domain")
+        {:ok, _} = ConceptCache.delete(42)
+      end)
+
+      subscriber = build(:subscriber, type: "role", identifier: "Domain")
+      scope = build(:scope, resource_type: "concept", resource_id: "42")
+      subscription = insert(:subscription, subscriber: subscriber, scope: scope)
+
+      assert [1, 2] = Subscriptions.list_recipient_ids(subscription)
     end
   end
 end

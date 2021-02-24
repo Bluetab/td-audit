@@ -16,6 +16,12 @@ defmodule TdAudit.Notifications do
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.UserCache
 
+  def list_notifications(user_id) do
+    from(n in Notification, where: ^user_id in n.recipient_ids, order_by: [desc: :id])
+    |> Repo.all()
+    |> Repo.preload(:events)
+  end
+
   def send_pending do
     Multi.new()
     |> Multi.run(:notifications, fn _, _ -> {:ok, pending()} end)
@@ -69,6 +75,7 @@ defmodule TdAudit.Notifications do
         |> Multi.run(:subscriptions, &list_subscriptions(&1, &2, clauses))
         |> Multi.run(:update_last_event_id, &update_last_event_id/2)
         |> Multi.run(:subscription_event_ids, &subscription_event_ids/2)
+        |> Multi.run(:subscription_recipient_ids, &subscription_recipient_ids/2)
         |> Multi.run(:notifications, &bulk_insert_notifications/2)
         |> Repo.transaction()
     end
@@ -98,6 +105,13 @@ defmodule TdAudit.Notifications do
     |> Email.create()
   end
 
+  def list_recipients(notification) do
+    Enum.map(notification.recipient_ids, fn user_id ->
+      {:ok, user} = UserCache.get(user_id)
+      {user.full_name, user.email}
+    end)
+  end
+
   defp list_subscriptions(_repo, _changes, clauses) do
     {:ok, Subscriptions.list_subscriptions(clauses)}
   end
@@ -119,15 +133,36 @@ defmodule TdAudit.Notifications do
 
   defp subscription_event_ids(_repo, %{subscriptions: subscriptions, max_event_id: max_event_id}) do
     subscription_event_ids =
-      Map.new(subscriptions, fn s -> {s.id, Events.subscription_event_ids(s, max_event_id)} end)
+      subscriptions
+      |> Enum.map(fn s -> {s.id, Events.subscription_event_ids(s, max_event_id)} end)
+      |> Enum.reject(fn {_, event_ids} -> event_ids == [] end)
+      |> Map.new()
 
     {:ok, subscription_event_ids}
   end
 
-  defp bulk_insert_notifications(_repo, %{subscription_event_ids: subscription_event_ids}) do
+  defp subscription_recipient_ids(_repo, %{
+         subscriptions: subscriptions,
+         subscription_event_ids: subscription_event_ids
+       }) do
+    subscription_recipient_ids =
+      subscriptions
+      |> Enum.filter(&Map.has_key?(subscription_event_ids, &1.id))
+      |> Enum.map(fn s -> {s.id, Subscriptions.list_recipient_ids(s)} end)
+      |> Map.new()
+
+    {:ok, subscription_recipient_ids}
+  end
+
+  defp bulk_insert_notifications(_repo, %{
+         subscription_event_ids: subscription_event_ids,
+         subscription_recipient_ids: subscription_recipient_ids
+       }) do
     subscription_event_ids
-    |> Enum.reject(fn {_, event_ids} -> event_ids == [] end)
-    |> Enum.map(fn {id, event_ids} -> {notification_changeset(id), event_ids} end)
+    |> Enum.map(fn {id, event_ids} ->
+      recipient_ids = Map.get(subscription_recipient_ids, id)
+      {notification_changeset(id, recipient_ids), event_ids}
+    end)
     |> Enum.reduce_while(%{}, &reduce_changesets/2)
     |> case do
       {:error, error} ->
@@ -151,8 +186,11 @@ defmodule TdAudit.Notifications do
     Enum.map(event_ids, &%{event_id: &1, notification_id: notification_id})
   end
 
-  defp notification_changeset(subscription_id) do
-    %{status: "pending", notification: %{subscription_id: subscription_id}}
+  defp notification_changeset(subscription_id, recipient_ids) do
+    %{
+      status: "pending",
+      notification: %{subscription_id: subscription_id, recipient_ids: recipient_ids}
+    }
     |> Status.changeset()
   end
 

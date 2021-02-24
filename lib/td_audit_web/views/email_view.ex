@@ -3,10 +3,12 @@ defmodule TdAuditWeb.EmailView do
 
   require Logger
 
+  alias TdAuditWeb.EventView
+
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
-      name: resource_name(event),
+      name: EventView.resource_name(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -20,7 +22,7 @@ defmodule TdAuditWeb.EmailView do
       |> Enum.map(fn {k, v} -> {translate(k), v} end)
 
     render("rule_result_created.html",
-      name: rule_implementation_name(event),
+      name: EventView.resource_name(event),
       values: values,
       domains: domain_path(event),
       date: payload["date"],
@@ -31,7 +33,7 @@ defmodule TdAuditWeb.EmailView do
   def render("comment_created.html", %{event: %{payload: payload} = event}) do
     render("comment_created.html",
       user: user_name(event),
-      name: payload["resource_name"],
+      name: EventView.resource_name(event),
       domains: domain_path(event),
       comment: payload["content"],
       uri: uri(event)
@@ -51,7 +53,7 @@ defmodule TdAuditWeb.EmailView do
 
   def render("relation_deprecated.html", %{event: event}) do
     render("relation_deprecated.html",
-      name: resource_name(event),
+      name: EventView.resource_name(event),
       event_name: event_name(event),
       target: relation_side(event),
       domains: domain_path(event),
@@ -71,31 +73,12 @@ defmodule TdAuditWeb.EmailView do
   defp render_concepts(%{event: event}) do
     render("concepts.html",
       user: user_name(event),
-      name: resource_name(event),
+      name: EventView.resource_name(event),
       event_name: event_name(event),
       domains: domain_path(event),
       uri: uri(event)
     )
   end
-
-  defp resource_name(%{payload: %{"name" => name}}), do: name
-
-  defp resource_name(%{resource_id: resource_id, resource_type: "concept"}) do
-    case TdCache.ConceptCache.get(resource_id, :name) do
-      {:ok, name} -> name
-      _ -> nil
-    end
-  end
-
-  defp resource_name(_), do: nil
-
-  defp rule_implementation_name(%{
-         payload: %{"name" => name, "implementation_key" => implementation_key}
-       }) do
-    Enum.join([name, implementation_key], " : ")
-  end
-
-  defp rule_implementation_name(_), do: nil
 
   defp format_number(%{"result_type" => result_type} = payload, key) do
     format =
@@ -145,60 +128,17 @@ defmodule TdAuditWeb.EmailView do
     |> Enum.join(" › ")
   end
 
-  defp uri(%{
-         resource_type: "comment",
-         payload: %{"resource_type" => "ingest", "version_id" => id}
-       }) do
-    Enum.join([host_name(), "ingests", id], "/")
+  defp uri(event) do
+    "#{host_name()}#{EventView.path(event)}"
   end
-
-  defp uri(%{
-         resource_type: "comment",
-         payload: %{
-           "resource_type" => "business_concept",
-           "resource_id" => resource_id,
-           "version_id" => id
-         }
-       }) do
-    Enum.join([host_name(), "concepts", resource_id, "versions", id], "/")
-  end
-
-  defp uri(%{resource_type: "ingest", payload: %{"id" => id}}) do
-    Enum.join([host_name(), "ingests", id], "/")
-  end
-
-  defp uri(%{resource_type: "concept", event: event, resource_id: resource_id})
-       when event in ["relation_created", "relation_deleted", "relation_deprecated"] do
-    case TdCache.ConceptCache.get(resource_id, :business_concept_version_id) do
-      {:ok, version} ->
-        Enum.join([host_name(), "concepts", resource_id, "versions", version], "/")
-
-      _ ->
-        nil
-    end
-  end
-
-  defp uri(%{resource_type: "concept", resource_id: resource_id, payload: %{"id" => id}}) do
-    Enum.join([host_name(), "concepts", resource_id, "versions", id], "/")
-  end
-
-  defp uri(%{
-         resource_type: "rule_result",
-         payload: %{"rule_id" => rule_id, "implementation_id" => implementation_id}
-       }) do
-    Enum.join(
-      [host_name(), "rules", rule_id, "implementations", implementation_id, "results"],
-      "/"
-    )
-  end
-
-  defp uri(_), do: nil
 
   defp target_uri(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
-    Enum.join([host_name(), "structures", id], "/")
+    "#{host_name()}/structures/#{id}"
   end
 
   defp target_uri(_), do: nil
+
+  defp host_name, do: Application.fetch_env!(:td_audit, :host_name)
 
   defp event_name(%{event: "concept_rejected"}), do: "Concept Rejected"
   defp event_name(%{event: "concept_submitted"}), do: "Concept Sent For Approval"
@@ -217,10 +157,6 @@ defmodule TdAuditWeb.EmailView do
   defp translate("records"), do: "Record Count"
   defp translate("errors"), do: "Error Count"
   defp translate("result"), do: "Result"
-
-  defp host_name do
-    Application.fetch_env!(:td_audit, :host_name)
-  end
 
   defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
     case TdCache.StructureCache.get(id) do

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3055] User notifications endpoint
+
 ## [4.14.0] 2021-2-22
 
 ### Changed

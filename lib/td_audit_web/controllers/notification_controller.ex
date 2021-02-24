@@ -1,10 +1,8 @@
 defmodule TdAuditWeb.NotificationController do
-  @moduledoc """
-  Controller for the subscribers of the system
-  """
   use TdAuditWeb, :controller
   use PhoenixSwagger
 
+  alias TdAudit.Notifications
   alias TdAudit.Notifications.Dispatcher
   alias TdAuditWeb.SwaggerDefinitions
 
@@ -12,6 +10,22 @@ defmodule TdAuditWeb.NotificationController do
 
   def swagger_definitions do
     SwaggerDefinitions.notification_swagger_definitions()
+  end
+
+  swagger_path :index_by_user do
+    description("Get logged user notifications")
+    produces("application/json")
+
+    response(200, "OK", Schema.ref(:NotificationsResponse))
+    response(403, "Forbidden")
+    response(422, "Client Error")
+  end
+
+  def index_by_user(conn, _params) do
+    with %{user_id: user_id} <- conn.assigns[:current_resource] do
+      notifications = Notifications.list_notifications(user_id)
+      render(conn, "index.json", notifications: notifications)
+    end
   end
 
   swagger_path :create do

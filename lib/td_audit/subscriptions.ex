@@ -12,7 +12,7 @@ defmodule TdAudit.Subscriptions do
   alias TdAudit.Subscriptions.Scope
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.AclCache
-  alias TdCache.UserCache
+  alias TdCache.ConceptCache
 
   @doc """
   Returns the list of subscriptions.
@@ -144,56 +144,40 @@ defmodule TdAudit.Subscriptions do
     |> Repo.delete_all()
   end
 
-  def get_recipients(%Subscription{subscriber: subscriber, scope: scope}) do
-    recipients(subscriber, scope)
+  def list_recipient_ids(%Subscription{subscriber: %{type: "user", identifier: sid}}) do
+    [String.to_integer(sid)]
   end
 
-  defp recipients({:ok, %{} = user}), do: recipients(user)
-  defp recipients(%{full_name: full_name, email: email}), do: [{full_name, email}]
-  defp recipients(%{email: email}), do: [email]
-  defp recipients(_), do: []
-
-  defp recipients(%{type: "email", identifier: email}, _scope) do
-    [email]
+  def list_recipient_ids(%Subscription{
+        subscriber: %{type: "role", identifier: role},
+        scope: %{resource_type: type, resource_id: domain}
+      })
+      when type in ~w(domain domains) do
+    list_recipient_ids_by_role(domain, role)
   end
 
-  defp recipients(%{type: "user", identifier: user_id}, _scope) do
-    user_id
-    |> UserCache.get()
-    |> recipients()
+  def list_recipient_ids(%Subscription{
+        subscriber: %{type: "role", identifier: role},
+        scope: %{resource_type: "concept", resource_id: concept}
+      }) do
+    concept
+    |> list_concept_domains()
+    |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
   end
 
-  defp recipients(%{type: "role", identifier: role}, %{
-         resource_type: resource_type,
-         resource_id: domain_id
-       })
-       when resource_type in ["domain", "domains"] do
-    recipients_by_role(domain_id, role)
+  def list_recipient_ids(_subscription) do
+    []
   end
 
-  defp recipients(%{type: "role", identifier: role}, %{
-         resource_type: "concept",
-         resource_id: concept_id
-       }) do
-    concept_id
-    |> domains()
-    |> Enum.map(&recipients_by_role(&1, role))
-    |> List.flatten()
-    |> Enum.uniq_by(fn {email, _name} -> email end)
-  end
-
-  defp recipients(_, _), do: []
-
-  defp recipients_by_role(domain_id, role_name) do
+  defp list_recipient_ids_by_role(domain, role) do
     "domain"
-    |> AclCache.get_acl_role_users(domain_id, role_name)
-    |> Enum.map(&UserCache.get/1)
-    |> Enum.flat_map(&recipients/1)
+    |> AclCache.get_acl_role_users(domain, role)
+    |> Enum.map(&String.to_integer/1)
   end
 
-  defp domains(resource_id) do
-    case TdCache.ConceptCache.get(resource_id, :domain_ids) do
-      {:ok, [_ | _] = domain_ids} -> domain_ids
+  defp list_concept_domains(resource_id) do
+    case ConceptCache.get(resource_id, :domain_ids) do
+      {:ok, domains} when is_list(domains) -> domains
       _ -> []
     end
   end

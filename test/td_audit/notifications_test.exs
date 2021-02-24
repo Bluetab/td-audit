@@ -5,19 +5,69 @@ defmodule TdAudit.NotificationsTest do
   use TdAudit.DataCase
 
   alias TdAudit.Notifications
+  alias TdCache.AclCache
   alias TdCache.UserCache
 
   describe "notifications" do
-    setup do
+    test "create/1 creates notifications for subscriptions matching the specified `clauses`" do
+      domain_id = System.unique_integer([:positive])
+      user_ids = Enum.map(1..3, fn _ -> System.unique_integer([:positive]) end)
+      role = "foo"
+      event = "bar"
+      AclCache.set_acl_role_users("domain", domain_id, role, user_ids)
+
+      on_exit(fn ->
+        AclCache.delete_acl_role_users("domain", domain_id, role)
+      end)
+
+      %{id: event_id} = insert(:event, event: event, payload: %{"domain_ids" => [domain_id]})
+      subscriber = %{id: subscriber_id} = insert(:subscriber, type: "role", identifier: role)
+      scope = %{events: [event], resource_id: domain_id, resource_type: "domains"}
+
+      %{id: subscription_id} =
+        insert(:subscription, periodicity: "minutely", subscriber: subscriber, scope: scope)
+
+      {:ok,
+       %{
+         max_event_id: ^event_id,
+         notifications: [
+           %{
+             notification: %{subscription_id: ^subscription_id, recipient_ids: ^user_ids},
+             status: "pending"
+           }
+         ],
+         subscription_event_ids: %{^subscription_id => [^event_id]},
+         subscription_recipient_ids: %{^subscription_id => ^user_ids},
+         subscriptions: [
+           %{
+             periodicity: "minutely",
+             scope: %{events: [^event], resource_id: ^domain_id, resource_type: "domains"},
+             subscriber_id: ^subscriber_id
+           }
+         ],
+         update_last_event_id:
+           {1,
+            [
+              %{
+                last_event_id: ^event_id,
+                periodicity: "minutely",
+                scope: %{events: [^event], resource_id: ^domain_id, resource_type: "domains"},
+                subscriber_id: ^subscriber_id
+              }
+            ]}
+       }} = Notifications.create(periodicity: "minutely")
+    end
+
+    test "share/1 shares an email with a list of recipients" do
       sender = %{
-        id: :random.uniform(1_000_000),
+        id: System.unique_integer(),
         full_name: "xyz",
         name: "xyz",
         email: "xyz@bar.net"
       }
 
-      u1 = %{id: :random.uniform(1_000_000), full_name: "xyz", name: "bar", email: "foo@bar.net"}
-      u2 = %{id: :random.uniform(1_000_000), full_name: "xyz", name: "baz", email: "bar@baz.net"}
+      u1 = %{id: System.unique_integer(), full_name: "xyz", name: "bar", email: "foo@bar.net"}
+      u2 = %{id: System.unique_integer(), full_name: "xyz", name: "baz", email: "bar@baz.net"}
 
       UserCache.put(sender)
 
@@ -25,10 +75,6 @@ defmodule TdAudit.NotificationsTest do
         UserCache.delete(sender.id)
       end)
 
-      [sender: sender, users: [u1, u2]]
-    end
-
-    test "share/1 shares an email with a list of recipients", %{sender: sender, users: [u1, u2]} do
       user_id = Map.get(sender, :id)
       description = "bar"
       name = "foo"
@@ -89,6 +135,21 @@ defmodule TdAudit.NotificationsTest do
       assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} =
                Notifications.share(message)
     end
+  end
+
+  test "list_recipients/1 lists user emails with full names" do
+    UserCache.put(%{id: 1, full_name: "Foo", email: "foo@example.com"})
+    UserCache.put(%{id: 2, full_name: "Bar", email: "bar@example.com"})
+
+    on_exit(fn ->
+      UserCache.delete(1)
+      UserCache.delete(2)
+    end)
+
+    notification = insert(:notification, recipient_ids: [1, 2])
+
+    assert [{"Foo", "foo@example.com"}, {"Bar", "bar@example.com"}] =
+             Notifications.list_recipients(notification)
   end
 
   defp config, do: Application.fetch_env!(:td_audit, TdAudit.Notifications.Email)
