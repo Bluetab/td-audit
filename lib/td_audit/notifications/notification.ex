@@ -15,6 +15,8 @@ defmodule TdAudit.Notifications.Notification do
     many_to_many(:events, Event, join_through: "notifications_events")
     has_many(:status, Status)
 
+    field(:recipient_ids, {:array, :integer}, default: [])
+
     timestamps(updated_at: false, type: :utc_datetime_usec)
   end
 
@@ -24,7 +26,7 @@ defmodule TdAudit.Notifications.Notification do
 
   def changeset(%__MODULE__{} = subscription, params) do
     subscription
-    |> cast(params, [:subscription_id])
-    |> validate_required([:subscription_id])
+    |> cast(params, [:subscription_id, :recipient_ids])
+    |> validate_required([:subscription_id, :recipient_ids])
   end
 end

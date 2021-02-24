@@ -6,11 +6,29 @@ defmodule TdAudit.Factory do
   use ExMachina.Ecto, repo: TdAudit.Repo
 
   alias TdAudit.Audit.Event
+  alias TdAudit.Notifications.Notification
+  alias TdAudit.Notifications.Status
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.ConceptCache
   alias TdCache.DomainCache
   alias TdCache.RuleCache
+
+  def notification_factory(attrs) do
+    %Notification{
+      subscription: build(:subscription),
+      events: [build(:event)],
+      status: [build(:status)]
+    }
+    |> merge_attributes(attrs)
+  end
+
+  def status_factory(attrs) do
+    %Status{
+      status: "pending"
+    }
+    |> merge_attributes(attrs)
+  end
 
   def subscription_factory(attrs) do
     attrs = default_assoc(attrs, :subscriber_id, :subscriber)

@@ -4,13 +4,13 @@ defmodule TdAudit.Notifications.Email do
   """
   use Bamboo.Phoenix, view: TdAuditWeb.EmailView
 
+  alias TdAudit.Notifications
   alias TdAudit.Notifications.Notification
-  alias TdAudit.Subscriptions
   alias TdDfLib.RichText
 
-  def create(%Notification{events: events, subscription: subscription} = notification) do
+  def create(%Notification{events: events} = notification) do
     template = template(notification)
-    recipients = Subscriptions.get_recipients(subscription)
+    recipients = Notifications.list_recipients(notification)
 
     new_email()
     |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
