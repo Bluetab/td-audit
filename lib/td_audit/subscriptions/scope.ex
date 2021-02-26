@@ -8,6 +8,7 @@ defmodule TdAudit.Subscriptions.Scope do
   import Ecto.Changeset
 
   alias Ecto.Changeset
+  alias TdAudit.Subscriptions.Filters
 
   @primary_key false
 
@@ -16,6 +17,7 @@ defmodule TdAudit.Subscriptions.Scope do
     field(:status, {:array, :string})
     field(:resource_type, :string)
     field(:resource_id, :integer)
+    embeds_one(:filters, Filters, on_replace: :delete)
   end
 
   def changeset(%{} = params) do
@@ -41,6 +43,7 @@ defmodule TdAudit.Subscriptions.Scope do
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)
     |> validate_status(params)
+    |> cast_embed(:filters, with: &Filters.changeset/2, required: false)
   end
 
   defp validate_status(%Changeset{} = changeset, %{} = params) do
