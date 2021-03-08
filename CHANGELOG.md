@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [4.15.0] 2021-03-08
 
 ### Added
 
@@ -9,6 +9,8 @@
 ### Changed
 
 - [TD-3055] User notifications endpoint
+- Updated to Bamboo 2.0.x and Bamboo SMTP 4.0.0
+- Build with `elixir:1.11.3-alpine`, runtime `alpine:3.13`
 
 ## [4.14.0] 2021-2-22
 
