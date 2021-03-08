@@ -2,6 +2,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
   use TdAudit.DataCase
 
   alias TdAudit.Subscriptions.Events
+  alias TdCache.TemplateCache
 
   @concept_events [
     "concept_deprecated",
@@ -211,6 +212,169 @@ defmodule TdAudit.Subscriptions.EventsTest do
     test "returns event ids", %{subscription: subscription} do
       %{id: event_id} =
         insert(:event, event: "some_event", resource_type: "some_resource_type", resource_id: 42)
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+    end
+  end
+
+  describe "subscription_event_ids/1 for events with subscribable fields" do
+    setup do
+      content = [
+        %{
+          "name" => "group",
+          "fields" => [
+            %{
+              name: "foo",
+              type: "string",
+              cardinality: "*",
+              values: %{
+                "fixed_tuple" => [
+                  %{"name" => "foo", "value" => "2"},
+                  %{"name" => "bar", "value" => "1"}
+                ]
+              },
+              subscribable: true
+            },
+            %{
+              name: "xyz",
+              type: "string",
+              cardinality: "?",
+              values: %{"fixed" => ["foo", "bar"]},
+              subscribable: true
+            }
+          ]
+        }
+      ]
+
+      template_id = System.unique_integer([:positive])
+
+      TemplateCache.put(%{
+        id: template_id,
+        name: "foo",
+        label: "label",
+        scope: "test",
+        content: content,
+        updated_at: DateTime.utc_now()
+      })
+
+      scope0 =
+        build(:scope,
+          events: ["some_event"],
+          resource_type: "concept",
+          resource_id: 42,
+          filters: %{
+            content: %{"name" => "foo", "value" => "2"},
+            template: %{"id" => template_id}
+          }
+        )
+
+      scope1 =
+        build(:scope,
+          events: ["some_event"],
+          resource_type: "concept",
+          resource_id: 42,
+          filters: %{
+            content: %{"name" => "xyz", "value" => "foo"},
+            template: %{"id" => template_id}
+          }
+        )
+
+      [
+        s0: insert(:subscription, scope: scope0, last_event_id: 0),
+        s1: insert(:subscription, scope: scope1, last_event_id: 0)
+      ]
+    end
+
+    test "returns event ids for multiple cardinality", %{s0: subscription} do
+      payload = %{"subscribable_fields" => %{"foo" => ["1"]}}
+
+      insert(:event,
+        event: "some_event",
+        resource_type: "concept",
+        resource_id: 42,
+        payload: payload
+      )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+
+      payload = %{"subscribable_fields" => %{"foo" => "1"}}
+
+      insert(:event,
+        event: "some_event",
+        resource_type: "concept",
+        resource_id: 42,
+        payload: payload
+      )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+
+      payload = %{"foo" => "bar"}
+
+      insert(:event,
+        event: "some_event",
+        resource_type: "concept",
+        resource_id: 42,
+        payload: payload
+      )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+
+      payload = %{"subscribable_fields" => %{"foo" => ["2"]}}
+
+      %{id: event_id} =
+        insert(:event,
+          event: "some_event",
+          resource_type: "concept",
+          resource_id: 42,
+          payload: payload
+        )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+    end
+
+    test "returns event ids for single cardinality", %{s1: subscription} do
+      payload = %{"subscribable_fields" => %{"xyz" => ["foo"]}}
+
+      insert(:event,
+        event: "some_event",
+        resource_type: "concept",
+        resource_id: 42,
+        payload: payload
+      )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+
+      payload = %{"subscribable_fields" => %{"xyz" => ["bar"]}}
+
+      insert(:event,
+        event: "some_event",
+        resource_type: "concept",
+        resource_id: 42,
+        payload: payload
+      )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+
+      payload = %{"foo" => "bar"}
+
+      insert(:event,
+        event: "some_event",
+        resource_type: "concept",
+        resource_id: 42,
+        payload: payload
+      )
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+
+      payload = %{"subscribable_fields" => %{"xyz" => "foo"}}
+
+      %{id: event_id} =
+        insert(:event,
+          event: "some_event",
+          resource_type: "concept",
+          resource_id: 42,
+          payload: payload
+        )
 
       assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
     end

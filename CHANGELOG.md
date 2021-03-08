@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-3063] Subscription filter in scope
+
 ### Changed
 
 - [TD-3055] User notifications endpoint
