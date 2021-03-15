@@ -27,6 +27,19 @@ defmodule TdAudit.Audit do
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
 
+  def list_events(%{"ts" => %{"between" => [startDate, endDate]}}) do
+    startDate = string_to_iso8601(startDate)
+    endDate = string_to_iso8601(endDate)
+    user_map = UserCache.map()
+    from(p in Event,
+      where: p.ts >= ^startDate,
+      where: p.ts <= ^endDate,
+      order_by: [asc: :ts]
+    )
+    |> Repo.all()
+    |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
+  end
+
   def list_events(params) do
     user_map = UserCache.map()
 
@@ -83,5 +96,13 @@ defmodule TdAudit.Audit do
     %Event{}
     |> Event.changeset(params)
     |> Repo.insert()
+  end
+
+  defp string_to_iso8601(date) do
+    date
+    |> Date.from_iso8601!()
+    |> NaiveDateTime.new!(~T[00:00:00])
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.to_iso8601()
   end
 end
