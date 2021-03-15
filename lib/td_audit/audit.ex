@@ -27,9 +27,9 @@ defmodule TdAudit.Audit do
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
 
-  def list_events(%{"ts" => %{"between" => [startDate, endDate]}}) do
-    startDate = string_to_iso8601(startDate)
-    endDate = string_to_iso8601(endDate)
+  def list_events(%{"ts" => %{"between" => [start_date, end_date]}}) do
+    start_date = string_to_iso8601(start_date)
+    end_date = string_to_iso8601(end_date)
     user_map = UserCache.map()
     from(p in Event,
       where: p.ts >= ^startDate,

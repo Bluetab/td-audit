@@ -44,7 +44,6 @@ defmodule TdAuditWeb.EventControllerTest do
       assert [%{"id" => ^id}] = data
     end
 
-
     @tag authenticated_user: @admin_user_name
     test "lists all events filtered by event type", %{conn: conn, swagger_schema: schema} do
       %{id: id} = insert(:event, event: "event_type_1")
