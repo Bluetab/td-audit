@@ -32,8 +32,8 @@ defmodule TdAudit.Audit do
     end_date = string_to_iso8601(end_date)
     user_map = UserCache.map()
     from(p in Event,
-      where: p.ts >= ^startDate,
-      where: p.ts <= ^endDate,
+      where: p.ts >= ^start_date,
+      where: p.ts <= ^end_date,
       order_by: [asc: :ts]
     )
     |> Repo.all()
