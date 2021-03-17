@@ -27,23 +27,11 @@ defmodule TdAudit.Audit do
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
 
-  def list_events(%{"ts" => %{"between" => [start_date, end_date]}}) do
-    start_date = string_to_iso8601(start_date)
-    end_date = string_to_iso8601(end_date)
-    user_map = UserCache.map()
-    from(p in Event,
-      where: p.ts >= ^start_date,
-      where: p.ts <= ^end_date,
-      order_by: [asc: :ts]
-    )
-    |> Repo.all()
-    |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
-  end
-
   def list_events(params) do
     user_map = UserCache.map()
 
-    fields = Event.__schema__(:fields)
+    additional_filters = [:start_ts, :end_ts]
+    fields = Event.__schema__(:fields) ++ additional_filters
     dynamic = QuerySupport.filter(params, fields)
 
     from(p in Event,
@@ -96,13 +84,5 @@ defmodule TdAudit.Audit do
     %Event{}
     |> Event.changeset(params)
     |> Repo.insert()
-  end
-
-  defp string_to_iso8601(date) do
-    date
-    |> Date.from_iso8601!()
-    |> NaiveDateTime.new!(~T[00:00:00])
-    |> DateTime.from_naive!("Etc/UTC")
-    |> DateTime.to_iso8601()
   end
 end
