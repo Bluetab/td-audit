@@ -5,7 +5,7 @@ defmodule TdAuditWeb.EventController do
   alias TdAudit.Audit
   alias TdAuditWeb.SwaggerDefinitions
 
-  @filters_availables ["resource_id", "resource_type"]
+  @filters_availables ["resource_id", "resource_type", "event", "start_ts", "end_ts"]
 
   action_fallback(TdAuditWeb.FallbackController)
 

@@ -30,7 +30,8 @@ defmodule TdAudit.Audit do
   def list_events(params) do
     user_map = UserCache.map()
 
-    fields = Event.__schema__(:fields)
+    additional_filters = [:start_ts, :end_ts]
+    fields = Event.__schema__(:fields) ++ additional_filters
     dynamic = QuerySupport.filter(params, fields)
 
     from(p in Event,

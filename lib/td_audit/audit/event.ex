@@ -39,14 +39,19 @@ defmodule TdAudit.Audit.Event do
     |> put_payload(params)
     |> validate_required([
       :service,
-      :resource_id,
-      :resource_type,
       :event,
       :payload,
-      :user_id,
       :ts
     ])
+    |> validate_user_and_resource()
     |> update_change(:resource_type, &update_resource_type/1)
+  end
+
+  defp validate_user_and_resource(changeset) do
+    case get_field(changeset, :event) do
+      "login_attempt" -> changeset
+      _ -> validate_required(changeset, [:user_id, :resource_type, :resource_id])
+    end
   end
 
   defp update_resource_type("business_concept"), do: "concept"

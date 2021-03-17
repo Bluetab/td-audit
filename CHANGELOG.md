@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] 
+
+### Added
+
+- [TD-1389] Enable to filter events by timestamp range and event type
+
 ## [4.15.0] 2021-03-08
 
 ### Added
