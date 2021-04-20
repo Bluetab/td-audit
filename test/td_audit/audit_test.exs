@@ -102,6 +102,19 @@ defmodule TdAudit.AuditTest do
                  "resource_type" => "some new resource_type"
                })
     end
+
+    test "returns events filtered by list of values" do
+      insert(:event)
+      insert(:event, resource_type: "auth")
+      %{id: edi1} = insert(:event, resource_type: "auth", event: "login_attempt")
+      %{id: edi2} = insert(:event, resource_type: "auth", event: "login_success")
+
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
+               Audit.list_events(%{
+                 "event" => ["login_attempt", "login_success"],
+                 "resource_type" => "auth"
+               })
+    end
   end
 
   describe "get_event!/1" do
