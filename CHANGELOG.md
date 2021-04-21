@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] 
+
+### Added
+
+- [TD-3346] Search events Api
+
 ## [4.17.0] 2021-04-05
 
 ### Changed
