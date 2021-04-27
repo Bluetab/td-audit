@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-3346] Search events Api
+
 ## Fixed
 
 - [TD-3618] Exception sending email

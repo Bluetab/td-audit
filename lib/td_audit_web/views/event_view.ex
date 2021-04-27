@@ -22,6 +22,7 @@ defmodule TdAuditWeb.EventView do
       user_id: event.user_id,
       user_name: event.user_name,
       user: event.user,
+      inserted_at: event.inserted_at,
       ts: event.ts
     }
   end
