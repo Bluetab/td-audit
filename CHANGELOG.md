@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+## Fixed
+
+- [TD-3618] Exception sending email
+
 ## [4.17.0] 2021-04-05
 
 ### Changed
@@ -31,7 +37,7 @@
 - [TD-3265] Url for concept resources in notifications
 - [TD-3245] Tested compatibility with PostgreSQL 9.6, 10.15, 11.10, 12.5 and
   13.1. CI pipeline changed to use `postgres:12.5-alpine`.
-  
+
 ### Removed
 
 - [TD-3171] Kubernetes jobs are no longer launched by `td-audit`
