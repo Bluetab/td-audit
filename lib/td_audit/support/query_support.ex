@@ -31,6 +31,22 @@ defmodule TdAudit.QuerySupport do
     dynamic([p], field(p, :ts) <= ^value and ^acc)
   end
 
+  defp filter_by_type(key, %{"gt" => value}, acc) do
+    dynamic([p], field(p, ^key) > ^value and ^acc)
+  end
+
+  defp filter_by_type(key, %{"lt" => value}, acc) do
+    dynamic([p], field(p, ^key) < ^value and ^acc)
+  end
+
+  defp filter_by_type(key, %{"gte" => value}, acc) do
+    dynamic([p], field(p, ^key) >= ^value and ^acc)
+  end
+
+  defp filter_by_type(key, %{"lte" => value}, acc) do
+    dynamic([p], field(p, ^key) <= ^value and ^acc)
+  end
+
   defp filter_by_type(atom_key, values, acc) when is_list(values) do
     dynamic([p], field(p, ^atom_key) in ^values and ^acc)
   end

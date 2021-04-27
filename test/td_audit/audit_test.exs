@@ -102,6 +102,60 @@ defmodule TdAudit.AuditTest do
                  "resource_type" => "some new resource_type"
                })
     end
+
+    test "returns events filtered by list of values" do
+      insert(:event)
+      insert(:event, resource_type: "auth")
+      %{id: edi1} = insert(:event, resource_type: "auth", event: "login_attempt")
+      %{id: edi2} = insert(:event, resource_type: "auth", event: "login_success")
+
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
+               Audit.list_events(%{
+                 "event" => ["login_attempt", "login_success"],
+                 "resource_type" => "auth"
+               })
+    end
+
+    test "returns events filtered by inserted_at" do
+      insert(:event)
+      insert(:event, resource_type: "auth")
+
+      %{id: edi1, inserted_at: inserted_at} =
+        insert(:event, resource_type: "auth", event: "login_attempt")
+
+      date = DateTime.add(inserted_at, 3600, :second)
+
+      %{id: edi2} =
+        insert(:event, resource_type: "auth", event: "login_success", inserted_at: date)
+
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
+               Audit.list_events(%{
+                 "event" => ["login_attempt", "login_success"],
+                 "resource_type" => "auth",
+                 "inserted_at" => %{"gte" => inserted_at}
+               })
+
+      assert [%{id: ^edi2}] =
+               Audit.list_events(%{
+                 "event" => ["login_attempt", "login_success"],
+                 "resource_type" => "auth",
+                 "inserted_at" => %{"gt" => inserted_at}
+               })
+
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
+               Audit.list_events(%{
+                 "event" => ["login_attempt", "login_success"],
+                 "resource_type" => "auth",
+                 "inserted_at" => %{"lte" => date}
+               })
+
+      assert [%{id: ^edi1}] =
+               Audit.list_events(%{
+                 "event" => ["login_attempt", "login_success"],
+                 "resource_type" => "auth",
+                 "inserted_at" => %{"lt" => date}
+               })
+    end
   end
 
   describe "get_event!/1" do

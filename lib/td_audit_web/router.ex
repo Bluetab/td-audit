@@ -27,6 +27,7 @@ defmodule TdAuditWeb.Router do
   scope "/api", TdAuditWeb do
     pipe_through([:api, :api_secure])
     resources("/events", EventController, only: [:index, :show])
+    resources("/events/search", EventSearchController, only: [:create])
     resources("/subscribers", SubscriberController, except: [:new, :edit, :update])
     resources("/subscriptions", SubscriptionController, except: [:new, :edit])
     post("/subscriptions/user/me/search", SubscriptionController, :index_by_user)
