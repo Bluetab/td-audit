@@ -70,9 +70,13 @@ defmodule TdAudit.NotificationsTest do
       u2 = %{id: System.unique_integer(), full_name: "xyz", name: "baz", email: "bar@baz.net"}
 
       UserCache.put(sender)
+      UserCache.put(u1)
+      UserCache.put(u2)
 
       on_exit(fn ->
         UserCache.delete(sender.id)
+        UserCache.delete(u1.id)
+        UserCache.delete(u2.id)
       end)
 
       user_id = Map.get(sender, :id)
@@ -94,13 +98,13 @@ defmodule TdAudit.NotificationsTest do
       }
 
       recipients = [
-        %{"id" => Map.get(u1, :id), "role" => "user", "email" => Map.get(u1, :email)},
+        %{"id" => Map.get(u1, :id), "role" => "user"},
         %{
           "id" => 1,
           "role" => "group",
           "users" => [
-            %{"id" => Map.get(u1, :id), "role" => "user", "email" => Map.get(u1, :email)},
-            %{"id" => Map.get(u2, :id), "role" => "user", "email" => Map.get(u2, :email)}
+            %{"id" => Map.get(u1, :id), "role" => "user"},
+            %{"id" => Map.get(u2, :id), "role" => "user"}
           ]
         }
       ]
