@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3503] Share notification: Retrieve user emails by id
+
 ## [4.20.0] 2021-05-17
 
 ### Changed
