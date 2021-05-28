@@ -6,6 +6,7 @@
 
 - [TD-3503] Share notification: Retrieve user emails by id
 - [TD-3753] Build using Elixir 1.12 and Erlang/OTP 24
+- [TD-3502] Update td-cache and td-df-lib
 
 ## [4.20.0] 2021-05-17
 
