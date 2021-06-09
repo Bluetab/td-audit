@@ -15,6 +15,7 @@ defmodule TdAudit.Subscriptions.Scope do
   embedded_schema do
     field(:events, {:array, :string})
     field(:status, {:array, :string})
+    field(:resource_name, :string)
     field(:resource_type, :string)
     field(:resource_id, :integer)
     embeds_one(:filters, Filters, on_replace: :delete)
@@ -26,7 +27,7 @@ defmodule TdAudit.Subscriptions.Scope do
 
   def changeset(%__MODULE__{} = scope, %{} = params) do
     scope
-    |> cast(params, [:events, :resource_type, :resource_id])
+    |> cast(params, [:events, :resource_name, :resource_type, :resource_id])
     |> common_changeset(params)
   end
 
@@ -39,7 +40,14 @@ defmodule TdAudit.Subscriptions.Scope do
   defp common_changeset(changeset, params) do
     changeset
     |> validate_length(:events, min: 1)
-    |> validate_inclusion(:resource_type, ["domain", "domains", "ingest", "concept", "rule"])
+    |> validate_inclusion(:resource_type, [
+      "data_structure",
+      "domain",
+      "domains",
+      "ingest",
+      "concept",
+      "rule"
+    ])
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)
     |> validate_status(params)
