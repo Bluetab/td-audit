@@ -58,7 +58,7 @@ config :td_audit, TdAudit.Notifications.Email,
     concepts: "🖋 Alert: New event in Business Glosary",
     relations: "👓 Alert: Relations changed",
     rule_results: "👓 Alert: Data quality issues detected",
-    tags: "👓 Alert: Tags changed",
+    tags: "👓 Alert: Changes in tags",
     comments: "🖋 Alert: New comments added",
     default: "⚡ Alert: New notifications"
   ],
