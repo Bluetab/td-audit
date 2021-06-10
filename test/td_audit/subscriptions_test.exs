@@ -139,5 +139,42 @@ defmodule TdAudit.SubscriptionsTest do
 
       assert [1, 2] = Subscriptions.list_recipient_ids(subscription)
     end
+
+    test "list_recipient_ids/1 gets user ids for data_structure role subscription" do
+      parent_id = System.unique_integer([:positive])
+      domain_id = System.unique_integer([:positive])
+      structure_id = System.unique_integer([:positive])
+      user_ids = Enum.map(1..2, fn _ -> System.unique_integer([:positive]) end)
+      parent = %{id: parent_id, name: "foo", updated_at: ~N[2021-01-26 14:41:14]}
+
+      domain = %{
+        id: domain_id,
+        name: "bar",
+        parent_ids: [parent_id],
+        updated_at: ~N[2021-01-26 14:41:14]
+      }
+
+      AclCache.set_acl_role_users("domain", parent_id, "xyz", user_ids)
+      DomainCache.put(parent)
+      DomainCache.put(domain)
+
+      on_exit(fn ->
+        {:ok, _} = DomainCache.delete(domain_id)
+        {:ok, _} = DomainCache.delete(parent_id)
+        AclCache.delete_acl_roles("domain", parent_id)
+      end)
+
+      subscriber = build(:subscriber, type: "role", identifier: "xyz")
+
+      scope =
+        build(:scope,
+          resource_type: "data_structure",
+          resource_id: structure_id,
+          domain_id: domain_id
+        )
+
+      subscription = insert(:subscription, subscriber: subscriber, scope: scope)
+      assert ^user_ids = Subscriptions.list_recipient_ids(subscription)
+    end
   end
 end

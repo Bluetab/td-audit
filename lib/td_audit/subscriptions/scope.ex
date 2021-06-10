@@ -18,6 +18,7 @@ defmodule TdAudit.Subscriptions.Scope do
     field(:resource_name, :string)
     field(:resource_type, :string)
     field(:resource_id, :integer)
+    field(:domain_id, :integer)
     embeds_one(:filters, Filters, on_replace: :delete)
   end
 
@@ -27,7 +28,7 @@ defmodule TdAudit.Subscriptions.Scope do
 
   def changeset(%__MODULE__{} = scope, %{} = params) do
     scope
-    |> cast(params, [:events, :resource_name, :resource_type, :resource_id])
+    |> cast(params, [:domain_id, :events, :resource_name, :resource_type, :resource_id])
     |> common_changeset(params)
   end
 

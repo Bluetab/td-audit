@@ -11,8 +11,7 @@ defmodule TdAudit.Subscriptions do
   alias TdAudit.Repo
   alias TdAudit.Subscriptions.Scope
   alias TdAudit.Subscriptions.Subscription
-  alias TdCache.AclCache
-  alias TdCache.ConceptCache
+  alias TdCache.{AclCache, ConceptCache, TaxonomyCache}
 
   @doc """
   Returns the list of subscriptions.
@@ -162,6 +161,15 @@ defmodule TdAudit.Subscriptions do
       }) do
     concept
     |> list_concept_domains()
+    |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
+  end
+
+  def list_recipient_ids(%Subscription{
+        subscriber: %{type: "role", identifier: role},
+        scope: %{resource_type: "data_structure", domain_id: id}
+      }) do
+    id
+    |> TaxonomyCache.get_parent_ids()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
   end
 

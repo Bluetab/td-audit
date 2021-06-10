@@ -78,6 +78,9 @@ defmodule TdAudit.Notifications.Email do
   defp template(["relation_deleted"]), do: :concepts
   defp template(["update_concept_draft"]), do: :concepts
   defp template(["relation_deprecated"]), do: :relations
+  defp template(["structure_tag_linked"]), do: :tags
+  defp template(["structure_tag_link_updated"]), do: :tags
+  defp template(["structure_tag_link_deleted"]), do: :tags
 
   defp template(events) when length(events) > 1 do
     events
