@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-3735] Notifications for tag related events 
+
 ## [4.21.0] 2021-05-31
 
 ### Changed
