@@ -27,6 +27,13 @@ defmodule TdAuditWeb.EventView do
     }
   end
 
+  def resource_name(%{payload: %{"resource" => %{"name" => name, "path" => path}}}) do
+    full_path = Enum.concat(path, [name])
+    Enum.join(full_path, " > ")
+  end
+
+  def resource_name(%{payload: %{"resource" => %{"name" => name}}}), do: name
+
   def resource_name(%{
         payload: %{"name" => name, "implementation_key" => implementation_key}
       }) do
@@ -88,6 +95,10 @@ defmodule TdAuditWeb.EventView do
         payload: %{"rule_id" => rule_id, "implementation_id" => implementation_id}
       }) do
     "/rules/#{rule_id}/implementations/#{implementation_id}/results"
+  end
+
+  def path(%{resource_type: "data_structure", resource_id: id}) do
+    "/structures/#{id}"
   end
 
   def path(_), do: nil

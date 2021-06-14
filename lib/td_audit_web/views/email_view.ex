@@ -62,6 +62,10 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("structure_tag_linked.html", event), do: render_tag(event)
+  def render("structure_tag_link_updated.html", event), do: render_tag(event)
+  def render("structure_tag_link_deleted.html", event), do: render_tag(event)
+
   def render(template, %{event: event}) do
     Logger.warn("Template #{template} not supported")
 
@@ -75,6 +79,18 @@ defmodule TdAuditWeb.EmailView do
       user: user_name(event),
       name: EventView.resource_name(event),
       event_name: event_name(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
+  defp render_tag(%{event: event}) do
+    render("tag.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      tag: resource_tag(event),
+      description: description(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -151,6 +167,9 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
   defp event_name(%{event: "update_concept_draft"}), do: "Concept Draft Updated"
   defp event_name(%{event: "relation_deprecated"}), do: "Relation deprecated"
+  defp event_name(%{event: "structure_tag_linked"}), do: "Structure linked to tag"
+  defp event_name(%{event: "structure_tag_link_updated"}), do: "Tag linked to structure updated"
+  defp event_name(%{event: "structure_tag_link_deleted"}), do: "Tag linked to structure deleted"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"
@@ -166,4 +185,12 @@ defmodule TdAuditWeb.EmailView do
   end
 
   defp relation_side(_), do: nil
+
+  defp resource_tag(%{payload: %{"tag" => tag}}), do: tag
+
+  defp resource_tag(_), do: nil
+
+  defp description(%{payload: %{"description" => description}}), do: description
+
+  defp description(_), do: nil
 end
