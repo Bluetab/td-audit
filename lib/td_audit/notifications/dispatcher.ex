@@ -50,7 +50,10 @@ defmodule TdAudit.Notifications.Dispatcher do
 
     message
     |> Notifications.share()
-    |> send_email()
+    |> case do
+      {:ok, email} -> send_email(email)
+      {:error, _} -> :ignore
+    end
 
     {:noreply, state}
   end

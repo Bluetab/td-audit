@@ -136,21 +136,17 @@ defmodule TdAudit.NotificationsTest do
 
       to = Enum.map([u1, u2], & &1.email)
 
-      assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} =
-               Notifications.share(message)
+      assert {:ok, email} = Notifications.share(message)
+      assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} = email
     end
   end
 
-  test "list_recipients/1 lists user emails with full names" do
-    UserCache.put(%{id: 1, full_name: "Foo", email: "foo@example.com"})
-    UserCache.put(%{id: 2, full_name: "Bar", email: "bar@example.com"})
+  test "list_recipients/1 lists users with non-nil emails with full names" do
+    %{id: id1} = create_user(%{full_name: "Foo", email: "foo@example.com"})
+    %{id: id2} = create_user(%{full_name: "Bar", email: "bar@example.com"})
+    %{id: id3} = create_user(%{full_name: "Baz has no email"})
 
-    on_exit(fn ->
-      UserCache.delete(1)
-      UserCache.delete(2)
-    end)
-
-    notification = insert(:notification, recipient_ids: [1, 2])
+    notification = insert(:notification, recipient_ids: [id1, id2, id3])
 
     assert [{"Foo", "foo@example.com"}, {"Bar", "bar@example.com"}] =
              Notifications.list_recipients(notification)
@@ -165,5 +161,17 @@ defmodule TdAudit.NotificationsTest do
 
     version = Application.spec(:td_audit, :vsn)
     "#{footer} v#{version}"
+  end
+
+  defp create_user(%{id: id} = user) do
+    on_exit(fn -> UserCache.delete(id) end)
+    UserCache.put(user)
+    user
+  end
+
+  defp create_user(%{} = params) do
+    params
+    |> Map.put(:id, System.unique_integer([:positive]))
+    |> create_user()
   end
 end

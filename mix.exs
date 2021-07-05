@@ -57,7 +57,7 @@ defmodule TdAudit.Mixfile do
       {:postgrex, "~> 0.15.0"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:guardian, "~> 2.0"},
       {:ex_machina, "~> 2.4", only: :test},
       {:phoenix_swagger, "~> 0.8.3"},

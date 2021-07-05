@@ -26,7 +26,14 @@ defmodule TdAudit.Notifications do
     Multi.new()
     |> Multi.run(:notifications, fn _, _ -> {:ok, pending()} end)
     |> Multi.run(:emails, fn _, %{notifications: notifications} ->
-      emails = Enum.map(notifications, &Email.create/1)
+      emails =
+        notifications
+        |> Enum.map(&Email.create/1)
+        |> Enum.flat_map(fn
+          {:ok, email} -> [email]
+          _ -> []
+        end)
+
       {:ok, emails}
     end)
     |> Multi.run(:status, &bulk_insert_status(&1, &2, DateTime.utc_now()))
@@ -92,23 +99,29 @@ defmodule TdAudit.Notifications do
       |> Map.get(user_id, %{})
       |> Map.take([:full_name, :email])
 
+    email_map =
+      user_map
+      |> Enum.flat_map(fn
+        {id, %{email: email}} -> [{id, email}]
+        _ -> []
+      end)
+      |> Map.new()
+
     recipients =
       recipients
-      |> Enum.map(fn
+      |> Enum.flat_map(fn
         %{"role" => "user", "id" => id} ->
-          user_map
-          |> Map.get(id, %{})
-          |> Map.get(:email)
+          [Map.get(email_map, id)]
 
         %{"users" => users} ->
-          users
-          |> Enum.map(&Map.get(&1, "id"))
-          |> Enum.map(&Map.get(user_map, &1))
-          |> Enum.filter(& &1)
-          |> Enum.map(&Map.get(&1, :email))
+          user_ids = Enum.map(users, &Map.get(&1, "id"))
+
+          email_map
+          |> Map.take(user_ids)
+          |> Map.values()
       end)
-      |> List.flatten()
       |> Enum.uniq()
+      |> Enum.reject(&is_nil/1)
 
     message
     |> Map.put(:recipients, recipients)
@@ -116,10 +129,12 @@ defmodule TdAudit.Notifications do
     |> Email.create()
   end
 
-  def list_recipients(notification) do
-    Enum.map(notification.recipient_ids, fn user_id ->
-      {:ok, user} = UserCache.get(user_id)
-      {user.full_name, user.email}
+  def list_recipients(%{recipient_ids: user_ids}) do
+    user_ids
+    |> Enum.map(&UserCache.get/1)
+    |> Enum.flat_map(fn
+      {:ok, %{full_name: full_name, email: email}} when is_binary(email) -> [{full_name, email}]
+      _ -> []
     end)
   end
 
