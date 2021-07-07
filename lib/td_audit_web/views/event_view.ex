@@ -29,8 +29,15 @@ defmodule TdAuditWeb.EventView do
 
   def resource_name(%{event: "share_document", payload: %{"message" => message}}), do: message
 
-  def resource_name(%{payload: %{"resource" => %{"name" => name, "path" => path}}}) do
-    full_path = Enum.concat(path, [name])
+  def resource_name(%{payload: %{"resource" => %{"name" => name, "path" => path = [_ | _]}}}) do
+    full_path =
+      path
+      |> Enum.map(fn
+        %{"name" => name} -> name
+        name -> name
+      end)
+      |> Enum.concat([name])
+
     Enum.join(full_path, " > ")
   end
 
