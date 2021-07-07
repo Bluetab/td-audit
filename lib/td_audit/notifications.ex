@@ -92,28 +92,87 @@ defmodule TdAudit.Notifications do
       |> Map.get(user_id, %{})
       |> Map.take([:full_name, :email])
 
-    recipients =
-      recipients
-      |> Enum.map(fn
-        %{"role" => "user", "id" => id} ->
-          user_map
-          |> Map.get(id, %{})
-          |> Map.get(:email)
-
-        %{"users" => users} ->
-          users
-          |> Enum.map(&Map.get(&1, "id"))
-          |> Enum.map(&Map.get(user_map, &1))
-          |> Enum.filter(& &1)
-          |> Enum.map(&Map.get(&1, :email))
-      end)
-      |> List.flatten()
-      |> Enum.uniq()
+    recipient_ids = get_recipients_prop(recipients, user_map, :id)
 
     message
-    |> Map.put(:recipients, recipients)
+    |> Map.put(:recipients, recipient_ids)
+    |> Map.put(:who, who)
+    |> create_shared_notification()
+
+    recipient_emails = get_recipients_prop(recipients, user_map, :email)
+
+    message
+    |> Map.put(:recipients, recipient_emails)
     |> Map.put(:who, who)
     |> Email.create()
+  end
+
+  defp get_recipients_prop(recipients, user_map, prop) do
+    recipients
+    |> Enum.map(fn
+      %{"role" => "user", "id" => id} ->
+        user_map
+        |> Map.get(id, %{})
+        |> Map.get(prop)
+
+      %{"users" => users} ->
+        users
+        |> Enum.map(&Map.get(&1, "id"))
+        |> Enum.map(&Map.get(user_map, &1))
+        |> Enum.filter(& &1)
+        |> Enum.map(&Map.get(&1, prop))
+    end)
+    |> List.flatten()
+    |> Enum.uniq()
+  end
+
+  defp create_shared_notification(%{
+         user_id: user_id,
+         recipients: recipients,
+         headers: %{"subject" => subject},
+         resource: %{"name" => name},
+         who: %{full_name: user},
+         uri: uri
+       }) do
+    message =
+      subject
+      |> String.replace("(name)", name)
+      |> String.replace("(user)", user)
+
+    path =
+      uri
+      |> URI.parse()
+      |> Map.get(:path)
+
+    event = %{
+      service: "td_audit",
+      event: "share_document",
+      payload: %{
+        message: message,
+        path: path
+      },
+      ts: DateTime.utc_now(),
+      user_id: user_id
+    }
+
+    Multi.new()
+    |> Multi.run(:create_event, fn _, _ -> Audit.create_event(event) end)
+    |> Multi.run(:create_notification, fn _, %{create_event: %{id: event_id}} ->
+      insert_shared_notification(recipients, event_id)
+    end)
+    |> Repo.transaction()
+  end
+
+  defp insert_shared_notification(recipients, event_id) do
+    changeset = notification_changeset(nil, recipients, "sent")
+
+    with {:ok, %{notification: %{id: notification_id}}} <- Repo.insert(changeset),
+         {1, nil} <-
+           Repo.insert_all("notifications_events", [
+             %{event_id: event_id, notification_id: notification_id}
+           ]) do
+      {:ok, nil}
+    end
   end
 
   def list_recipients(notification) do
@@ -197,9 +256,9 @@ defmodule TdAudit.Notifications do
     Enum.map(event_ids, &%{event_id: &1, notification_id: notification_id})
   end
 
-  defp notification_changeset(subscription_id, recipient_ids) do
+  defp notification_changeset(subscription_id, recipient_ids, status \\ "pending") do
     %{
-      status: "pending",
+      status: status,
       notification: %{subscription_id: subscription_id, recipient_ids: recipient_ids}
     }
     |> Status.changeset()

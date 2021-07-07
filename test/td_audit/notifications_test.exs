@@ -58,16 +58,27 @@ defmodule TdAudit.NotificationsTest do
        }} = Notifications.create(periodicity: "minutely")
     end
 
-    test "share/1 shares an email with a list of recipients" do
+    test "share/1 shares an email with a list of recipients and creates notification" do
       sender = %{
-        id: System.unique_integer(),
+        id: System.unique_integer([:positive]),
         full_name: "xyz",
         name: "xyz",
         email: "xyz@bar.net"
       }
 
-      u1 = %{id: System.unique_integer(), full_name: "xyz", name: "bar", email: "foo@bar.net"}
-      u2 = %{id: System.unique_integer(), full_name: "xyz", name: "baz", email: "bar@baz.net"}
+      u1 = %{
+        id: System.unique_integer([:positive]),
+        full_name: "xyz",
+        name: "bar",
+        email: "foo@bar.net"
+      }
+
+      u2 = %{
+        id: System.unique_integer([:positive]),
+        full_name: "xyz",
+        name: "baz",
+        email: "bar@baz.net"
+      }
 
       UserCache.put(sender)
       UserCache.put(u1)
@@ -138,6 +149,23 @@ defmodule TdAudit.NotificationsTest do
 
       assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} =
                Notifications.share(message)
+
+      u1_id = u1.id
+      u2_id = u2.id
+
+      assert [
+               %TdAudit.Notifications.Notification{
+                 events: [
+                   %TdAudit.Audit.Event{
+                     event: "share_document",
+                     payload: %{"message" => "foo xyz and bar foo", "path" => "/bar"},
+                     service: "td_audit",
+                     user_id: ^user_id
+                   }
+                 ],
+                 recipient_ids: [^u1_id, ^u2_id]
+               }
+             ] = Notifications.list_notifications(u1_id)
     end
   end
 
