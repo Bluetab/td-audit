@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-3724] Notifications when document is shared
+
 ## [4.22.0] 2021-06-15
 
 ### Added

@@ -58,28 +58,16 @@ defmodule TdAudit.NotificationsTest do
        }} = Notifications.create(periodicity: "minutely")
     end
 
-    test "share/1 shares an email with a list of recipients" do
-      sender = %{
-        id: System.unique_integer(),
-        full_name: "xyz",
-        name: "xyz",
-        email: "xyz@bar.net"
-      }
+    test "share/1 shares an email with a list of recipients and creates notification" do
+      %{id: user_id} =
+        sender = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
 
-      u1 = %{id: System.unique_integer(), full_name: "xyz", name: "bar", email: "foo@bar.net"}
-      u2 = %{id: System.unique_integer(), full_name: "xyz", name: "baz", email: "bar@baz.net"}
+      %{id: id1, email: email1} =
+        create_user(%{full_name: "xyz", email: "foo@bar.net", name: "bar"})
 
-      UserCache.put(sender)
-      UserCache.put(u1)
-      UserCache.put(u2)
+      %{id: id2, email: email2} =
+        create_user(%{full_name: "xyz", email: "bar@baz.net", name: "baz"})
 
-      on_exit(fn ->
-        UserCache.delete(sender.id)
-        UserCache.delete(u1.id)
-        UserCache.delete(u2.id)
-      end)
-
-      user_id = Map.get(sender, :id)
       description = "bar"
       name = "foo"
       resource = %{"name" => name, "description" => description}
@@ -98,13 +86,13 @@ defmodule TdAudit.NotificationsTest do
       }
 
       recipients = [
-        %{"id" => Map.get(u1, :id), "role" => "user"},
+        %{"id" => id1, "role" => "user"},
         %{
           "id" => 1,
           "role" => "group",
           "users" => [
-            %{"id" => Map.get(u1, :id), "role" => "user"},
-            %{"id" => Map.get(u2, :id), "role" => "user"}
+            %{"id" => id1, "role" => "user"},
+            %{"id" => id2, "role" => "user"}
           ]
         }
       ]
@@ -132,12 +120,26 @@ defmodule TdAudit.NotificationsTest do
       subject =
         subject
         |> String.replace("(user)", sender.full_name)
-        |> String.replace("(name)", "\"#{name}\"")
+        |> String.replace("(name)", ~s("#{name}"))
 
-      to = Enum.map([u1, u2], & &1.email)
+      to = [email1, email2]
 
       assert {:ok, email} = Notifications.share(message)
       assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} = email
+
+      assert [
+               %TdAudit.Notifications.Notification{
+                 events: [
+                   %TdAudit.Audit.Event{
+                     event: "share_document",
+                     payload: %{"message" => "foo xyz and bar foo", "path" => "/bar"},
+                     service: "td_audit",
+                     user_id: ^user_id
+                   }
+                 ],
+                 recipient_ids: [^id1, ^id2]
+               }
+             ] = Notifications.list_notifications(id1)
     end
   end
 
