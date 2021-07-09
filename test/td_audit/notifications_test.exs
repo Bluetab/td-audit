@@ -59,38 +59,15 @@ defmodule TdAudit.NotificationsTest do
     end
 
     test "share/1 shares an email with a list of recipients and creates notification" do
-      sender = %{
-        id: System.unique_integer([:positive]),
-        full_name: "xyz",
-        name: "xyz",
-        email: "xyz@bar.net"
-      }
+      %{id: user_id} =
+        sender = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
 
-      u1 = %{
-        id: System.unique_integer([:positive]),
-        full_name: "xyz",
-        name: "bar",
-        email: "foo@bar.net"
-      }
+      %{id: id1, email: email1} =
+        create_user(%{full_name: "xyz", email: "foo@bar.net", name: "bar"})
 
-      u2 = %{
-        id: System.unique_integer([:positive]),
-        full_name: "xyz",
-        name: "baz",
-        email: "bar@baz.net"
-      }
+      %{id: id2, email: email2} =
+        create_user(%{full_name: "xyz", email: "bar@baz.net", name: "baz"})
 
-      UserCache.put(sender)
-      UserCache.put(u1)
-      UserCache.put(u2)
-
-      on_exit(fn ->
-        UserCache.delete(sender.id)
-        UserCache.delete(u1.id)
-        UserCache.delete(u2.id)
-      end)
-
-      user_id = Map.get(sender, :id)
       description = "bar"
       name = "foo"
       resource = %{"name" => name, "description" => description}
@@ -109,13 +86,13 @@ defmodule TdAudit.NotificationsTest do
       }
 
       recipients = [
-        %{"id" => Map.get(u1, :id), "role" => "user"},
+        %{"id" => id1, "role" => "user"},
         %{
           "id" => 1,
           "role" => "group",
           "users" => [
-            %{"id" => Map.get(u1, :id), "role" => "user"},
-            %{"id" => Map.get(u2, :id), "role" => "user"}
+            %{"id" => id1, "role" => "user"},
+            %{"id" => id2, "role" => "user"}
           ]
         }
       ]
@@ -143,15 +120,12 @@ defmodule TdAudit.NotificationsTest do
       subject =
         subject
         |> String.replace("(user)", sender.full_name)
-        |> String.replace("(name)", "\"#{name}\"")
+        |> String.replace("(name)", ~s("#{name}"))
 
-      to = Enum.map([u1, u2], & &1.email)
+      to = [email1, email2]
 
-      assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} =
-               Notifications.share(message)
-
-      u1_id = u1.id
-      u2_id = u2.id
+      assert {:ok, email} = Notifications.share(message)
+      assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} = email
 
       assert [
                %TdAudit.Notifications.Notification{
@@ -163,22 +137,18 @@ defmodule TdAudit.NotificationsTest do
                      user_id: ^user_id
                    }
                  ],
-                 recipient_ids: [^u1_id, ^u2_id]
+                 recipient_ids: [^id1, ^id2]
                }
-             ] = Notifications.list_notifications(u1_id)
+             ] = Notifications.list_notifications(id1)
     end
   end
 
-  test "list_recipients/1 lists user emails with full names" do
-    UserCache.put(%{id: 1, full_name: "Foo", email: "foo@example.com"})
-    UserCache.put(%{id: 2, full_name: "Bar", email: "bar@example.com"})
+  test "list_recipients/1 lists users with non-nil emails with full names" do
+    %{id: id1} = create_user(%{full_name: "Foo", email: "foo@example.com"})
+    %{id: id2} = create_user(%{full_name: "Bar", email: "bar@example.com"})
+    %{id: id3} = create_user(%{full_name: "Baz has no email"})
 
-    on_exit(fn ->
-      UserCache.delete(1)
-      UserCache.delete(2)
-    end)
-
-    notification = insert(:notification, recipient_ids: [1, 2])
+    notification = insert(:notification, recipient_ids: [id1, id2, id3])
 
     assert [{"Foo", "foo@example.com"}, {"Bar", "bar@example.com"}] =
              Notifications.list_recipients(notification)
@@ -193,5 +163,17 @@ defmodule TdAudit.NotificationsTest do
 
     version = Application.spec(:td_audit, :vsn)
     "#{footer} v#{version}"
+  end
+
+  defp create_user(%{id: id} = user) do
+    on_exit(fn -> UserCache.delete(id) end)
+    UserCache.put(user)
+    user
+  end
+
+  defp create_user(%{} = params) do
+    params
+    |> Map.put(:id, System.unique_integer([:positive]))
+    |> create_user()
   end
 end
