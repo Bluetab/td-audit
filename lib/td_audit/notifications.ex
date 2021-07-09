@@ -26,7 +26,14 @@ defmodule TdAudit.Notifications do
     Multi.new()
     |> Multi.run(:notifications, fn _, _ -> {:ok, pending()} end)
     |> Multi.run(:emails, fn _, %{notifications: notifications} ->
-      emails = Enum.map(notifications, &Email.create/1)
+      emails =
+        notifications
+        |> Enum.map(&Email.create/1)
+        |> Enum.flat_map(fn
+          {:ok, email} -> [email]
+          _ -> []
+        end)
+
       {:ok, emails}
     end)
     |> Multi.run(:status, &bulk_insert_status(&1, &2, DateTime.utc_now()))
@@ -85,50 +92,42 @@ defmodule TdAudit.Notifications do
   Generate a notification when a resource is shared.
   """
   def share(%{recipients: recipients, user_id: user_id} = message) do
-    user_map = UserCache.map()
-
     who =
-      user_map
-      |> Map.get(user_id, %{})
-      |> Map.take([:full_name, :email])
+      case UserCache.get(user_id) do
+        {:ok, %{} = user} -> Map.take(user, [:full_name, :email])
+        _ -> %{}
+      end
 
-    recipient_ids = get_recipients_prop(recipients, user_map, :id)
+    email_map = UserCache.id_to_email_map()
+
+    recipient_ids =
+      recipients
+      |> Enum.flat_map(fn
+        %{"role" => "user", "id" => id} ->
+          [id]
+
+        %{"users" => users} ->
+          Enum.map(users, &Map.get(&1, "id"))
+      end)
+      |> Enum.uniq()
+      |> Enum.reject(&is_nil/1)
+
+    recipients_with_emails = Map.take(email_map, recipient_ids)
 
     message
-    |> Map.put(:recipients, recipient_ids)
+    |> Map.put(:recipient_ids, Map.keys(recipients_with_emails))
     |> Map.put(:who, who)
     |> create_shared_notification()
 
-    recipient_emails = get_recipients_prop(recipients, user_map, :email)
-
     message
-    |> Map.put(:recipients, recipient_emails)
+    |> Map.put(:recipients, _recipient_emails = Map.values(recipients_with_emails))
     |> Map.put(:who, who)
     |> Email.create()
   end
 
-  defp get_recipients_prop(recipients, user_map, prop) do
-    recipients
-    |> Enum.map(fn
-      %{"role" => "user", "id" => id} ->
-        user_map
-        |> Map.get(id, %{})
-        |> Map.get(prop)
-
-      %{"users" => users} ->
-        users
-        |> Enum.map(&Map.get(&1, "id"))
-        |> Enum.map(&Map.get(user_map, &1))
-        |> Enum.filter(& &1)
-        |> Enum.map(&Map.get(&1, prop))
-    end)
-    |> List.flatten()
-    |> Enum.uniq()
-  end
-
   defp create_shared_notification(%{
          user_id: user_id,
-         recipients: recipients,
+         recipient_ids: recipient_ids,
          headers: %{"subject" => subject},
          resource: %{"name" => name},
          who: %{full_name: user},
@@ -158,14 +157,15 @@ defmodule TdAudit.Notifications do
     Multi.new()
     |> Multi.run(:create_event, fn _, _ -> Audit.create_event(event) end)
     |> Multi.run(:create_notification, fn _, %{create_event: %{id: event_id}} ->
-      insert_shared_notification(recipients, event_id)
+      insert_shared_notification(recipient_ids, event_id)
     end)
     |> Repo.transaction()
   end
 
-  defp insert_shared_notification(recipients, event_id) do
-    changeset = notification_changeset(nil, recipients, "sent")
+  defp insert_shared_notification(recipient_ids, event_id) do
+    changeset = notification_changeset(nil, recipient_ids, "sent")
 
+    # TODO: Refactor. Use Multi.insert, avoid insert_all for a single insert
     with {:ok, %{notification: %{id: notification_id}}} <- Repo.insert(changeset),
          {1, nil} <-
            Repo.insert_all("notifications_events", [
@@ -175,10 +175,12 @@ defmodule TdAudit.Notifications do
     end
   end
 
-  def list_recipients(notification) do
-    Enum.map(notification.recipient_ids, fn user_id ->
-      {:ok, user} = UserCache.get(user_id)
-      {user.full_name, user.email}
+  def list_recipients(%{recipient_ids: user_ids}) do
+    user_ids
+    |> Enum.map(&UserCache.get/1)
+    |> Enum.flat_map(fn
+      {:ok, %{full_name: full_name, email: email}} when is_binary(email) -> [{full_name, email}]
+      _ -> []
     end)
   end
 

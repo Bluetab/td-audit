@@ -10,18 +10,28 @@ defmodule TdAudit.Notifications.Email do
 
   def create(%Notification{events: events} = notification) do
     template = template(notification)
-    recipients = Notifications.list_recipients(notification)
 
-    new_email()
-    |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
-    |> assign(:header, header(template))
-    |> assign(:footer, footer())
-    |> assign(:events, events)
-    |> subject(subj(template))
-    |> to(recipients)
-    |> from(sender())
-    |> render("events.html")
+    case Notifications.list_recipients(notification) do
+      [] ->
+        {:error, :no_recipients}
+
+      recipients ->
+        email =
+          new_email()
+          |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
+          |> assign(:header, header(template))
+          |> assign(:footer, footer())
+          |> assign(:events, events)
+          |> subject(subj(template))
+          |> to(recipients)
+          |> from(sender())
+          |> render("events.html")
+
+        {:ok, email}
+    end
   end
+
+  def create(%{recipients: []}), do: {:error, :no_recipients}
 
   def create(%{recipients: recipients, who: who, uri: uri, resource: resource} = message) do
     headers = Map.get(message, :headers, %{})
@@ -40,21 +50,24 @@ defmodule TdAudit.Notifications.Email do
       |> Map.get("header")
       |> header_from_headers(user)
 
-    new_email()
-    |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
-    |> put_header("Reply-To", reply_to)
-    |> assign(:header, header)
-    |> assign(:uri, uri)
-    |> assign(:name, name)
-    |> assign(:description, description(description))
-    |> assign(:description_header, Map.get(headers, "description_header", "Description"))
-    |> assign(:footer, footer())
-    |> assign(:message, Map.get(message, :message))
-    |> assign(:message_header, Map.get(headers, "message_header", "Message"))
-    |> subject(subject)
-    |> to(recipients)
-    |> from(sender())
-    |> render("share.html")
+    email =
+      new_email()
+      |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
+      |> put_header("Reply-To", reply_to)
+      |> assign(:header, header)
+      |> assign(:uri, uri)
+      |> assign(:name, name)
+      |> assign(:description, description(description))
+      |> assign(:description_header, Map.get(headers, "description_header", "Description"))
+      |> assign(:footer, footer())
+      |> assign(:message, Map.get(message, :message))
+      |> assign(:message_header, Map.get(headers, "message_header", "Message"))
+      |> subject(subject)
+      |> to(recipients)
+      |> from(sender())
+      |> render("share.html")
+
+    {:ok, email}
   end
 
   defp template(%Notification{events: events}) do
