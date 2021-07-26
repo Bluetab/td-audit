@@ -10,7 +10,10 @@ defmodule TdAudit.Canada.Abilities do
   defimpl Canada.Can, for: Claims do
     def can?(%Claims{is_admin: true}, _action, _domain), do: true
 
-    def can?(%Claims{user_id: user_id}, :create_subscriber, %{"type" => "user", "identifier" => identifier}) do
+    def can?(%Claims{user_id: user_id}, :create_subscriber, %{
+          "type" => "user",
+          "identifier" => identifier
+        }) do
       to_string(user_id) == to_string(identifier)
     end
 

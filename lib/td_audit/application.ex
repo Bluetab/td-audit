@@ -27,9 +27,10 @@ defmodule TdAudit.Application do
     :ok
   end
 
-  defp children(:test), do: [
-    {TdAudit.Broadway, broadway_config()}
-  ]
+  defp children(:test),
+    do: [
+      {TdAudit.Broadway, broadway_config()}
+    ]
 
   defp children(_env) do
     [

@@ -47,15 +47,11 @@ defmodule TdAuditWeb.EventControllerTest do
     @tag authenticated_user: @admin_user_name
     test "lists all events filtered by event type", %{conn: conn, swagger_schema: schema} do
       %{id: id} = insert(:event, event: "event_type_1")
-     insert(:event, event: "event_type_2")
+      insert(:event, event: "event_type_2")
 
       assert %{"data" => data} =
                conn
-               |> get(
-                 Routes.event_path(conn, :index,
-                   event: "event_type_1"
-                 )
-               )
+               |> get(Routes.event_path(conn, :index, event: "event_type_1"))
                |> validate_resp_schema(schema, "EventsResponse")
                |> json_response(:ok)
 
@@ -70,18 +66,17 @@ defmodule TdAuditWeb.EventControllerTest do
       insert(:event, event: "event_type_ts3", ts: "2021-02-04T00:00:00Z")
 
       assert %{"data" => data} =
-              conn
-              |> get(
-                Routes.event_path(conn, :index,
-                  start_ts: "2021-02-02T00:00:00Z",
-                  end_ts: "2021-02-03T00:00:00Z"
-                )
-              )
-              |> validate_resp_schema(schema, "EventsResponse")
-              |> json_response(:ok)
+               conn
+               |> get(
+                 Routes.event_path(conn, :index,
+                   start_ts: "2021-02-02T00:00:00Z",
+                   end_ts: "2021-02-03T00:00:00Z"
+                 )
+               )
+               |> validate_resp_schema(schema, "EventsResponse")
+               |> json_response(:ok)
 
       assert [%{"id" => ^id2}, %{"id" => ^id1}] = data
-
     end
 
     @tag authenticated_user: @admin_user_name
@@ -91,17 +86,12 @@ defmodule TdAuditWeb.EventControllerTest do
       %{id: id} = insert(:event, event: "event_type_ts2", ts: "2021-02-03T00:00:00Z")
 
       assert %{"data" => data} =
-              conn
-              |> get(
-                Routes.event_path(conn, :index,
-                  start_ts: "2021-02-02T12:00:00Z"
-                )
-              )
-              |> validate_resp_schema(schema, "EventsResponse")
-              |> json_response(:ok)
+               conn
+               |> get(Routes.event_path(conn, :index, start_ts: "2021-02-02T12:00:00Z"))
+               |> validate_resp_schema(schema, "EventsResponse")
+               |> json_response(:ok)
 
       assert [%{"id" => ^id}] = data
-
     end
   end
 end
