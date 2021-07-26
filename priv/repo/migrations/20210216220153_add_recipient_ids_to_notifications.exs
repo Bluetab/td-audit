@@ -6,6 +6,6 @@ defmodule TdAudit.Repo.Migrations.AddRecipientIdsToNotifications do
       add(:recipient_ids, {:array, :integer}, default: [])
     end
 
-    create index(:notifications, [:recipient_ids])
+    create(index(:notifications, [:recipient_ids]))
   end
 end

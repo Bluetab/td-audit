@@ -16,8 +16,7 @@ config :td_audit, TdAudit.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 1
 
-config :td_audit, TdAudit.Notifications.Mailer,
-  adapter: Bamboo.TestAdapter
+config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.TestAdapter
 
 config :td_audit, host_name: "http://localhost:8080"
 
