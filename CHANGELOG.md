@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.25.0] 2021-07-26
+
+### Changed
+
+- Updated dependencies
+
 ## [4.24.0] 2021-07-13
 
 ### Added
@@ -10,7 +16,7 @@
 
 ### Added
 
-- [TD-3735] Notifications for tag related events 
+- [TD-3735] Notifications for tag related events
 
 ## [4.21.0] 2021-05-31
 
