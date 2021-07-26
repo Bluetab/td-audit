@@ -7,12 +7,12 @@ defmodule TdAudit.Auth.Claims do
 
   @typedoc "The claims of an authenticated user"
   @type t :: %__MODULE__{
-    user_id: non_neg_integer() | nil,
-    user_name: binary() | nil,
-    role: binary() | nil,
-    is_admin: boolean(),
-    jti: binary() | nil
-  }
+          user_id: non_neg_integer() | nil,
+          user_name: binary() | nil,
+          role: binary() | nil,
+          is_admin: boolean(),
+          jti: binary() | nil
+        }
 
   @derive {Jason.Encoder, only: [:user_id, :user_name]}
   defstruct [:user_id, :user_name, :role, :jti, is_admin: false]

@@ -177,6 +177,10 @@ defmodule TdAudit.Subscriptions.Events do
   end
 
   defp where_from_cardinality(query, %{"name" => name, "value" => value}, _cardinality) do
-    where(query, [e], fragment("? @> ?", e.payload["subscribable_fields"], ~s({"#{name}":"#{value}"})))
+    where(
+      query,
+      [e],
+      fragment("? @> ?", e.payload["subscribable_fields"], ~s({"#{name}":"#{value}"}))
+    )
   end
 end
