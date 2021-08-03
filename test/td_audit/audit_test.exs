@@ -111,7 +111,7 @@ defmodule TdAudit.AuditTest do
       %{id: edi1} = insert(:event, resource_type: "auth", event: "login_attempt")
       %{id: edi2} = insert(:event, resource_type: "auth", event: "login_success")
 
-      assert [%{id: ^edi1}, %{id: ^edi2}] =
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
                Audit.list_events(%{
                  "event" => ["login_attempt", "login_success"],
                  "resource_type" => "auth"
@@ -130,7 +130,7 @@ defmodule TdAudit.AuditTest do
       %{id: edi2} =
         insert(:event, resource_type: "auth", event: "login_success", inserted_at: date)
 
-      assert [%{id: ^edi1}, %{id: ^edi2}] =
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
                Audit.list_events(%{
                  "event" => ["login_attempt", "login_success"],
                  "resource_type" => "auth",
@@ -144,7 +144,7 @@ defmodule TdAudit.AuditTest do
                  "inserted_at" => %{"gt" => inserted_at}
                })
 
-      assert [%{id: ^edi1}, %{id: ^edi2}] =
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
                Audit.list_events(%{
                  "event" => ["login_attempt", "login_success"],
                  "resource_type" => "auth",
@@ -164,7 +164,7 @@ defmodule TdAudit.AuditTest do
       %{id: edi2} = insert(:event, service: "td_auth")
       insert(:event, service: "td_bg")
 
-      assert [%{id: ^edi1}, %{id: ^edi2}] =
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
                Audit.list_events(%{
                  "service" => ["td_lm", "td_auth"]
                })

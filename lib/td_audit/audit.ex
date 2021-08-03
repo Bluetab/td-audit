@@ -39,6 +39,7 @@ defmodule TdAudit.Audit do
     |> where(^dynamic)
     |> where_cursor(cursor_params)
     |> page_limit(cursor_params)
+    |> order(cursor_params)
     |> Repo.all()
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
@@ -107,4 +108,11 @@ defmodule TdAudit.Audit do
   end
 
   defp page_limit(query, _), do: query
+
+  defp order(query, cursor_params) do
+    case Map.has_key?(cursor_params, :cursor) do
+      true -> query
+      false -> order_by(query, [e], [desc: e.ts])
+    end
+  end
 end

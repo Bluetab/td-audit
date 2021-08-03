@@ -27,7 +27,7 @@ defmodule TdAuditWeb.EventSearchControllerTest do
                |> validate_resp_schema(schema, "EventsResponse")
                |> json_response(:ok)
 
-      assert [%{"id" => ^edi1}, %{"id" => ^edi2}] = data
+      assert [%{"id" => ^edi2}, %{"id" => ^edi1}] = data
     end
 
     @tag authenticated_user: @admin_user_name
