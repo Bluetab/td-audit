@@ -3,6 +3,7 @@ defmodule TdAudit.TestOperators do
   Equality operators for tests
   """
 
+  alias TdAudit.Audit.Event
   alias TdAudit.Subscriptions.Subscription
 
   def a <~> b, do: approximately_equal(a, b)
@@ -12,6 +13,11 @@ defmodule TdAudit.TestOperators do
   defp approximately_equal(%Subscription{} = a, %Subscription{} = b) do
     Map.drop(a, [:subscriber]) ==
       Map.drop(b, [:subscriber])
+  end
+
+  defp approximately_equal(%Event{} = a, %Event{} = b) do
+    Map.drop(a, [:user]) ==
+      Map.drop(b, [:user])
   end
 
   defp approximately_equal([h | t], [h2 | t2]) do

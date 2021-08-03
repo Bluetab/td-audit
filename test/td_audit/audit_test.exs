@@ -4,6 +4,8 @@ defmodule TdAudit.AuditTest do
   """
   use TdAudit.DataCase
 
+  import TdAudit.TestOperators
+
   alias TdAudit.Audit
   alias TdAudit.Audit.Event
 
@@ -109,7 +111,7 @@ defmodule TdAudit.AuditTest do
       %{id: edi1} = insert(:event, resource_type: "auth", event: "login_attempt")
       %{id: edi2} = insert(:event, resource_type: "auth", event: "login_success")
 
-      assert [%{id: ^edi2}, %{id: ^edi1}] =
+      assert [%{id: ^edi1}, %{id: ^edi2}] =
                Audit.list_events(%{
                  "event" => ["login_attempt", "login_success"],
                  "resource_type" => "auth"
@@ -128,7 +130,7 @@ defmodule TdAudit.AuditTest do
       %{id: edi2} =
         insert(:event, resource_type: "auth", event: "login_success", inserted_at: date)
 
-      assert [%{id: ^edi2}, %{id: ^edi1}] =
+      assert [%{id: ^edi1}, %{id: ^edi2}] =
                Audit.list_events(%{
                  "event" => ["login_attempt", "login_success"],
                  "resource_type" => "auth",
@@ -142,7 +144,7 @@ defmodule TdAudit.AuditTest do
                  "inserted_at" => %{"gt" => inserted_at}
                })
 
-      assert [%{id: ^edi2}, %{id: ^edi1}] =
+      assert [%{id: ^edi1}, %{id: ^edi2}] =
                Audit.list_events(%{
                  "event" => ["login_attempt", "login_success"],
                  "resource_type" => "auth",
@@ -155,6 +157,50 @@ defmodule TdAudit.AuditTest do
                  "resource_type" => "auth",
                  "inserted_at" => %{"lt" => date}
                })
+    end
+
+    test "returns events filtered by service" do
+      %{id: edi1} = insert(:event, service: "td_lm")
+      %{id: edi2} = insert(:event, service: "td_auth")
+      insert(:event, service: "td_bg")
+
+      assert [%{id: ^edi1}, %{id: ^edi2}] =
+               Audit.list_events(%{
+                 "service" => ["td_lm", "td_auth"]
+               })
+    end
+
+    test "returns empty list if cursor offsets events" do
+      %{id: id} = insert(:event)
+      page = id + 1
+      size = 20
+      cursor = %{id: page, size: size}
+      assert [] = Audit.list_events(%{cursor: cursor})
+    end
+
+    test "returns results paginated by query" do
+      events = Enum.map(1..5, fn _ -> Enum.map(1..200, &insert(:event, event: "event_#{&1}")) end)
+      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200}})
+      [chunk | rest] = events
+      assert chunk <|> results
+      id = results |> List.last() |> Map.get(:id)
+      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      [chunk | rest] = rest
+      assert chunk <|> results
+      id = results |> List.last() |> Map.get(:id)
+      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      [chunk | rest] = rest
+      assert chunk <|> results
+      id = results |> List.last() |> Map.get(:id)
+      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      [chunk | rest] = rest
+      assert chunk <|> results
+      id = results |> List.last() |> Map.get(:id)
+      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      [chunk | _rest] = rest
+      assert chunk <|> results
+      id = results |> List.last() |> Map.get(:id)
+      assert [] = Audit.list_events(%{cursor: %{size: 200, id: id}})
     end
   end
 
