@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3987] Include `cursor` with `id` and `size` on events search
+
 ## [4.25.0] 2021-07-26
 
 ### Changed

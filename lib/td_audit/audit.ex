@@ -29,15 +29,17 @@ defmodule TdAudit.Audit do
 
   def list_events(params) do
     user_map = UserCache.map()
+    cursor_params = get_cursor_params(params)
 
     additional_filters = [:start_ts, :end_ts]
     fields = Event.__schema__(:fields) ++ additional_filters
     dynamic = QuerySupport.filter(params, fields)
 
-    from(p in Event,
-      where: ^dynamic,
-      order_by: [desc: :ts]
-    )
+    Event
+    |> where(^dynamic)
+    |> where_cursor(cursor_params)
+    |> page_limit(cursor_params)
+    |> order(cursor_params)
     |> Repo.all()
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
@@ -84,5 +86,33 @@ defmodule TdAudit.Audit do
     %Event{}
     |> Event.changeset(params)
     |> Repo.insert()
+  end
+
+  defp get_cursor_params(%{"cursor" => %{} = cursor}) do
+    id = Map.get(cursor, "id")
+    size = Map.get(cursor, "size")
+
+    %{cursor: %{id: id, size: size}}
+  end
+
+  defp get_cursor_params(params), do: params
+
+  defp where_cursor(query, %{cursor: %{id: id}}) when is_integer(id) do
+    where(query, [e], e.id > ^id)
+  end
+
+  defp where_cursor(query, _), do: query
+
+  defp page_limit(query, %{cursor: %{size: size}}) when is_integer(size) do
+    limit(query, ^size)
+  end
+
+  defp page_limit(query, _), do: query
+
+  defp order(query, cursor_params) do
+    case Map.has_key?(cursor_params, :cursor) do
+      true -> order_by(query, [e], asc: e.id)
+      false -> order_by(query, [e], desc: e.ts)
+    end
   end
 end
