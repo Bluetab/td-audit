@@ -156,6 +156,45 @@ defmodule TdAudit.AuditTest do
                  "inserted_at" => %{"lt" => date}
                })
     end
+
+    test "returns events filtered by service" do
+      %{id: edi1} = insert(:event, service: "td_lm")
+      %{id: edi2} = insert(:event, service: "td_auth")
+      insert(:event, service: "td_bg")
+
+      assert [%{id: ^edi2}, %{id: ^edi1}] =
+               Audit.list_events(%{
+                 "service" => ["td_lm", "td_auth"]
+               })
+    end
+
+    test "returns empty list if cursor offsets events" do
+      %{id: id} = insert(:event)
+      page = id + 1
+      size = 20
+      cursor = %{id: page, size: size}
+      assert [] = Audit.list_events(%{cursor: cursor})
+    end
+
+    test "returns ordered results paginated by query" do
+      page_size = 200
+      [chunk | rest] = Enum.map(1..5, fn _ -> Enum.map(1..page_size, &insert(:event, event: "event_#{&1}")) end)
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
+      [chunk | rest] = rest
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
+      [chunk | rest] = rest
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
+      [chunk | rest] = rest
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
+      [chunk | _rest] = rest
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
+      assert [] = Audit.list_events(%{cursor: %{size: page_size, id: id}})
+    end
   end
 
   describe "get_event!/1" do
