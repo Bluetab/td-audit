@@ -111,8 +111,8 @@ defmodule TdAudit.Audit do
 
   defp order(query, cursor_params) do
     case Map.has_key?(cursor_params, :cursor) do
-      true -> query
-      false -> order_by(query, [e], [desc: e.ts])
+      true -> order_by(query, [e], asc: e.id)
+      false -> order_by(query, [e], desc: e.ts)
     end
   end
 end

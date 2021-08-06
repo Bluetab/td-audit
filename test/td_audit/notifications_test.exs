@@ -4,6 +4,8 @@ defmodule TdAudit.NotificationsTest do
   """
   use TdAudit.DataCase
 
+  import TdAudit.TestOperators
+
   alias TdAudit.Notifications
   alias TdCache.AclCache
   alias TdCache.UserCache
@@ -122,10 +124,9 @@ defmodule TdAudit.NotificationsTest do
         |> String.replace("(user)", sender.full_name)
         |> String.replace("(name)", ~s("#{name}"))
 
-      to = [email1, email2]
-
       assert {:ok, email} = Notifications.share(message)
-      assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: ^to} = email
+      assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: to} = email
+      assert [email1, email2] <|> to
 
       assert [
                %TdAudit.Notifications.Notification{
@@ -137,9 +138,11 @@ defmodule TdAudit.NotificationsTest do
                      user_id: ^user_id
                    }
                  ],
-                 recipient_ids: [^id1, ^id2]
+                 recipient_ids: recipient_ids
                }
              ] = Notifications.list_notifications(id1)
+
+      assert [id1, id2] <|> recipient_ids
     end
   end
 

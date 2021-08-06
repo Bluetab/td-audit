@@ -4,8 +4,6 @@ defmodule TdAudit.AuditTest do
   """
   use TdAudit.DataCase
 
-  import TdAudit.TestOperators
-
   alias TdAudit.Audit
   alias TdAudit.Audit.Event
 
@@ -178,29 +176,24 @@ defmodule TdAudit.AuditTest do
       assert [] = Audit.list_events(%{cursor: cursor})
     end
 
-    test "returns results paginated by query" do
-      events = Enum.map(1..5, fn _ -> Enum.map(1..200, &insert(:event, event: "event_#{&1}")) end)
-      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200}})
-      [chunk | rest] = events
-      assert chunk <|> results
-      id = results |> List.last() |> Map.get(:id)
-      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+    test "returns ordered results paginated by query" do
+      page_size = 200
+      [chunk | rest] = Enum.map(1..5, fn _ -> Enum.map(1..page_size, &insert(:event, event: "event_#{&1}")) end)
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
       [chunk | rest] = rest
-      assert chunk <|> results
-      id = results |> List.last() |> Map.get(:id)
-      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
       [chunk | rest] = rest
-      assert chunk <|> results
-      id = results |> List.last() |> Map.get(:id)
-      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
       [chunk | rest] = rest
-      assert chunk <|> results
-      id = results |> List.last() |> Map.get(:id)
-      assert results = [_ | _] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
       [chunk | _rest] = rest
-      assert chunk <|> results
-      id = results |> List.last() |> Map.get(:id)
-      assert [] = Audit.list_events(%{cursor: %{size: 200, id: id}})
+      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+      id = chunk |> List.last() |> Map.get(:id)
+      assert [] = Audit.list_events(%{cursor: %{size: page_size, id: id}})
     end
   end
 
