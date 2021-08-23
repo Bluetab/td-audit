@@ -1,5 +1,12 @@
 # Changelog
 
+ ## [Unreleased]
+
+### Added
+
+- [TD-3951] Notifications included for grants
+
+
 ## [4.26.0] 2021-08-16
 
 ### Changed

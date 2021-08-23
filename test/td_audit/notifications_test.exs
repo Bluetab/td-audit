@@ -60,6 +60,53 @@ defmodule TdAudit.NotificationsTest do
        }} = Notifications.create(periodicity: "minutely")
     end
 
+    test "create/1 create individual notification for grants events" do
+      domain_id = System.unique_integer([:positive])
+
+      %{id: user_id1, email: email, full_name: full_name} =
+        create_user(%{full_name: "foo_full_name", email: "foo@foo.net", name: "foo"})
+
+      %{id: user_id2} =
+        create_user(%{full_name: "bar_full_name", email: "bar@bar.net", name: "bar"})
+
+      %{id: user_id3} = create_user(%{full_name: "xyz", email: "xyz@xyz.net", name: "xyz"})
+
+      role = "foobar"
+      event = "grant_created"
+
+      AclCache.set_acl_role_users("domain", domain_id, role, [user_id1, user_id2, user_id3])
+
+      on_exit(fn ->
+        AclCache.delete_acl_roles("domain", domain_id)
+        # AclCache.delete_acl_role_users("domain", domain_id, role)
+      end)
+
+      payload = %{
+        "data_structure_id" => 1,
+        "detail" => %{},
+        "domain_ids" => [domain_id],
+        "end_date" => ~D[2022-01-19],
+        "resource" => %{"name" => "foo", "description" => "some desc"},
+        "start_date" => ~D[2021-01-17],
+        "user_id" => user_id1
+      }
+
+      %{id: _event_id} = insert(:event, event: event, payload: payload)
+
+      subscriber = %{id: _subscriber_id} = insert(:subscriber, type: "role", identifier: role)
+
+      scope = %{events: [event], resource_id: domain_id, resource_type: "domains"}
+
+      %{id: _subscription_id} =
+        insert(:subscription, periodicity: "minutely", subscriber: subscriber, scope: scope)
+
+      assert {:ok, _} = Notifications.create(periodicity: "minutely")
+
+      assert {:ok, %{emails: [notification_email]}} = Notifications.send_pending()
+
+      assert %Bamboo.Email{to: [{^full_name, ^email}]} = notification_email
+    end
+
     test "share/1 shares an email with a list of recipients and creates notification" do
       %{id: user_id} =
         sender = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
