@@ -66,6 +66,9 @@ defmodule TdAuditWeb.EmailView do
   def render("structure_tag_link_updated.html", event), do: render_tag(event)
   def render("structure_tag_link_deleted.html", event), do: render_tag(event)
 
+  def render("grant_created.html", event), do: render_grant(event)
+  def render("grant_deleted.html", event), do: render_grant(event)
+
   def render(template, %{event: event}) do
     Logger.warn("Template #{template} not supported")
 
@@ -92,6 +95,18 @@ defmodule TdAuditWeb.EmailView do
       tag: resource_tag(event),
       description: description(event),
       domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
+  defp render_grant(%{event: event}) do
+    render("grant.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      start_date: grant_date(event, "start_date"),
+      end_date: grant_date(event, "end_date"),
       uri: uri(event)
     )
   end
@@ -171,6 +186,12 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "structure_tag_link_updated"}), do: "Tag linked to structure updated"
   defp event_name(%{event: "structure_tag_link_deleted"}), do: "Tag linked to structure deleted"
 
+  defp event_name(%{event: "grant_created"}),
+    do: "You have been granted access to the corresponding structure"
+
+  defp event_name(%{event: "grant_deleted"}),
+    do: "You have been deleted access to the corresponding structure"
+
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"
   defp translate("records"), do: "Record Count"
@@ -193,4 +214,8 @@ defmodule TdAuditWeb.EmailView do
   defp description(%{payload: %{"description" => description}}), do: description
 
   defp description(_), do: nil
+
+  defp grant_date(%{payload: %{"start_date" => start_date}}, "start_date"), do: start_date
+
+  defp grant_date(%{payload: %{"end_date" => end_date}}, "end_date"), do: end_date
 end

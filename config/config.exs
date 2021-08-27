@@ -60,6 +60,7 @@ config :td_audit, TdAudit.Notifications.Email,
     rule_results: "👓 Alert: Data quality issues detected",
     tags: "👓 Alert: Changes in tags",
     comments: "🖋 Alert: New comments added",
+    grants: "👓 Alert: Grant notification",
     default: "⚡ Alert: New notifications"
   ],
   headers: [
@@ -69,6 +70,7 @@ config :td_audit, TdAudit.Notifications.Email,
     rule_results: "The following data quality issues have been detected:",
     tags: "The following changes in tags have been detected over a structure:",
     comments: "The following comments have been added:",
+    grants: "The following changes in grants have been detected over a structure:",
     default: "New notifications have been generated:"
   ],
   footer: "This message was sent by Truedat"
