@@ -5,7 +5,7 @@
 ### Added
 
 - [TD-3951] Notifications included for grants
-
+- [TD-3910] Notifications included for structures notes status changes
 
 ## [4.26.0] 2021-08-16
 
