@@ -30,6 +30,7 @@ defmodule TdAudit.Notifications do
         notifications
         |> Enum.map(&Email.create/1)
         |> Enum.flat_map(fn
+          {:ok, email} when is_list(email) -> email
           {:ok, email} -> [email]
           _ -> []
         end)

@@ -8,27 +8,9 @@ defmodule TdAudit.Notifications.Email do
   alias TdAudit.Notifications.Notification
   alias TdDfLib.RichText
 
-  def create(%Notification{events: events} = notification) do
+  def create(%Notification{} = notification) do
     template = template(notification)
-
-    case Notifications.list_recipients(notification) do
-      [] ->
-        {:error, :no_recipients}
-
-      recipients ->
-        email =
-          new_email()
-          |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
-          |> assign(:header, header(template))
-          |> assign(:footer, footer())
-          |> assign(:events, events)
-          |> subject(subj(template))
-          |> to(recipients)
-          |> from(sender())
-          |> render("events.html")
-
-        {:ok, email}
-    end
+    create(notification, template)
   end
 
   def create(%{recipients: []}), do: {:error, :no_recipients}
@@ -70,6 +52,52 @@ defmodule TdAudit.Notifications.Email do
     {:ok, email}
   end
 
+  def create(%Notification{events: events} = notification, template) when template in [:grants] do
+    events
+    |> Enum.map(fn %{payload: %{"user_id" => user_id}} = event ->
+      with true <- Enum.member?(notification.recipient_ids, user_id),
+           [_ | _] = recipients <- Notifications.list_recipients(%{recipient_ids: [user_id]}) do
+        new_email()
+        |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
+        |> assign(:header, header(template))
+        |> assign(:footer, footer())
+        |> assign(:events, [event])
+        |> subject(subj(template))
+        |> to(recipients)
+        |> from(sender())
+        |> render("events.html")
+      else
+        _ -> nil
+      end
+    end)
+    |> Enum.filter(&(!is_nil(&1)))
+    |> case do
+      [] -> {:error, :no_recipients}
+      mails -> {:ok, mails}
+    end
+  end
+
+  def create(%Notification{events: events} = notification, template) do
+    case Notifications.list_recipients(notification) do
+      [] ->
+        {:error, :no_recipients}
+
+      recipients ->
+        email =
+          new_email()
+          |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
+          |> assign(:header, header(template))
+          |> assign(:footer, footer())
+          |> assign(:events, events)
+          |> subject(subj(template))
+          |> to(recipients)
+          |> from(sender())
+          |> render("events.html")
+
+        {:ok, email}
+    end
+  end
+
   defp template(%Notification{events: events}) do
     events
     |> Enum.map(& &1.event)
@@ -101,6 +129,8 @@ defmodule TdAudit.Notifications.Email do
   defp template(["structure_tag_linked"]), do: :tags
   defp template(["structure_tag_link_updated"]), do: :tags
   defp template(["structure_tag_link_deleted"]), do: :tags
+  defp template(["grant_created"]), do: :grants
+  defp template(["grant_deleted"]), do: :grants
 
   defp template(events) when length(events) > 1 do
     events
