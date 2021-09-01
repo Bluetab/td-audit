@@ -108,7 +108,8 @@ defmodule TdAuditWeb.EventView do
     "/rules/#{rule_id}/implementations/#{implementation_id}/results"
   end
 
-  def path(%{resource_type: "data_structure", resource_id: id}) do
+  def path(%{resource_type: resource_type, resource_id: id})
+      when resource_type in ["data_structure", "data_structure_note"] do
     "/structures/#{id}"
   end
 

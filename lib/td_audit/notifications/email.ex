@@ -91,6 +91,13 @@ defmodule TdAudit.Notifications.Email do
   defp template(["relation_deleted"]), do: :concepts
   defp template(["update_concept_draft"]), do: :concepts
   defp template(["relation_deprecated"]), do: :relations
+  defp template(["structure_note_deleted"]), do: :notes
+  defp template(["structure_note_deprecated"]), do: :notes
+  defp template(["structure_note_draft"]), do: :notes
+  defp template(["structure_note_pending_approval"]), do: :notes
+  defp template(["structure_note_published"]), do: :notes
+  defp template(["structure_note_rejected"]), do: :notes
+  defp template(["structure_note_versioned"]), do: :notes
   defp template(["structure_tag_linked"]), do: :tags
   defp template(["structure_tag_link_updated"]), do: :tags
   defp template(["structure_tag_link_deleted"]), do: :tags
