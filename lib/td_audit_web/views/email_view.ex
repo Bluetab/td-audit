@@ -62,6 +62,13 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("structure_note_deleted.html", event), do: render_notes(event)
+  def render("structure_note_deprecated.html", event), do: render_notes(event)
+  def render("structure_note_draft.html", event), do: render_notes(event)
+  def render("structure_note_pending_approval.html", event), do: render_notes(event)
+  def render("structure_note_published.html", event), do: render_notes(event)
+  def render("structure_note_rejected.html", event), do: render_notes(event)
+  def render("structure_note_versioned.html", event), do: render_notes(event)
   def render("structure_tag_linked.html", event), do: render_tag(event)
   def render("structure_tag_link_updated.html", event), do: render_tag(event)
   def render("structure_tag_link_deleted.html", event), do: render_tag(event)
@@ -94,6 +101,16 @@ defmodule TdAuditWeb.EmailView do
       name: EventView.resource_name(event),
       tag: resource_tag(event),
       description: description(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
+  defp render_notes(%{event: event}) do
+    render("notes.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -182,6 +199,16 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
   defp event_name(%{event: "update_concept_draft"}), do: "Concept Draft Updated"
   defp event_name(%{event: "relation_deprecated"}), do: "Relation deprecated"
+  defp event_name(%{event: "structure_note_deleted"}), do: "Structure note deleted"
+  defp event_name(%{event: "structure_note_deprecated"}), do: "Structure note deprecated"
+  defp event_name(%{event: "structure_note_draft"}), do: "Structure note to draft"
+
+  defp event_name(%{event: "structure_note_pending_approval"}),
+    do: "Structure note pending approval"
+
+  defp event_name(%{event: "structure_note_published"}), do: "Structure note published"
+  defp event_name(%{event: "structure_note_rejected"}), do: "Structure note rejected"
+  defp event_name(%{event: "structure_note_versioned"}), do: "Structure note versioned"
   defp event_name(%{event: "structure_tag_linked"}), do: "Structure linked to tag"
   defp event_name(%{event: "structure_tag_link_updated"}), do: "Tag linked to structure updated"
   defp event_name(%{event: "structure_tag_link_deleted"}), do: "Tag linked to structure deleted"
