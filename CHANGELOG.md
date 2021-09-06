@@ -1,11 +1,16 @@
 # Changelog
 
- ## [Unreleased]
+## [Unreleased]
 
 ### Added
 
 - [TD-3951] Notifications included for grants
 - [TD-3910] Notifications included for structures notes status changes
+
+### Changed
+
+- [TD-3973] Update td-df-lib for default values in swith fields
+>>>>>>> 8227903def1315e18e458382d07a783f0a8017ad
 
 ## [4.26.0] 2021-08-16
 
