@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] 
+
+### Added
+
+- [TD-3971] Template mandatory dependent field
+
 ## [4.27.0] 2021-09-07
 
 ### Added
@@ -10,7 +16,6 @@
 ### Changed
 
 - [TD-3973] Update td-df-lib for default values in swith fields
->>>>>>> 8227903def1315e18e458382d07a783f0a8017ad
 
 ## [4.26.0] 2021-08-16
 
