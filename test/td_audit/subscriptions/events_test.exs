@@ -146,6 +146,39 @@ defmodule TdAudit.Subscriptions.EventsTest do
     end
   end
 
+  describe "subscription_event_ids/1 for domains" do
+    setup do
+      scope =
+        build(:scope,
+          events: ["update_concept_draft", "concept_rejection_canceled"],
+          resource_type: "domains",
+          resource_id: 4
+        )
+
+      payload = string_params_for(:payload, event: "update_concept_draft", domain_ids: [5, 4, 1])
+
+      %{id: last_event_id} =
+        _old_event = insert(:event, event: "update_concept_draft", payload: payload)
+
+      [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
+    end
+
+    test "returns new event ids in a child domain", %{
+      subscription: subscription
+    } do
+      payload = string_params_for(:payload, domain_ids: [1])
+      insert(:event, event: "concept_rejection_canceled", payload: payload)
+      payload = string_params_for(:payload, domain_ids: [4, 1])
+      insert(:event, event: "foo", payload: payload)
+      payload = string_params_for(:payload, domain_ids: [4, 1])
+      %{id: event_id1} = insert(:event, event: "concept_rejection_canceled", payload: payload)
+      payload = string_params_for(:payload, domain_ids: [5, 4, 1])
+      %{id: event_id2} = insert(:event, event: "update_concept_draft", payload: payload)
+
+      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id1, event_id2]
+    end
+  end
+
   describe "subscription_event_ids/1 for concept related actions" do
     setup do
       scope =

@@ -122,7 +122,7 @@ defmodule TdAudit.Subscriptions.Events do
     query
     |> where([e], e.event in ^events)
     |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
-    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], fragment("? @> ?", e.payload, ~s({"domain_ids":[#{resource_id}]})))
     |> where_content_condition(scope)
   end
 
