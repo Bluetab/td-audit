@@ -9,7 +9,7 @@ defmodule TdAudit.Subscriptions.SubscriberTest do
       params = params_for(:subscriber, type: "foo")
 
       assert %{valid?: false, errors: errors} = Subscriber.changeset(params)
-      assert {_message, [validation: :inclusion, enum: ["email", "user", "role"]]} = errors[:type]
+      assert {_message, [validation: :inclusion, enum: ["email", "user", "role", "taxonomy_role"]]} = errors[:type]
     end
 
     test "validates unique constraint on type and identifier" do

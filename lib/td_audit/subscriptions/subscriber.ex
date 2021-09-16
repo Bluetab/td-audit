@@ -25,7 +25,7 @@ defmodule TdAudit.Subscriptions.Subscriber do
     subscription
     |> cast(attrs, [:type, :identifier])
     |> validate_required([:type, :identifier])
-    |> validate_inclusion(:type, ["email", "user", "role"])
+    |> validate_inclusion(:type, ["email", "user", "role", "taxonomy_role"])
     |> unique_constraint(:unique_subscriber, name: :subscribers_type_identifier_index)
   end
 end
