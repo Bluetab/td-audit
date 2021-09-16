@@ -176,5 +176,46 @@ defmodule TdAudit.SubscriptionsTest do
       subscription = insert(:subscription, subscriber: subscriber, scope: scope)
       assert ^user_ids = Subscriptions.list_recipient_ids(subscription)
     end
+
+    test "list_recipient_ids/1 gets user ids for domains ant role_taxonomy subscription" do
+      parent_id = System.unique_integer([:positive])
+      domain_id = System.unique_integer([:positive])
+      user_ids = Enum.map(1..2, fn _ -> System.unique_integer([:positive]) end)
+
+      parent = %{
+        id: parent_id,
+        name: "foo",
+        updated_at: ~N[2021-01-26 14:41:14],
+        descendent_ids: [domain_id]
+      }
+
+      domain = %{
+        id: domain_id,
+        name: "bar",
+        parent_ids: [parent_id],
+        updated_at: ~N[2021-01-26 14:41:14]
+      }
+
+      AclCache.set_acl_role_users("domain", domain_id, "xyz", user_ids)
+      DomainCache.put(parent)
+      DomainCache.put(domain)
+
+      on_exit(fn ->
+        {:ok, _} = DomainCache.delete(domain_id)
+        {:ok, _} = DomainCache.delete(parent_id)
+        AclCache.delete_acl_roles("domain", domain_id)
+      end)
+
+      subscriber = build(:subscriber, type: "taxonomy_role", identifier: "xyz")
+
+      scope =
+        build(:scope,
+          resource_type: "domains",
+          resource_id: parent_id
+        )
+
+      subscription = insert(:subscription, subscriber: subscriber, scope: scope)
+      assert ^user_ids = Subscriptions.list_recipient_ids(subscription)
+    end
   end
 end
