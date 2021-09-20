@@ -148,6 +148,16 @@ defmodule TdAudit.Subscriptions do
   end
 
   def list_recipient_ids(%Subscription{
+        subscriber: %{type: "taxonomy_role", identifier: role},
+        scope: %{resource_type: type, resource_id: domain}
+      })
+      when type == "domains" do
+    domain
+    |> TaxonomyCache.get_descendent_ids()
+    |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
+  end
+
+  def list_recipient_ids(%Subscription{
         subscriber: %{type: "role", identifier: role},
         scope: %{resource_type: type, resource_id: domain}
       })

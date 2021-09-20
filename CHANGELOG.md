@@ -5,6 +5,7 @@
 ### Added
 
 - [TD-3971] Template mandatory dependent field
+- [TD-3780] `taxonomy_role` subscriber type support
 
 ## [4.27.0] 2021-09-07
 
