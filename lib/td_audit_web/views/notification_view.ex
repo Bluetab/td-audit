@@ -14,7 +14,7 @@ defmodule TdAuditWeb.NotificationView do
       |> Enum.map(&with_name_and_path/1)
 
     notification
-    |> Map.take([:id, :inserted_at])
+    |> Map.take([:id, :inserted_at, :read_mark])
     |> Map.put(:events, events)
   end
 

@@ -9,6 +9,7 @@ defmodule TdAudit.Notifications do
   alias TdAudit.Audit
   alias TdAudit.Notifications.Email
   alias TdAudit.Notifications.Notification
+  alias TdAudit.Notifications.NotificationsReadByRecipients
   alias TdAudit.Notifications.Status
   alias TdAudit.Repo
   alias TdAudit.Subscriptions
@@ -17,9 +18,39 @@ defmodule TdAudit.Notifications do
   alias TdCache.UserCache
 
   def list_notifications(user_id) do
-    from(n in Notification, where: ^user_id in n.recipient_ids, order_by: [desc: :id])
+    user_id
+    |> query_user_notifications
     |> Repo.all()
     |> Repo.preload(:events)
+  end
+
+  def query_user_notifications(user_id) do
+    from(n in Notification,
+      where: ^user_id in n.recipient_ids,
+      order_by: [desc: :id],
+      left_join: reads in NotificationsReadByRecipients,
+      on: reads.recipient_id == ^user_id and reads.notification_id == n.id,
+      group_by: n.id,
+      select: %{n | read_mark: count(reads.id) > 0}
+    )
+  end
+
+  def read(notification_id, recipient_id) do
+    with notification <- Repo.get(Notification, notification_id) do
+      case Repo.get_by(NotificationsReadByRecipients,
+             notification_id: notification_id,
+             recipient_id: recipient_id
+           ) do
+        nil -> insert_read_mark(notification, recipient_id)
+        read -> read
+      end
+    end
+  end
+
+  def insert_read_mark(notification, recipient_id) do
+    notification
+    |> NotificationsReadByRecipients.changeset(recipient_id)
+    |> Repo.insert()
   end
 
   def send_pending do

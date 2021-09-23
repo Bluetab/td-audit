@@ -62,4 +62,20 @@ defmodule TdAuditWeb.NotificationController do
       send_resp(conn, :accepted, "")
     end
   end
+
+  swagger_path :read do
+    description("Read notification")
+
+    response(200, "OK")
+    response(403, "Forbidden")
+    response(422, "Client Error")
+  end
+
+  def read(conn, %{"id" => id}) do
+    with %{user_id: user_id} <- conn.assigns[:current_resource],
+         {notification_id, _} <- Integer.parse(id) do
+      Notifications.read(notification_id, user_id)
+      send_resp(conn, :ok, "")
+    end
+  end
 end

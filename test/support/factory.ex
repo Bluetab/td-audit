@@ -7,6 +7,7 @@ defmodule TdAudit.Factory do
 
   alias TdAudit.Audit.Event
   alias TdAudit.Notifications.Notification
+  alias TdAudit.Notifications.NotificationsReadByRecipients
   alias TdAudit.Notifications.Status
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
@@ -21,6 +22,10 @@ defmodule TdAudit.Factory do
       status: [build(:status)]
     }
     |> merge_attributes(attrs)
+  end
+
+  def notifications_read_by_recipients_factory(attrs) do
+    %NotificationsReadByRecipients{} |> merge_attributes(attrs)
   end
 
   def status_factory(attrs) do
