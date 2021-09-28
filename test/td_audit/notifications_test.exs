@@ -204,6 +204,35 @@ defmodule TdAudit.NotificationsTest do
              Notifications.list_recipients(notification)
   end
 
+  test "list_notifications/1 lists with read mark" do
+    %{id: id1} = create_user(%{full_name: "Foo", email: "foo@example.com"})
+    %{id: id2} = create_user(%{full_name: "Bar", email: "bar@example.com"})
+    %{id: id3} = create_user(%{full_name: "Baz has no email"})
+
+    notification = insert(:notification, recipient_ids: [id1, id2, id3])
+
+    insert(:notifications_read_by_recipients, notification_id: notification.id, recipient_id: id1)
+    insert(:notifications_read_by_recipients, notification_id: notification.id, recipient_id: id2)
+
+    assert [%{read_mark: true}] = Notifications.list_notifications(id1)
+    assert [%{read_mark: true}] = Notifications.list_notifications(id2)
+    assert [%{read_mark: false}] = Notifications.list_notifications(id3)
+  end
+
+  test "read_notifications/2 mark it as read only for the reader" do
+    %{id: id1} = create_user(%{full_name: "Foo", email: "foo@example.com"})
+    %{id: id2} = create_user(%{full_name: "Bar", email: "bar@example.com"})
+    %{id: id3} = create_user(%{full_name: "Baz has no email"})
+
+    notification = insert(:notification, recipient_ids: [id1, id2, id3])
+
+    Notifications.read(notification.id, id3)
+
+    assert [%{read_mark: false}] = Notifications.list_notifications(id1)
+    assert [%{read_mark: false}] = Notifications.list_notifications(id2)
+    assert [%{read_mark: true}] = Notifications.list_notifications(id3)
+  end
+
   defp config, do: Application.fetch_env!(:td_audit, TdAudit.Notifications.Email)
 
   defp footer do
