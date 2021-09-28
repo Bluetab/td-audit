@@ -66,6 +66,10 @@ defmodule TdAuditWeb.NotificationController do
   swagger_path :read do
     description("Read notification")
 
+    parameters do
+      id(:path, :integer, "Notification ID", required: true)
+    end
+
     response(200, "OK")
     response(403, "Forbidden")
     response(422, "Client Error")

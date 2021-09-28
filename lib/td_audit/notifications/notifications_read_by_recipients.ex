@@ -15,7 +15,7 @@ defmodule TdAudit.Notifications.NotificationsReadByRecipients do
     timestamps(updated_at: false, type: :utc_datetime_usec)
   end
 
-  def changeset(%{id: notification_id} = notification, recipient_id) do
+  def changeset(notification, recipient_id) do
     %__MODULE__{}
     |> cast(%{recipient_id: recipient_id}, [:recipient_id])
     |> put_assoc(:notification, notification)

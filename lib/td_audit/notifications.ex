@@ -36,7 +36,7 @@ defmodule TdAudit.Notifications do
   end
 
   def read(notification_id, recipient_id) do
-    with notification <- Repo.get(Notification, notification_id) do
+    with notification when not is_nil(notification) <- Repo.get(Notification, notification_id) do
       case Repo.get_by(NotificationsReadByRecipients,
              notification_id: notification_id,
              recipient_id: recipient_id
