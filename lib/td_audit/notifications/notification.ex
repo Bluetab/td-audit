@@ -14,6 +14,7 @@ defmodule TdAudit.Notifications.Notification do
     belongs_to(:subscription, Subscription)
     many_to_many(:events, Event, join_through: "notifications_events")
     has_many(:status, Status)
+    field(:read_mark, :boolean, virtual: true, default: false)
 
     field(:recipient_ids, {:array, :integer}, default: [])
 

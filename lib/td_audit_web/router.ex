@@ -32,6 +32,7 @@ defmodule TdAuditWeb.Router do
     resources("/subscriptions", SubscriptionController, except: [:new, :edit])
     post("/subscriptions/user/me/search", SubscriptionController, :index_by_user)
     resources("/notifications", NotificationController, only: [:create])
+    post("/notifications/:id/read", NotificationController, :read)
     post("/notifications/user/me/search", NotificationController, :index_by_user)
   end
 

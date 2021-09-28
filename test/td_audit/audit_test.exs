@@ -178,20 +178,41 @@ defmodule TdAudit.AuditTest do
 
     test "returns ordered results paginated by query" do
       page_size = 200
-      [chunk | rest] = Enum.map(1..5, fn _ -> Enum.map(1..page_size, &insert(:event, event: "event_#{&1}")) end)
-      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size}}) |> Enum.map(&(%{&1 | user: nil}))
+
+      [chunk | rest] =
+        Enum.map(1..5, fn _ -> Enum.map(1..page_size, &insert(:event, event: "event_#{&1}")) end)
+
+      assert ^chunk =
+               Audit.list_events(%{cursor: %{size: page_size}}) |> Enum.map(&%{&1 | user: nil})
+
       id = chunk |> List.last() |> Map.get(:id)
       [chunk | rest] = rest
-      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+
+      assert ^chunk =
+               Audit.list_events(%{cursor: %{size: page_size, id: id}})
+               |> Enum.map(&%{&1 | user: nil})
+
       id = chunk |> List.last() |> Map.get(:id)
       [chunk | rest] = rest
-      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+
+      assert ^chunk =
+               Audit.list_events(%{cursor: %{size: page_size, id: id}})
+               |> Enum.map(&%{&1 | user: nil})
+
       id = chunk |> List.last() |> Map.get(:id)
       [chunk | rest] = rest
-      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+
+      assert ^chunk =
+               Audit.list_events(%{cursor: %{size: page_size, id: id}})
+               |> Enum.map(&%{&1 | user: nil})
+
       id = chunk |> List.last() |> Map.get(:id)
       [chunk | _rest] = rest
-      assert ^chunk = Audit.list_events(%{cursor: %{size: page_size, id: id}}) |> Enum.map(&(%{&1 | user: nil}))
+
+      assert ^chunk =
+               Audit.list_events(%{cursor: %{size: page_size, id: id}})
+               |> Enum.map(&%{&1 | user: nil})
+
       id = chunk |> List.last() |> Map.get(:id)
       assert [] = Audit.list_events(%{cursor: %{size: page_size, id: id}})
     end
