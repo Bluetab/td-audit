@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-3396] Add notification `read mark`
+
 ## [4.28.0] 2021-09-20 
 
 ### Added
