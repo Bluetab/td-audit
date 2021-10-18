@@ -17,7 +17,6 @@ defmodule TdAudit.Notifications do
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.UserCache
 
-  @spec list_notifications(any) :: nil | [%{optional(atom) => any}] | %{optional(atom) => any}
   def list_notifications(user_id) do
     user_id
     |> query_user_notifications
