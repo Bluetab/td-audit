@@ -6,12 +6,10 @@ defmodule TdAudit.Notifications.NotificationsReadByRecipients do
 
   import Ecto.Changeset
 
-  alias TdAudit.Audit.Event
   alias TdAudit.Notifications.Notification
 
   schema "notifications_read_by_recipients" do
     belongs_to(:notification, Notification)
-    belongs_to(:event, Event)
     field(:recipient_id, :integer)
 
     timestamps(updated_at: false, type: :utc_datetime_usec)

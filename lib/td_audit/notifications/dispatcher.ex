@@ -31,7 +31,6 @@ defmodule TdAudit.Notifications.Dispatcher do
 
       {:ok, _email, response} ->
         Logger.info("Email sent: Obtained #{inspect(response)} from server")
-        Logger.info("Email sent  from server")
 
       {:error, error} ->
         Logger.error("Error: #{error}")
