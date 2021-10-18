@@ -15,13 +15,24 @@ defmodule TdAudit.Subscriptions.Events do
   Returns a list of event identifiers matching the given subscription, with `id`
   less than or equal to the specified `max_id`.
   """
-  def subscription_event_ids(%Subscription{last_event_id: prev_id, scope: scope}, max_id) do
+  def subscription_event_ids(subscription, max_id) do
+    subscription_events_query(subscription, max_id)
+    |> select([e], e.id)
+    |> Repo.all()
+  end
+
+  def subscription_events(subscription, max_id) do
+    query = subscription_events_query(subscription, max_id)
+    Ecto.Adapters.SQL.to_sql(:all, Repo, query)
+    query
+    |> Repo.all()
+  end
+
+  defp subscription_events_query(%Subscription{last_event_id: prev_id, scope: scope}, max_id) do
     Event
     |> where([e], e.id > ^prev_id)
     |> where([e], e.id <= ^max_id)
-    |> select([e], e.id)
     |> filter_by_scope(scope)
-    |> Repo.all()
   end
 
   # filter for business glossary comments
