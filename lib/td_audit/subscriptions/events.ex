@@ -22,9 +22,7 @@ defmodule TdAudit.Subscriptions.Events do
   end
 
   def subscription_events(subscription, max_id) do
-    query = subscription_events_query(subscription, max_id)
-    Ecto.Adapters.SQL.to_sql(:all, Repo, query)
-    query
+    subscription_events_query(subscription, max_id)
     |> Repo.all()
   end
 
