@@ -17,7 +17,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
     "update_concept_draft"
   ]
 
-  describe "subscription_event_ids/1 for comment_created subscription" do
+  describe "subscription_events/1 for comment_created subscription" do
     setup do
       scope =
         build(:scope,
@@ -30,17 +30,13 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
     end
 
-    test "returns new event ids", %{subscription: subscription} do
-      event_ids =
-        1..3
-        |> Enum.map(fn _ -> insert(:event, event: "comment_created") end)
-        |> Enum.map(& &1.id)
-
-      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+    test "returns new events", %{subscription: subscription} do
+      events = Enum.map(1..3, fn _ -> insert(:event, event: "comment_created") end)
+      assert Events.subscription_events(subscription, 1_000_000) == events
     end
   end
 
-  describe "subscription_event_ids/1 for rule_result_created subscription" do
+  describe "subscription_events/1 for rule_result_created subscription" do
     setup do
       scope =
         build(:scope,
@@ -55,17 +51,13 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
     end
 
-    test "returns new event ids", %{subscription: subscription} do
-      event_ids =
-        1..3
-        |> Enum.map(fn _ -> insert(:event, event: "rule_result_created") end)
-        |> Enum.map(& &1.id)
-
-      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+    test "returns new events", %{subscription: subscription} do
+      events = Enum.map(1..3, fn _ -> insert(:event, event: "rule_result_created") end)
+      assert Events.subscription_events(subscription, 1_000_000) == events
     end
   end
 
-  describe "subscription_event_ids/1 for rule_result_created and rule resource_type subscription" do
+  describe "subscription_events/1 for rule_result_created and rule resource_type subscription" do
     setup do
       scope =
         build(:scope,
@@ -80,19 +72,17 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
     end
 
-    test "returns new event ids", %{subscription: subscription} do
-      event_ids =
-        1..3
-        |> Enum.map(fn _ ->
+    test "returns new events", %{subscription: subscription} do
+      events =
+        Enum.map(1..3, fn _ ->
           insert(:event, event: "rule_result_created", resource_type: "rule")
         end)
-        |> Enum.map(& &1.id)
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+      assert Events.subscription_events(subscription, 1_000_000) == events
     end
   end
 
-  describe "subscription_event_ids/1 for ingest_sent_for_approval subscription" do
+  describe "subscription_events/1 for ingest_sent_for_approval subscription" do
     setup do
       scope =
         build(:scope,
@@ -106,17 +96,14 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
     end
 
-    test "returns new event ids", %{subscription: subscription} do
-      event_ids =
-        1..3
-        |> Enum.map(fn _ -> insert(:event, event: "ingest_sent_for_approval") end)
-        |> Enum.map(& &1.id)
+    test "returns new events", %{subscription: subscription} do
+      events = Enum.map(1..3, fn _ -> insert(:event, event: "ingest_sent_for_approval") end)
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+      assert Events.subscription_events(subscription, 1_000_000) == events
     end
   end
 
-  describe "subscription_event_ids/1 for ingest_sent_for_approval subscription without subdomains" do
+  describe "subscription_events/1 for ingest_sent_for_approval subscription without subdomains" do
     setup do
       scope =
         build(:scope,
@@ -140,13 +127,13 @@ defmodule TdAudit.Subscriptions.EventsTest do
         Enum.map(1..3, fn _ -> insert(:event, event: "ingest_sent_for_approval") end)
 
       payload = string_params_for(:payload, event: "ingest_sent_for_approval", domain_ids: [4, 1])
-      %{id: event_id} = insert(:event, event: "ingest_sent_for_approval", payload: payload)
+      event = insert(:event, event: "ingest_sent_for_approval", payload: payload)
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
   end
 
-  describe "subscription_event_ids/1 for domains" do
+  describe "subscription_events/1 for domains" do
     setup do
       scope =
         build(:scope,
@@ -171,15 +158,15 @@ defmodule TdAudit.Subscriptions.EventsTest do
       payload = string_params_for(:payload, domain_ids: [4, 1])
       insert(:event, event: "foo", payload: payload)
       payload = string_params_for(:payload, domain_ids: [4, 1])
-      %{id: event_id1} = insert(:event, event: "concept_rejection_canceled", payload: payload)
+      e1 = insert(:event, event: "concept_rejection_canceled", payload: payload)
       payload = string_params_for(:payload, domain_ids: [5, 4, 1])
-      %{id: event_id2} = insert(:event, event: "update_concept_draft", payload: payload)
+      e2 = insert(:event, event: "update_concept_draft", payload: payload)
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id1, event_id2]
+      assert Events.subscription_events(subscription, 1_000_000) == [e1, e2]
     end
   end
 
-  describe "subscription_event_ids/1 for concept related actions" do
+  describe "subscription_events/1 for concept related actions" do
     setup do
       scope =
         build(:scope,
@@ -192,17 +179,18 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
     end
 
-    test "returns new event ids", %{subscription: subscription} do
-      event_ids =
-        @concept_events
-        |> Enum.map(&insert(:event, event: &1, resource_id: 1, resource_type: "concept"))
-        |> Enum.map(& &1.id)
+    test "returns new events", %{subscription: subscription} do
+      events =
+        Enum.map(
+          @concept_events,
+          &insert(:event, event: &1, resource_id: 1, resource_type: "concept")
+        )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+      assert Events.subscription_events(subscription, 1_000_000) == events
     end
   end
 
-  describe "subscription_event_ids/1 for action relation_deprecated" do
+  describe "subscription_events/1 for action relation_deprecated" do
     setup do
       scope =
         build(:scope,
@@ -218,19 +206,17 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
     end
 
-    test "returns new event ids", %{subscription: subscription} do
-      event_ids =
-        1..3
-        |> Enum.map(fn _ ->
+    test "returns new events", %{subscription: subscription} do
+      events =
+        Enum.map(1..3, fn _ ->
           insert(:event, event: "relation_deprecated", resource_type: "concept", resource_id: 1)
         end)
-        |> Enum.map(& &1.id)
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == event_ids
+      assert Events.subscription_events(subscription, 1_000_000) == events
     end
   end
 
-  describe "subscription_event_ids/1 for arbitrary events and resource" do
+  describe "subscription_events/1 for arbitrary events and resource" do
     setup do
       scope =
         build(:scope,
@@ -242,15 +228,15 @@ defmodule TdAudit.Subscriptions.EventsTest do
       [subscription: insert(:subscription, scope: scope, last_event_id: 0)]
     end
 
-    test "returns event ids", %{subscription: subscription} do
-      %{id: event_id} =
+    test "returns events", %{subscription: subscription} do
+      event =
         insert(:event, event: "some_event", resource_type: "some_resource_type", resource_id: 42)
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
   end
 
-  describe "subscription_event_ids/1 for events with subscribable fields" do
+  describe "subscription_events/1 for events with subscribable fields" do
     setup do
       content = [
         %{
@@ -318,7 +304,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
       ]
     end
 
-    test "returns event ids for multiple cardinality", %{s0: subscription} do
+    test "returns events for multiple cardinality", %{s0: subscription} do
       payload = %{"subscribable_fields" => %{"foo" => ["1"]}}
 
       insert(:event,
@@ -328,7 +314,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
         payload: payload
       )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+      assert Events.subscription_events(subscription, 1_000_000) == []
 
       payload = %{"subscribable_fields" => %{"foo" => "1"}}
 
@@ -339,7 +325,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
         payload: payload
       )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+      assert Events.subscription_events(subscription, 1_000_000) == []
 
       payload = %{"foo" => "bar"}
 
@@ -350,11 +336,11 @@ defmodule TdAudit.Subscriptions.EventsTest do
         payload: payload
       )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+      assert Events.subscription_events(subscription, 1_000_000) == []
 
       payload = %{"subscribable_fields" => %{"foo" => ["2"]}}
 
-      %{id: event_id} =
+      event =
         insert(:event,
           event: "some_event",
           resource_type: "concept",
@@ -362,10 +348,10 @@ defmodule TdAudit.Subscriptions.EventsTest do
           payload: payload
         )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
 
-    test "returns event ids for single cardinality", %{s1: subscription} do
+    test "returns events for single cardinality", %{s1: subscription} do
       payload = %{"subscribable_fields" => %{"xyz" => ["foo"]}}
 
       insert(:event,
@@ -375,7 +361,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
         payload: payload
       )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+      assert Events.subscription_events(subscription, 1_000_000) == []
 
       payload = %{"subscribable_fields" => %{"xyz" => ["bar"]}}
 
@@ -386,7 +372,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
         payload: payload
       )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+      assert Events.subscription_events(subscription, 1_000_000) == []
 
       payload = %{"foo" => "bar"}
 
@@ -397,11 +383,11 @@ defmodule TdAudit.Subscriptions.EventsTest do
         payload: payload
       )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == []
+      assert Events.subscription_events(subscription, 1_000_000) == []
 
       payload = %{"subscribable_fields" => %{"xyz" => "foo"}}
 
-      %{id: event_id} =
+      event =
         insert(:event,
           event: "some_event",
           resource_type: "concept",
@@ -409,7 +395,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
           payload: payload
         )
 
-      assert Events.subscription_event_ids(subscription, 1_000_000) == [event_id]
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
   end
 end

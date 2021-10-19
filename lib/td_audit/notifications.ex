@@ -239,7 +239,7 @@ defmodule TdAudit.Notifications do
     subscription_events =
       subscriptions
       |> Enum.map(fn s -> {s.id, Events.subscription_events(s, max_event_id)} end)
-      |> Enum.reject(fn {_, event_ids} -> event_ids == [] end)
+      |> Enum.reject(fn {_, events} -> events == [] end)
       |> Map.new()
 
     {:ok, subscription_events}

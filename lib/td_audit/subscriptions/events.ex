@@ -15,11 +15,6 @@ defmodule TdAudit.Subscriptions.Events do
   Returns a list of event identifiers matching the given subscription, with `id`
   less than or equal to the specified `max_id`.
   """
-  def subscription_event_ids(subscription, max_id) do
-    subscription_events_query(subscription, max_id)
-    |> select([e], e.id)
-    |> Repo.all()
-  end
 
   def subscription_events(subscription, max_id) do
     subscription_events_query(subscription, max_id)
