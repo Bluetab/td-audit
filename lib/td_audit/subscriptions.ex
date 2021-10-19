@@ -143,48 +143,89 @@ defmodule TdAudit.Subscriptions do
     |> Repo.delete_all()
   end
 
-  def list_recipient_ids(%Subscription{subscriber: %{type: "user", identifier: sid}}) do
+  def list_recipient_ids(%Subscription{subscriber: %{type: "user", identifier: sid}}, _events) do
     [String.to_integer(sid)]
   end
 
   def list_recipient_ids(%Subscription{
         subscriber: %{type: "taxonomy_role", identifier: role},
         scope: %{resource_type: type, resource_id: domain}
-      })
+      }, events)
       when type == "domains" do
-    domain
-    |> TaxonomyCache.get_descendent_ids()
-    |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
+
+    subscription_domain_ids = TaxonomyCache.get_descendent_ids(domain)
+
+    Enum.reduce(
+      events,
+      %{},
+      fn event, acc ->
+        Map.put(
+          acc,
+          event.id,
+          MapSet.intersection(
+            MapSet.new(event.payload["domain_ids"]),
+            MapSet.new(subscription_domain_ids)
+          )
+          |> list_recipient_ids_by_domains_role(role)
+        )
+      end
+    )
   end
 
   def list_recipient_ids(%Subscription{
         subscriber: %{type: "role", identifier: role},
         scope: %{resource_type: type, resource_id: domain}
-      })
+      }, events)
       when type in ~w(domain domains) do
+
     list_recipient_ids_by_role(domain, role)
+    |> put_recipients_into_events(events)
   end
 
   def list_recipient_ids(%Subscription{
         subscriber: %{type: "role", identifier: role},
         scope: %{resource_type: "concept", resource_id: concept}
-      }) do
+      }, events) do
+
     concept
     |> list_concept_domains()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
+    |> put_recipients_into_events(events)
   end
 
   def list_recipient_ids(%Subscription{
         subscriber: %{type: "role", identifier: role},
         scope: %{resource_type: "data_structure", domain_id: id}
-      }) do
+      }, events) do
+
     id
     |> TaxonomyCache.get_parent_ids()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
+    |> put_recipients_into_events(events)
   end
 
-  def list_recipient_ids(_subscription) do
+  def list_recipient_ids(_subscription, _events) do
     []
+  end
+
+  def put_recipients_into_events(recipient_ids, events) do
+    Enum.reduce(
+      events,
+      %{},
+      fn event, acc ->
+        Map.put(acc, event.id, recipient_ids)
+      end
+    )
+  end
+
+  defp list_recipient_ids_by_domains_role(domains, role) do
+    Enum.reduce(
+      domains,
+      [],
+      fn domain, acc ->
+        Kernel.++(list_recipient_ids_by_role(domain, role), acc)
+      end
+    )
   end
 
   defp list_recipient_ids_by_role(domain, role) do

@@ -27,37 +27,39 @@ defmodule TdAudit.NotificationsTest do
       scope = %{events: [event], resource_id: domain_id, resource_type: "domains"}
 
       %{id: subscription_id} =
+        subscription =
         insert(:subscription, periodicity: "minutely", subscriber: subscriber, scope: scope)
 
-      {:ok,
-       %{
-         max_event_id: ^event_id,
-         notifications: [
-           %{
-             notification: %{subscription_id: ^subscription_id, recipient_ids: ^user_ids},
-             status: "pending"
-           }
-         ],
-         subscription_event_ids: %{^subscription_id => [^event_id]},
-         subscription_recipient_ids: %{^subscription_id => ^user_ids},
-         subscriptions: [
-           %{
-             periodicity: "minutely",
-             scope: %{events: [^event], resource_id: ^domain_id, resource_type: "domains"},
-             subscriber_id: ^subscriber_id
-           }
-         ],
-         update_last_event_id:
-           {1,
-            [
+      assert {:ok,
               %{
-                last_event_id: ^event_id,
-                periodicity: "minutely",
-                scope: %{events: [^event], resource_id: ^domain_id, resource_type: "domains"},
-                subscriber_id: ^subscriber_id
-              }
-            ]}
-       }} = Notifications.create(periodicity: "minutely")
+                max_event_id: ^event_id,
+                notifications: _created_notification_ids,
+                subscription_events: %{^subscription_id => [%{id: ^event_id}]},
+                subscription_events_recipient_ids: subscription_events_recipient_ids,
+                subscriptions: [
+                  %{
+                    periodicity: "minutely",
+                    scope: %{events: [^event], resource_id: ^domain_id, resource_type: "domains"},
+                    subscriber: %{id: ^subscriber_id}
+                  }
+                ],
+                update_last_event_id:
+                  {1,
+                   [
+                     %{
+                       last_event_id: ^event_id,
+                       periodicity: "minutely",
+                       scope: %{
+                         events: [^event],
+                         resource_id: ^domain_id,
+                         resource_type: "domains"
+                       },
+                       subscriber_id: ^subscriber_id
+                     }
+                   ]}
+              }} = Notifications.create(periodicity: "minutely")
+
+      assert %{^subscription => %{^event_id => ^user_ids}} = subscription_events_recipient_ids
     end
 
     test "create/1 create individual notification for grants events" do

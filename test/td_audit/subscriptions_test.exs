@@ -103,30 +103,35 @@ defmodule TdAudit.SubscriptionsTest do
       assert_raise Ecto.NoResultsError, fn -> Subscriptions.get_subscription!(subscription.id) end
     end
 
-    test "list_recipient_ids/1 gets user id for user subscription" do
+    test "list_recipient_ids/2 gets user id for user subscription" do
       subscriber = build(:subscriber, type: "user", identifier: "42")
       subscription = insert(:subscription, subscriber: subscriber)
 
-      assert [42] = Subscriptions.list_recipient_ids(subscription)
+      assert [42] = Subscriptions.list_recipient_ids(subscription, [])
     end
 
-    test "list_recipient_ids/1 gets user ids for domain role subscription" do
-      AclCache.set_acl_role_users("domain", 42, "Domain", [1, 2])
+    test "list_recipient_ids/2 gets user ids for domain role subscription" do
+      domain_id = 42
+      user_ids = [1, 2]
+      AclCache.set_acl_role_users("domain", domain_id, "Domain", user_ids)
 
       on_exit(fn ->
         {:ok, _} = DomainCache.delete("Domain")
       end)
 
       subscriber = build(:subscriber, type: "role", identifier: "Domain")
-      scope = build(:scope, resource_type: "domain", resource_id: "42")
+      scope = build(:scope, resource_type: "domain", resource_id: Integer.to_string(domain_id))
       subscription = insert(:subscription, subscriber: subscriber, scope: scope)
 
-      assert [1, 2] = Subscriptions.list_recipient_ids(subscription)
+      %{id: event_id} = event = insert(:event, payload: %{"domain_ids" => [domain_id]})
+      assert %{^event_id => ^user_ids} = Subscriptions.list_recipient_ids(subscription, [event])
     end
 
-    test "list_recipient_ids/1 gets user ids for concept role subscription" do
-      AclCache.set_acl_role_users("domain", 7, "Domain", [1, 2])
-      ConceptCache.put(%{id: 42, name: "Concept", domain_id: 7})
+    test "list_recipient_ids/2 gets user ids for concept role subscription" do
+      domain_id = 7
+      user_ids = [1, 2]
+      AclCache.set_acl_role_users("domain", domain_id, "Domain", user_ids)
+      ConceptCache.put(%{id: 42, name: "Concept", domain_id: domain_id})
 
       on_exit(fn ->
         {:ok, _} = DomainCache.delete("Domain")
@@ -137,10 +142,11 @@ defmodule TdAudit.SubscriptionsTest do
       scope = build(:scope, resource_type: "concept", resource_id: "42")
       subscription = insert(:subscription, subscriber: subscriber, scope: scope)
 
-      assert [1, 2] = Subscriptions.list_recipient_ids(subscription)
+      %{id: event_id} = event = insert(:event, payload: %{"domain_ids" => [domain_id]})
+      assert %{^event_id => ^user_ids} = Subscriptions.list_recipient_ids(subscription, [event])
     end
 
-    test "list_recipient_ids/1 gets user ids for data_structure role subscription" do
+    test "list_recipient_ids/2 gets user ids for data_structure role subscription" do
       parent_id = System.unique_integer([:positive])
       domain_id = System.unique_integer([:positive])
       structure_id = System.unique_integer([:positive])
@@ -173,11 +179,12 @@ defmodule TdAudit.SubscriptionsTest do
           domain_id: domain_id
         )
 
+      %{id: event_id} = event = insert(:event, payload: %{"domain_ids" => [domain_id]})
       subscription = insert(:subscription, subscriber: subscriber, scope: scope)
-      assert ^user_ids = Subscriptions.list_recipient_ids(subscription)
+      assert %{^event_id => ^user_ids} = Subscriptions.list_recipient_ids(subscription, [event])
     end
 
-    test "list_recipient_ids/1 gets user ids for domains ant role_taxonomy subscription" do
+    test "list_recipient_ids/2 gets user ids for domains and role_taxonomy subscription" do
       parent_id = System.unique_integer([:positive])
       domain_id = System.unique_integer([:positive])
       user_ids = Enum.map(1..2, fn _ -> System.unique_integer([:positive]) end)
@@ -214,8 +221,81 @@ defmodule TdAudit.SubscriptionsTest do
           resource_id: parent_id
         )
 
+      %{id: event_id} = event = insert(:event, payload: %{"domain_ids" => [domain_id]})
       subscription = insert(:subscription, subscriber: subscriber, scope: scope)
-      assert ^user_ids = Subscriptions.list_recipient_ids(subscription)
+      assert %{^event_id => ^user_ids} = Subscriptions.list_recipient_ids(subscription, [event])
+    end
+
+    test "list_recipient_ids/2 gets user ids for the domains that events belong to and role_taxonomy subscription" do
+      parent_domain_id = System.unique_integer([:positive])
+
+      [child_1_domain_id, child_2_domain_id] =
+        Enum.map(1..2, fn _ -> System.unique_integer([:positive]) end)
+
+      members_child_1_domain = Enum.map(1..2, fn _ -> System.unique_integer([:positive]) end)
+      members_child_2_domain = Enum.map(1..2, fn _ -> System.unique_integer([:positive]) end)
+
+      parent = %{
+        id: parent_domain_id,
+        name: "foo",
+        updated_at: ~N[2021-01-26 14:41:14],
+        descendent_ids: [child_1_domain_id, child_2_domain_id]
+      }
+
+      child_1_domain = %{
+        id: child_1_domain_id,
+        name: "child_1_domain",
+        parent_ids: [parent_domain_id],
+        updated_at: ~N[2021-01-26 14:41:14]
+      }
+
+      child_2_domain = %{
+        id: child_2_domain_id,
+        name: "child_2_domain",
+        parent_ids: [parent_domain_id],
+        updated_at: ~N[2021-01-26 14:41:14]
+      }
+
+      AclCache.set_acl_role_users("domain", child_1_domain_id, "xyz", members_child_1_domain)
+      AclCache.set_acl_role_users("domain", child_2_domain_id, "xyz", members_child_2_domain)
+      DomainCache.put(parent)
+      DomainCache.put(child_1_domain)
+      DomainCache.put(child_2_domain)
+
+      on_exit(fn ->
+        {:ok, _} = DomainCache.delete(child_1_domain_id)
+        {:ok, _} = DomainCache.delete(child_1_domain_id)
+        {:ok, _} = DomainCache.delete(parent_domain_id)
+        AclCache.delete_acl_roles("domain", child_1_domain_id)
+        AclCache.delete_acl_roles("domain", child_2_domain_id)
+      end)
+
+      subscriber = build(:subscriber, type: "taxonomy_role", identifier: "xyz")
+
+      scope =
+        build(:scope,
+          resource_type: "domains",
+          resource_id: parent_domain_id
+        )
+
+      %{id: event_id_child_1_domain} =
+        event_child_1_domain =
+        insert(:event, payload: %{"domain_ids" => [child_1_domain_id, parent_domain_id]})
+
+      %{id: event_id_child_2_domain} =
+        event_child_2_domain =
+        insert(:event, payload: %{"domain_ids" => [child_2_domain_id, parent_domain_id]})
+
+      subscription = insert(:subscription, subscriber: subscriber, scope: scope)
+
+      assert %{
+               event_id_child_1_domain => members_child_1_domain,
+               event_id_child_2_domain => members_child_2_domain
+             } ==
+               Subscriptions.list_recipient_ids(subscription, [
+                 event_child_1_domain,
+                 event_child_2_domain
+               ])
     end
   end
 end
