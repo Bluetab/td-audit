@@ -216,6 +216,56 @@ defmodule TdAudit.Subscriptions.EventsTest do
     end
   end
 
+  describe "subscription_events/1 for data_structure resource type returns both data_structure and data_structure_notes event types" do
+    setup do
+      data_structure_id = 42
+
+      scope =
+        build(:scope,
+          events: ["structure_note_rejected", "data_structure_updated"],
+          resource_type: "data_structure",
+          resource_id: data_structure_id
+        )
+
+      %{id: last_event_id} =
+        _old_event =
+        insert(
+          :event,
+          event: "structure_note_rejected",
+          resource_type: "data_structure_note",
+          resource_id: 1,
+          payload: %{"data_structure_id" => data_structure_id}
+        )
+
+      [
+        data_structure_id: data_structure_id,
+        subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)
+      ]
+    end
+
+    test "returns new events", %{data_structure_id: data_structure_id, subscription: subscription} do
+      events = [
+        insert(
+          :event,
+          event: "data_structure_updated",
+          resource_type: "data_structure",
+          resource_id: data_structure_id
+        )
+        | Enum.map(2..4, fn note_id ->
+            insert(
+              :event,
+              event: "structure_note_rejected",
+              resource_type: "data_structure_note",
+              resource_id: note_id,
+              payload: %{"data_structure_id" => data_structure_id}
+            )
+          end)
+      ]
+
+      assert Events.subscription_events(subscription, 1_000_000) == events
+    end
+  end
+
   describe "subscription_events/1 for arbitrary events and resource" do
     setup do
       scope =
