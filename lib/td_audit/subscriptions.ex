@@ -143,8 +143,9 @@ defmodule TdAudit.Subscriptions do
     |> Repo.delete_all()
   end
 
-  def list_recipient_ids(%Subscription{subscriber: %{type: "user", identifier: sid}}, _events) do
+  def list_recipient_ids(%Subscription{subscriber: %{type: "user", identifier: sid}}, events) do
     [String.to_integer(sid)]
+    |> put_recipients_into_events(events)
   end
 
   def list_recipient_ids(%Subscription{

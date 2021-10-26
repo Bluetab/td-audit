@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- [TD-4211] Subscriptions on data structures include structure note events
 - [TD-4134] `taxonomy_roles` notifications
 
 ## [4.29.0] 2021-10-04

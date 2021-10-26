@@ -107,7 +107,9 @@ defmodule TdAudit.SubscriptionsTest do
       subscriber = build(:subscriber, type: "user", identifier: "42")
       subscription = insert(:subscription, subscriber: subscriber)
 
-      assert [42] = Subscriptions.list_recipient_ids(subscription, [])
+      %{id: event_id} = event = insert(:event, payload: %{"domain_ids" => [1]})
+
+      assert %{^event_id => [42]} = Subscriptions.list_recipient_ids(subscription, [event])
     end
 
     test "list_recipient_ids/2 gets user ids for domain role subscription" do

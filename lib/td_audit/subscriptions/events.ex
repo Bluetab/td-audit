@@ -134,6 +134,25 @@ defmodule TdAudit.Subscriptions.Events do
          query,
          %{
            events: events,
+           resource_type: "data_structure",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where(
+      [e],
+      (e.resource_id == ^resource_id and e.resource_type == "data_structure") or
+      (e.resource_type == "data_structure_note" and
+        fragment("? @> ?", e.payload["data_structure_id"], ^resource_id))
+    )
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: events,
            resource_type: resource_type,
            resource_id: resource_id
          } = scope
