@@ -249,7 +249,6 @@ defmodule TdAudit.Notifications do
          subscriptions: subscriptions,
          subscription_events: subscription_events
        }) do
-
     subscription_events_recipient_ids =
       subscriptions
       |> Enum.filter(&Map.has_key?(subscription_events, &1.id))
@@ -259,20 +258,20 @@ defmodule TdAudit.Notifications do
     {:ok, subscription_events_recipient_ids}
   end
 
-  defp list_recipient_ids(%Subscription{id: id, subscriber: %{type: _type}} = subscription, subscription_events) do
+  defp list_recipient_ids(
+         %Subscription{id: id, subscriber: %{type: _type}} = subscription,
+         subscription_events
+       ) do
     Subscriptions.list_recipient_ids(subscription, subscription_events[id])
   end
 
   defp bulk_insert_notifications(_repo, %{
          subscription_events_recipient_ids: subscription_events_recipient_ids
        }) do
-
     subscription_events_recipient_ids
-    |> Enum.flat_map(
-        fn {%Subscription{id: subscription_id}, recipients} ->
-            info_events(subscription_id, group_by_common_events(recipients))
-        end
-    )
+    |> Enum.flat_map(fn {%Subscription{id: subscription_id}, recipients} ->
+      info_events(subscription_id, group_by_common_events(recipients))
+    end)
     |> Enum.reduce_while(%{}, &reduce_changesets/2)
     |> case do
       {:error, error} ->
@@ -303,7 +302,8 @@ defmodule TdAudit.Notifications do
           acc,
           recipient_id,
           MapSet.new([event_id]),
-          fn event_id_set -> MapSet.put(event_id_set, event_id) end)
+          fn event_id_set -> MapSet.put(event_id_set, event_id) end
+        )
       end
     )
   end
@@ -312,15 +312,19 @@ defmodule TdAudit.Notifications do
     Enum.map(
       event_set_to_recipient_ids,
       fn {event_set, recipient_ids} ->
-        {event_set, notification_changeset(subscription_id, recipient_ids), event_set_to_recipient_ids}
+        {event_set, notification_changeset(subscription_id, recipient_ids),
+         event_set_to_recipient_ids}
       end
     )
   end
 
   defp reduce_changesets({event_set, %{} = changeset, _event_set_to_recipient_ids}, %{} = acc) do
     case Repo.insert(changeset) do
-      {:ok, notification_status} -> {:cont, Map.put(acc, notification_status.notification_id, event_set)}
-      error -> {:halt, error}
+      {:ok, notification_status} ->
+        {:cont, Map.put(acc, notification_status.notification_id, event_set)}
+
+      error ->
+        {:halt, error}
     end
   end
 

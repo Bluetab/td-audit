@@ -62,6 +62,7 @@ config :td_audit, TdAudit.Notifications.Email,
     notes: "👓 Alert: Changes in structure notes",
     comments: "🖋 Alert: New comments added",
     grants: "👓 Alert: Grant notification",
+    sources: "⚡ Alert: Source notification",
     default: "⚡ Alert: New notifications"
   ],
   headers: [
@@ -73,6 +74,7 @@ config :td_audit, TdAudit.Notifications.Email,
     notes: "The following changes in notes have been detected over a structure:",
     comments: "The following comments have been added:",
     grants: "The following changes in grants have been detected over a structure:",
+    sources: "The following status changes have been detected over origin",
     default: "New notifications have been generated:"
   ],
   footer: "This message was sent by Truedat"
