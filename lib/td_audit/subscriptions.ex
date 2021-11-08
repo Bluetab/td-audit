@@ -148,12 +148,14 @@ defmodule TdAudit.Subscriptions do
     |> put_recipients_into_events(events)
   end
 
-  def list_recipient_ids(%Subscription{
-        subscriber: %{type: "taxonomy_role", identifier: role},
-        scope: %{resource_type: type, resource_id: domain}
-      }, events)
+  def list_recipient_ids(
+        %Subscription{
+          subscriber: %{type: "taxonomy_role", identifier: role},
+          scope: %{resource_type: type, resource_id: domain}
+        },
+        events
+      )
       when type == "domains" do
-
     subscription_domain_ids = TaxonomyCache.get_descendent_ids(domain)
 
     Enum.reduce(
@@ -173,32 +175,38 @@ defmodule TdAudit.Subscriptions do
     )
   end
 
-  def list_recipient_ids(%Subscription{
-        subscriber: %{type: "role", identifier: role},
-        scope: %{resource_type: type, resource_id: domain}
-      }, events)
+  def list_recipient_ids(
+        %Subscription{
+          subscriber: %{type: "role", identifier: role},
+          scope: %{resource_type: type, resource_id: domain}
+        },
+        events
+      )
       when type in ~w(domain domains) do
-
     list_recipient_ids_by_role(domain, role)
     |> put_recipients_into_events(events)
   end
 
-  def list_recipient_ids(%Subscription{
-        subscriber: %{type: "role", identifier: role},
-        scope: %{resource_type: "concept", resource_id: concept}
-      }, events) do
-
+  def list_recipient_ids(
+        %Subscription{
+          subscriber: %{type: "role", identifier: role},
+          scope: %{resource_type: "concept", resource_id: concept}
+        },
+        events
+      ) do
     concept
     |> list_concept_domains()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
     |> put_recipients_into_events(events)
   end
 
-  def list_recipient_ids(%Subscription{
-        subscriber: %{type: "role", identifier: role},
-        scope: %{resource_type: "data_structure", domain_id: id}
-      }, events) do
-
+  def list_recipient_ids(
+        %Subscription{
+          subscriber: %{type: "role", identifier: role},
+          scope: %{resource_type: "data_structure", domain_id: id}
+        },
+        events
+      ) do
     id
     |> TaxonomyCache.get_parent_ids()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))

@@ -76,6 +76,13 @@ defmodule TdAuditWeb.EmailView do
   def render("grant_created.html", event), do: render_grant(event)
   def render("grant_deleted.html", event), do: render_grant(event)
 
+  def render("job_status_started.html", event), do: render_sources(event)
+  def render("job_status_pending.html", event), do: render_sources(event)
+  def render("job_status_failed.html", event), do: render_sources(event)
+  def render("job_status_succeeded.html", event), do: render_sources(event)
+  def render("job_status_warning.html", event), do: render_sources(event)
+  def render("job_status_info.html", event), do: render_sources(event)
+
   def render(template, %{event: event}) do
     Logger.warn("Template #{template} not supported")
 
@@ -125,6 +132,16 @@ defmodule TdAuditWeb.EmailView do
       start_date: grant_date(event, "start_date"),
       end_date: grant_date(event, "end_date"),
       uri: uri(event)
+    )
+  end
+
+  defp render_sources(%{event: %{payload: %{"source_external_id" => source_name}} = event}) do
+    render("sources.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: source_name,
+      job_uri: uri(event),
+      source_uri: uri(%{event | resource_type: "sources"})
     )
   end
 
@@ -218,6 +235,13 @@ defmodule TdAuditWeb.EmailView do
 
   defp event_name(%{event: "grant_deleted"}),
     do: "You have been deleted access to the corresponding structure"
+
+  defp event_name(%{event: "job_status_started"}), do: "Job started"
+  defp event_name(%{event: "job_status_pending"}), do: "Job pending"
+  defp event_name(%{event: "job_status_failed"}), do: "Job failed"
+  defp event_name(%{event: "job_status_succeeded"}), do: "Job succeeded"
+  defp event_name(%{event: "job_status_warning"}), do: "Job warning"
+  defp event_name(%{event: "job_status_info"}), do: "Job info"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"

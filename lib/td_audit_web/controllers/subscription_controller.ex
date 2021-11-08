@@ -206,6 +206,12 @@ defmodule TdAuditWeb.SubscriptionController do
     Map.put(subscription, :resource, %{id: id, name: name})
   end
 
+  defp with_resource(
+         %{scope: %{resource_type: "source", resource_name: name, resource_id: id}} = subscription
+       ) do
+    Map.put(subscription, :resource, %{id: id, name: name})
+  end
+
   defp with_resource(subscription), do: subscription
 
   swagger_path :index_by_user do

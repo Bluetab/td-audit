@@ -131,6 +131,12 @@ defmodule TdAudit.Notifications.Email do
   defp template(["structure_tag_link_deleted"]), do: :tags
   defp template(["grant_created"]), do: :grants
   defp template(["grant_deleted"]), do: :grants
+  defp template(["job_status_started"]), do: :sources
+  defp template(["job_status_pending"]), do: :sources
+  defp template(["job_status_failed"]), do: :sources
+  defp template(["job_status_succeeded"]), do: :sources
+  defp template(["job_status_warning"]), do: :sources
+  defp template(["job_status_info"]), do: :sources
 
   defp template(events) when length(events) > 1 do
     events
