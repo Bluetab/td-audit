@@ -1,10 +1,6 @@
 defmodule TdAudit.Repo.Migrations.AlterEventsFixResourceIdReferenceForJobs do
   use Ecto.Migration
 
-  import Ecto.Query
-  
-  alias TdAudit.Repo
-
   def up do
     execute(
       """
