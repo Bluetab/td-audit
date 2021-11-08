@@ -275,6 +275,34 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
                "subscriber" => ["can't be blank"]
              } = errors
     end
+
+    @tag :authenticated_user
+    test "can create a subscription with source resource", %{
+      conn: conn,
+      claims: claims,
+      swagger_schema: schema
+    } do
+      scope_params =
+        string_params_for(:scope,
+          events: ["status_changed"],
+          resource_type: "source",
+          status: ["job_status_started"]
+        )
+
+      params =
+        :subscription
+        |> string_params_for(scope: scope_params)
+        |> Map.put("subscriber", %{"type" => "user"})
+
+      assert %{"data" => data} =
+               conn
+               |> post(Routes.subscription_path(conn, :create), subscription: params)
+               |> validate_resp_schema(schema, "SubscriptionResponse")
+               |> json_response(:created)
+
+      subscriber_id = "#{claims.user_id}"
+      assert %{"subscriber" => %{"identifier" => ^subscriber_id}} = data
+    end
   end
 
   describe "update subscription" do

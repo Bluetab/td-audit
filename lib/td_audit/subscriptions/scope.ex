@@ -47,7 +47,8 @@ defmodule TdAudit.Subscriptions.Scope do
       "domains",
       "ingest",
       "concept",
-      "rule"
+      "rule",
+      "source"
     ])
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)
@@ -65,8 +66,54 @@ defmodule TdAudit.Subscriptions.Scope do
         |> validate_length(:status, min: 1)
         |> validate_change(:status, &status_validator/2)
 
+      ["status_changed"] ->
+        changeset
+        |> cast(params, [:status])
+        |> validate_required(:status)
+        |> update_change(:status, &sort_uniq/1)
+        |> validate_length(:status, min: 1)
+        |> validate_change(:status, &jobs_status_validator/2)
+
       _ ->
         changeset
+    end
+  end
+
+  defp jobs_status_validator(:status, status) do
+    status
+    |> Enum.all?(
+      &Enum.member?(
+        [
+          "job_status_started",
+          "job_status_pending",
+          "job_status_failed",
+          "job_status_succeeded",
+          "job_status_warning",
+          "job_status_info"
+        ],
+        &1
+      )
+    )
+    |> case do
+      true ->
+        []
+
+      _ ->
+        [
+          status:
+            {"is invalid",
+             [
+               validation: :inclusion,
+               enum: [
+                 "job_status_started",
+                 "job_status_pending",
+                 "job_status_failed",
+                 "job_status_succeeded",
+                 "job_status_warning",
+                 "job_status_info"
+               ]
+             ]}
+        ]
     end
   end
 
