@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-4345] change email subject and headers for rule results
+
 ## [4.32.0] 2021-11-15
 
 ### Added
