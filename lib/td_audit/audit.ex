@@ -50,7 +50,7 @@ defmodule TdAudit.Audit do
     |> Repo.one()
   end
 
-  defp get_user(user_map, 0 = id) do
+  defp get_user(_user_map, 0 = id) do
     %{id: id, full_name: "system", user_name: "system"}
   end
 

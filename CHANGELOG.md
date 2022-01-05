@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-4293] return username `system` in events when user_id is 0
+
 ## [4.34.0] 2021-12-15
 
 ### Added
