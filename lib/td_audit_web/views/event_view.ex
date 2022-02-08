@@ -108,6 +108,13 @@ defmodule TdAuditWeb.EventView do
     "/rules/#{rule_id}/implementations/#{implementation_id}/results"
   end
 
+  def path(%{
+        resource_type: "rule",
+        payload: %{"rule_id" => rule_id, "implementation_id" => implementation_id}
+      }) do
+    "/rules/#{rule_id}"
+  end
+
   def path(%{resource_type: resource_type, resource_id: id})
       when resource_type in ["data_structure", "data_structure_note"] do
     "/structures/#{id}"

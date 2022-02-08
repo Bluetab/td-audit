@@ -30,6 +30,8 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("rule_created.html", event), do: render_rule(event)
+
   def render("comment_created.html", %{event: %{payload: payload} = event}) do
     render("comment_created.html",
       user: user_name(event),
@@ -131,6 +133,16 @@ defmodule TdAuditWeb.EmailView do
       domains: domain_path(event),
       start_date: grant_date(event, "start_date"),
       end_date: grant_date(event, "end_date"),
+      uri: uri(event)
+    )
+  end
+
+  defp render_rule(%{event: event}) do
+    render("rule.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
       uri: uri(event)
     )
   end
@@ -242,6 +254,8 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "job_status_succeeded"}), do: "Job succeeded"
   defp event_name(%{event: "job_status_warning"}), do: "Job warning"
   defp event_name(%{event: "job_status_info"}), do: "Job info"
+
+  defp event_name(%{event: "rule_created"}), do: "Rule created"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"
