@@ -105,6 +105,7 @@ defmodule TdAudit.Notifications.Email do
     |> template()
   end
 
+  defp template(["implementation_created"]), do: :implementations
   defp template(["ingest_sent_for_approval"]), do: :ingests_pending
 
   defp template(["comment_created"]), do: :comments
@@ -118,7 +119,7 @@ defmodule TdAudit.Notifications.Email do
   defp template(["relation_created"]), do: :concepts
   defp template(["relation_deleted"]), do: :concepts
   defp template(["rule_result_created"]), do: :rule_results
-  defp template(["rule_created"]), do: :rule
+  defp template(["rule_created"]), do: :rules
   defp template(["update_concept_draft"]), do: :concepts
   defp template(["relation_deprecated"]), do: :relations
   defp template(["structure_note_deleted"]), do: :notes

@@ -5,6 +5,16 @@ defmodule TdAuditWeb.EmailView do
 
   alias TdAuditWeb.EventView
 
+  def render("implementation_created.html", %{event: event}) do
+    render("implementation.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
@@ -30,7 +40,15 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
-  def render("rule_created.html", event), do: render_rule(event)
+  def render("rule_created.html", %{event: event}) do
+    render("rule.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
 
   def render("comment_created.html", %{event: %{payload: payload} = event}) do
     render("comment_created.html",
@@ -137,16 +155,6 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
-  defp render_rule(%{event: event}) do
-    render("rule.html",
-      event_name: event_name(event),
-      user: user_name(event),
-      name: EventView.resource_name(event),
-      domains: domain_path(event),
-      uri: uri(event)
-    )
-  end
-
   defp render_sources(%{event: %{payload: %{"source_external_id" => source_name}} = event}) do
     render("sources.html",
       event_name: event_name(event),
@@ -223,6 +231,7 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "concept_deprecated"}), do: "Concept Deprecated"
   defp event_name(%{event: "concept_published"}), do: "Concept Published"
   defp event_name(%{event: "delete_concept_draft"}), do: "Draft Deleted"
+  defp event_name(%{event: "implementation_created"}), do: "Implementation Created"
   defp event_name(%{event: "new_concept_draft"}), do: "New Concept Draft"
   defp event_name(%{event: "relation_created"}), do: "Created Relation"
   defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
