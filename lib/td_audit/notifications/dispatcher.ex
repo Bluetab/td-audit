@@ -60,11 +60,12 @@ defmodule TdAudit.Notifications.Dispatcher do
 
   @impl GenServer
   def handle_cast(periodicity, state) do
-    Logger.debug("Triggering #{periodicity} notifications...")
+    Logger.info("Triggering #{periodicity} notifications...")
 
     with {:ok, _} <- Notifications.create(periodicity: periodicity),
          {:ok, %{emails: emails}} when emails != [] <- Notifications.send_pending() do
       Enum.each(emails, &send_email/1)
+
     end
 
     {:noreply, state}

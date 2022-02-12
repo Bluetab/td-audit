@@ -25,7 +25,7 @@ defmodule TdAuditWeb.EmailView do
       name: EventView.resource_name(event),
       values: values,
       domains: domain_path(event),
-      date: payload["date"],
+      date: payload["date"] |> TdAudit.Helpers.shift_zone(),
       uri: uri(event)
     )
   end
