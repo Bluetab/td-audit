@@ -1,5 +1,6 @@
 defmodule TdAuditWeb.EmailViewTest do
   use TdAuditWeb.ConnCase, async: true
+  alias Phoenix.HTML.Safe
   alias TdAuditWeb.EmailView
 
   test "renders rule_result_created.html using configured timezone" do
@@ -17,7 +18,7 @@ defmodule TdAuditWeb.EmailViewTest do
     assert EmailView.render("rule_result_created.html",
       %{event: build(:event, event: "rule_result_created", payload: payload)}
     )
-    |> Phoenix.HTML.Safe.to_iodata
+    |> Safe.to_iodata
     |> IO.iodata_to_binary =~ TdAudit.Helpers.shift_zone(payload["date"])
   end
 end
