@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-4463] Notifications for `rule_created` and `implementation_created`
+
 ### Changed
 
 - [TD-4491] Compatibility with new permissions cache model
