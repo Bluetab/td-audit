@@ -250,7 +250,7 @@ defmodule TdAuditWeb.EmailView do
 
   defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
     case TdCache.StructureCache.get(id) do
-      {:ok, structure} -> Map.get(structure, :external_id)
+      {:ok, %{external_id: external_id}} -> external_id
       _ -> nil
     end
   end

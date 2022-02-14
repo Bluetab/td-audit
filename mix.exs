@@ -57,9 +57,7 @@ defmodule TdAudit.Mixfile do
       {:postgrex, "~> 0.15.0"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:guardian, "~> 2.0"},
-      {:ex_machina, "~> 2.4", only: :test},
       {:phoenix_swagger, "~> 0.8.3"},
       {:ex_json_schema, "~> 0.7.3"},
       {:bamboo, "~> 2.0"},
@@ -72,7 +70,10 @@ defmodule TdAudit.Mixfile do
       {:quantum, "~> 3.0"},
       {:canada, "~> 2.0"},
       {:number, "~> 1.0"},
-      {:assertions, "~> 0.19", only: :test}
+      {:assertions, "~> 0.19", only: :test},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:ex_machina, "~> 2.4", only: :test}
     ]
   end
 
