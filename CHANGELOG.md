@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-4491] Compatibility with new permissions cache model
+
 ## [4.36.0] 2022-01-24
 
 ### Added
@@ -31,7 +37,7 @@
 
 - [TD-3396] Add notification `read mark`
 
-## [4.28.0] 2021-09-20 
+## [4.28.0] 2021-09-20
 
 ### Added
 

@@ -65,13 +65,14 @@ defmodule TdAudit.Mixfile do
       {:bamboo, "~> 2.0"},
       {:bamboo_phoenix, "~> 1.0"},
       {:bamboo_smtp, "~> 4.0.0"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.28.0", override: true},
-      {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", tag: "4.28.0"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", branch: "feature/td-4491", override: true},
+      {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", branch: "feature/td-4491"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},
       {:quantum, "~> 3.0"},
       {:canada, "~> 2.0"},
-      {:number, "~> 1.0"}
+      {:number, "~> 1.0"},
+      {:assertions, "~> 0.19", only: :test}
     ]
   end
 

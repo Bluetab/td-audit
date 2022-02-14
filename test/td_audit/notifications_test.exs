@@ -7,20 +7,14 @@ defmodule TdAudit.NotificationsTest do
   import TdAudit.TestOperators
 
   alias TdAudit.Notifications
-  alias TdCache.AclCache
-  alias TdCache.UserCache
 
   describe "notifications" do
     test "create/1 creates notifications for subscriptions matching the specified `clauses`" do
       domain_id = System.unique_integer([:positive])
-      user_ids = Enum.map(1..3, fn _ -> System.unique_integer([:positive]) end)
+      users = Enum.map(1..3, fn _ -> CacheHelpers.put_user() end)
       role = "foo"
       event = "bar"
-      AclCache.set_acl_role_users("domain", domain_id, role, user_ids)
-
-      on_exit(fn ->
-        AclCache.delete_acl_role_users("domain", domain_id, role)
-      end)
+      CacheHelpers.put_acl_role_users(domain_id, role, users)
 
       %{id: event_id} = insert(:event, event: event, payload: %{"domain_ids" => [domain_id]})
       subscriber = %{id: subscriber_id} = insert(:subscriber, type: "role", identifier: role)
@@ -59,7 +53,8 @@ defmodule TdAudit.NotificationsTest do
                    ]}
               }} = Notifications.create(periodicity: "minutely")
 
-      assert %{^subscription => %{^event_id => ^user_ids}} = subscription_events_recipient_ids
+      assert %{^subscription => %{^event_id => user_ids}} = subscription_events_recipient_ids
+      assert_lists_equal(user_ids, users, & &1 == &2.id)
     end
 
     test "create/1 create individual notification for grants events" do
@@ -76,12 +71,7 @@ defmodule TdAudit.NotificationsTest do
       role = "foobar"
       event = "grant_created"
 
-      AclCache.set_acl_role_users("domain", domain_id, role, [user_id1, user_id2, user_id3])
-
-      on_exit(fn ->
-        AclCache.delete_acl_roles("domain", domain_id)
-        # AclCache.delete_acl_role_users("domain", domain_id, role)
-      end)
+      CacheHelpers.put_acl_role_users(domain_id, role, [user_id1, user_id2, user_id3])
 
       payload = %{
         "data_structure_id" => 1,
@@ -198,7 +188,7 @@ defmodule TdAudit.NotificationsTest do
   test "list_recipients/1 lists users with non-nil emails with full names" do
     %{id: id1} = create_user(%{full_name: "Foo", email: "foo@example.com"})
     %{id: id2} = create_user(%{full_name: "Bar", email: "bar@example.com"})
-    %{id: id3} = create_user(%{full_name: "Baz has no email"})
+    %{id: id3} = create_user(%{full_name: "Baz has no email", email: nil})
 
     notification = insert(:notification, recipient_ids: [id1, id2, id3])
 
@@ -246,15 +236,7 @@ defmodule TdAudit.NotificationsTest do
     "#{footer} v#{version}"
   end
 
-  defp create_user(%{id: id} = user) do
-    on_exit(fn -> UserCache.delete(id) end)
-    UserCache.put(user)
-    user
-  end
-
   defp create_user(%{} = params) do
-    params
-    |> Map.put(:id, System.unique_integer([:positive]))
-    |> create_user()
+    CacheHelpers.put_user(params)
   end
 end

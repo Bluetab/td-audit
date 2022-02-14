@@ -151,22 +151,22 @@ defmodule TdAudit.Subscriptions do
   def list_recipient_ids(
         %Subscription{
           subscriber: %{type: "taxonomy_role", identifier: role},
-          scope: %{resource_type: type, resource_id: domain}
+          scope: %{resource_type: type, resource_id: domain_id}
         },
         events
       )
       when type == "domains" do
-    subscription_domain_ids = TaxonomyCache.get_descendent_ids(domain)
+    subscription_domain_ids = TaxonomyCache.reachable_domain_ids(domain_id)
 
     Enum.reduce(
       events,
       %{},
-      fn event, acc ->
+      fn %{id: id, payload: payload}, acc ->
         Map.put(
           acc,
-          event.id,
+          id,
           MapSet.intersection(
-            MapSet.new(event.payload["domain_ids"]),
+            MapSet.new(payload["domain_ids"]),
             MapSet.new(subscription_domain_ids)
           )
           |> list_recipient_ids_by_domains_role(role)
@@ -208,7 +208,7 @@ defmodule TdAudit.Subscriptions do
         events
       ) do
     id
-    |> TaxonomyCache.get_parent_ids()
+    |> TaxonomyCache.reaching_domain_ids()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
     |> put_recipients_into_events(events)
   end
@@ -237,10 +237,8 @@ defmodule TdAudit.Subscriptions do
     )
   end
 
-  defp list_recipient_ids_by_role(domain, role) do
-    "domain"
-    |> AclCache.get_acl_role_users(domain, role)
-    |> Enum.map(&String.to_integer/1)
+  defp list_recipient_ids_by_role(domain_id, role) do
+    AclCache.get_acl_role_users("domain", domain_id, role)
   end
 
   defp list_concept_domains(resource_id) do
