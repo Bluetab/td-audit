@@ -1,4 +1,8 @@
 defmodule CacheHelpers do
+  @moduledoc """
+  Helper functions for loading and cleaning test fixtures in cache
+  """
+
   import ExUnit.Callbacks, only: [on_exit: 1]
   import TdAudit.Factory
 

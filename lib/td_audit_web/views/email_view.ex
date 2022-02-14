@@ -189,8 +189,7 @@ defmodule TdAuditWeb.EmailView do
     |> Enum.reverse()
     |> Enum.map(&TdCache.TaxonomyCache.get_domain/1)
     |> Enum.filter(& &1)
-    |> Enum.map(& &1.name)
-    |> Enum.join(" › ")
+    |> Enum.map_join(" › ", & &1.name)
   end
 
   defp uri(event) do
