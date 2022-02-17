@@ -5,6 +5,16 @@ defmodule TdAuditWeb.EmailView do
 
   alias TdAuditWeb.EventView
 
+  def render("implementation_created.html", %{event: event}) do
+    render("implementation.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
@@ -26,6 +36,16 @@ defmodule TdAuditWeb.EmailView do
       values: values,
       domains: domain_path(event),
       date: TdAudit.Helpers.shift_zone(payload["date"]),
+      uri: uri(event)
+    )
+  end
+
+  def render("rule_created.html", %{event: event}) do
+    render("rule.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
       uri: uri(event)
     )
   end
@@ -211,6 +231,7 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "concept_deprecated"}), do: "Concept Deprecated"
   defp event_name(%{event: "concept_published"}), do: "Concept Published"
   defp event_name(%{event: "delete_concept_draft"}), do: "Draft Deleted"
+  defp event_name(%{event: "implementation_created"}), do: "Implementation Created"
   defp event_name(%{event: "new_concept_draft"}), do: "New Concept Draft"
   defp event_name(%{event: "relation_created"}), do: "Created Relation"
   defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
@@ -242,6 +263,8 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "job_status_succeeded"}), do: "Job succeeded"
   defp event_name(%{event: "job_status_warning"}), do: "Job warning"
   defp event_name(%{event: "job_status_info"}), do: "Job info"
+
+  defp event_name(%{event: "rule_created"}), do: "Rule created"
 
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"

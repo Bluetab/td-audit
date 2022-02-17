@@ -57,28 +57,32 @@ config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.SMTPAdapter
 config :td_audit, TdAudit.Notifications.Email,
   sender: {"Truedat Notifications", "no-reply@truedat.io"},
   subjects: [
-    ingests_pending: "📬 Alert: Data requests pending approval",
+    comments: "🖋 Alert: New comments added",
     concepts: "🖋 Alert: New event in Business Glosary",
+    default: "⚡ Alert: New notifications",
+    grants: "👓 Alert: Grant notification",
+    implementations: "⚡ Alert: Implementation notification",
+    ingests_pending: "📬 Alert: Data requests pending approval",
+    notes: "👓 Alert: Changes in structure notes",
     relations: "👓 Alert: Relations changed",
     rule_results: "👓 Alert: Data quality results detected",
-    tags: "👓 Alert: Changes in tags",
-    notes: "👓 Alert: Changes in structure notes",
-    comments: "🖋 Alert: New comments added",
-    grants: "👓 Alert: Grant notification",
+    rules: "⚡ Alert: Rule notification",
     sources: "⚡ Alert: Source notification",
-    default: "⚡ Alert: New notifications"
+    tags: "👓 Alert: Changes in tags"
   ],
   headers: [
-    ingests_pending: "The following data requests require approval:",
+    comments: "The following comments have been added:",
     concepts: "The following concepts have been changed:",
+    default: "New notifications have been generated:",
+    grants: "The following changes in grants have been detected over a structure:",
+    implementations: "The following changes in implementations have been detected",
+    ingests_pending: "The following data requests require approval:",
+    notes: "The following changes in notes have been detected over a structure:",
     relations: "The following relations have been deprecated due to the deletion of its target",
     rule_results: "The following data quality results have been detected:",
-    tags: "The following changes in tags have been detected over a structure:",
-    notes: "The following changes in notes have been detected over a structure:",
-    comments: "The following comments have been added:",
-    grants: "The following changes in grants have been detected over a structure:",
+    rules: "The following changes in rules have been detected",
     sources: "The following status changes have been detected over origin",
-    default: "New notifications have been generated:"
+    tags: "The following changes in tags have been detected over a structure:"
   ],
   footer: "This message was sent by Truedat"
 
