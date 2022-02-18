@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-4425] Shift quality result created event email date field timezone
 - [TD-4463] add notifications for `rule_created` and `implementation_created`
 
 ## [4.36.0] 2022-01-24
