@@ -25,6 +25,8 @@ config :td_cache,
 config :td_audit, TdAudit.Auth.Guardian, secret_key: System.fetch_env!("GUARDIAN_SECRET_KEY")
 config :td_audit, host_name: System.get_env("WEB_HOST")
 
+config :td_dd, :time_zone, System.get_env("TZ", "Etc/UTC")
+
 config :td_audit, TdAudit.Broadway,
   consumer_id: System.fetch_env!("HOSTNAME"),
   redis_host: System.fetch_env!("REDIS_HOST"),
