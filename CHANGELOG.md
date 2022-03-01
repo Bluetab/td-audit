@@ -2,13 +2,16 @@
 
 ## [Unreleased]
 
-### Added
-
-- [TD-4463] Notifications for `rule_created` and `implementation_created`
-
 ### Changed
 
 - [TD-4491] Compatibility with new permissions cache model
+
+## [4.38.0] 2022-02-22
+
+### Added
+
+- [TD-4425] Shift quality result created event email date field timezone
+- [TD-4463] Notifications for `rule_created` and `implementation_created`
 
 ## [4.36.0] 2022-01-24
 

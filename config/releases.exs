@@ -1,5 +1,7 @@
 import Config
 
+config :td_audit, :time_zone, System.get_env("TZ", "Etc/UTC")
+
 config :td_audit, TdAudit.Repo,
   username: System.fetch_env!("DB_USER"),
   password: System.fetch_env!("DB_PASSWORD"),
