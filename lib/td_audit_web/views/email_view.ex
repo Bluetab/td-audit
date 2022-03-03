@@ -192,19 +192,19 @@ defmodule TdAuditWeb.EmailView do
   defp user_name(_), do: nil
 
   defp domain_path(%{payload: %{"domain_ids" => domain_ids}}) do
-    buid_domain_path(domain_ids)
+    build_domain_path(domain_ids)
   end
 
   defp domain_path(%{resource_id: resource_id, resource_type: "concept"}) do
     case TdCache.ConceptCache.get(resource_id, :domain_ids) do
-      {:ok, [_ | _] = domain_ids} -> buid_domain_path(domain_ids)
+      {:ok, [_ | _] = domain_ids} -> build_domain_path(domain_ids)
       _ -> nil
     end
   end
 
   defp domain_path(_), do: nil
 
-  defp buid_domain_path(domain_ids) do
+  defp build_domain_path(domain_ids) do
     domain_ids
     |> Enum.reverse()
     |> Enum.map(&TdCache.TaxonomyCache.get_domain/1)
