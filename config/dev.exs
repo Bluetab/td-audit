@@ -21,10 +21,10 @@ config :td_audit, TdAudit.Repo,
   username: "postgres",
   password: "postgres",
   database: "td_audit_dev",
-  hostname: "localhost",
+  hostname: "postgres",
   pool_size: 4
 
 config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.LocalAdapter
 
-config :td_cache, redis_host: "localhost"
+config :td_cache, redis_host: "redis"
 config :td_audit, host_name: "http://localhost:8080"

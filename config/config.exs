@@ -91,7 +91,7 @@ config :td_audit, TdAudit.Broadway,
   consumer_group: "td_audit",
   consumer_id: "local",
   stream: "audit:events",
-  redis_host: "localhost",
+  redis_host: "redis",
   port: 6379
 
 config :td_audit, TdAudit.Scheduler,

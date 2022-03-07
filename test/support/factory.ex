@@ -155,6 +155,30 @@ defmodule TdAudit.Factory do
     }
   end
 
+  def domain_factory do
+    %{
+      id: System.unique_integer([:positive]),
+      parent_id: nil,
+      name: sequence("domain_name"),
+      updated_at: DateTime.utc_now()
+    }
+  end
+
+  def user_factory do
+    %{
+      id: System.unique_integer([:positive]),
+      user_name: sequence("user_name"),
+      email: sequence("user_email") <> "@example.com"
+    }
+  end
+
+  def concept_factory do
+    %{
+      id: System.unique_integer([:positive]),
+      name: sequence("concept_name")
+    }
+  end
+
   defp default_assoc(attrs, id_key, key) do
     if Enum.any?([key, id_key], &Map.has_key?(attrs, &1)) do
       attrs

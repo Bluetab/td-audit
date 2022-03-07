@@ -192,25 +192,24 @@ defmodule TdAuditWeb.EmailView do
   defp user_name(_), do: nil
 
   defp domain_path(%{payload: %{"domain_ids" => domain_ids}}) do
-    buid_domain_path(domain_ids)
+    build_domain_path(domain_ids)
   end
 
   defp domain_path(%{resource_id: resource_id, resource_type: "concept"}) do
     case TdCache.ConceptCache.get(resource_id, :domain_ids) do
-      {:ok, [_ | _] = domain_ids} -> buid_domain_path(domain_ids)
+      {:ok, [_ | _] = domain_ids} -> build_domain_path(domain_ids)
       _ -> nil
     end
   end
 
   defp domain_path(_), do: nil
 
-  defp buid_domain_path(domain_ids) do
+  defp build_domain_path(domain_ids) do
     domain_ids
     |> Enum.reverse()
     |> Enum.map(&TdCache.TaxonomyCache.get_domain/1)
     |> Enum.filter(& &1)
-    |> Enum.map(& &1.name)
-    |> Enum.join(" › ")
+    |> Enum.map_join(" › ", & &1.name)
   end
 
   defp uri(event) do
@@ -274,7 +273,7 @@ defmodule TdAuditWeb.EmailView do
 
   defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
     case TdCache.StructureCache.get(id) do
-      {:ok, structure} -> Map.get(structure, :external_id)
+      {:ok, %{external_id: external_id}} -> external_id
       _ -> nil
     end
   end
