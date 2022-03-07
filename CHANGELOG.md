@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- [TD-4545] Check status on domain/domains subscriptions to `rule_result_created`
+
 ## [4.38.0] 2022-02-22
 
 ### Added
