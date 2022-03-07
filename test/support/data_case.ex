@@ -22,6 +22,7 @@ defmodule TdAudit.DataCase do
     quote do
       alias TdAudit.Repo
 
+      import Assertions
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
