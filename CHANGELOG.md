@@ -6,6 +6,12 @@
 
 - [TD-4491] Compatibility with new permissions cache model
 
+## [4.39.0] 2022-03-07
+
+### Fixed
+
+- [TD-4545] Check status on domain/domains subscriptions to `rule_result_created`
+
 ## [4.38.0] 2022-02-22
 
 ### Added

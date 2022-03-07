@@ -46,14 +46,111 @@ defmodule TdAudit.Subscriptions.EventsTest do
           resource_id: "62"
         )
 
-      %{id: last_event_id} = _old_event = insert(:event, event: "rule_result_created")
+      domains_scope =
+        build(:scope,
+          events: ["rule_result_created"],
+          status: ["fail", "warn"],
+          resource_type: "domains",
+          resource_id: 4
+        )
 
-      [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
+      domain_scope =
+        build(:scope,
+          events: ["rule_result_created"],
+          status: ["success"],
+          resource_type: "domain",
+          resource_id: 4
+        )
+
+      [
+        subscription: insert(:subscription, scope: scope),
+        domains_subscription: insert(:subscription, scope: domains_scope),
+        domain_subscription: insert(:subscription, scope: domain_scope)
+      ]
     end
 
     test "returns new events", %{subscription: subscription} do
       events = Enum.map(1..3, fn _ -> insert(:event, event: "rule_result_created") end)
       assert Events.subscription_events(subscription, 1_000_000) == events
+    end
+
+    test "return failed results", %{domains_subscription: subscription} do
+      payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "fail",
+          domain_ids: [5, 4, 1]
+        )
+
+      event = insert(:event, event: "rule_result_created", payload: payload)
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "does not return succeeded status results", %{domains_subscription: subscription} do
+      failed_payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "fail",
+          domain_ids: [5, 4, 1]
+        )
+
+      warn_payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "warn",
+          domain_ids: [5, 4, 1]
+        )
+
+      succeeded_payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "success",
+          domain_ids: [5, 4, 1]
+        )
+
+      [failed_event, _succeeded_event, warned_event] = [
+        insert(:event, event: "rule_result_created", payload: failed_payload),
+        insert(:event, event: "rule_result_created", payload: succeeded_payload),
+        insert(:event, event: "rule_result_created", payload: warn_payload)
+      ]
+
+      assert Events.subscription_events(subscription, 1_000_000) == [failed_event, warned_event]
+    end
+
+    test "return success results of its domain", %{domain_subscription: subscription} do
+      succeeded_payload_different_domain =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "success",
+          domain_ids: [5, 1]
+        )
+
+      failed_payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "fail",
+          domain_ids: [5, 4, 1]
+        )
+
+      warn_payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "warn",
+          domain_ids: [5, 4, 1]
+        )
+
+      succeeded_payload =
+        string_params_for(:payload,
+          event: "rule_result_created",
+          status: "success",
+          domain_ids: [4]
+        )
+
+      insert(:event, event: "rule_result_created", payload: succeeded_payload_different_domain)
+      insert(:event, event: "rule_result_created", payload: failed_payload)
+      event = insert(:event, event: "rule_result_created", payload: succeeded_payload)
+      insert(:event, event: "rule_result_created", payload: warn_payload)
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
   end
 
