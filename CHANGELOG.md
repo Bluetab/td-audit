@@ -4,6 +4,8 @@
 
 ### Changed
 
+- [TD-2501] Database timeout can now be configured using the
+  `DB_TIMEOUT_MILLIS` environment variable. Defaults to 15000.
 - [TD-4491] Compatibility with new permissions cache model
 
 ## [4.39.0] 2022-03-07
