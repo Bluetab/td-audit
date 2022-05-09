@@ -11,7 +11,9 @@ defmodule TdAudit.Subscriptions do
   alias TdAudit.Repo
   alias TdAudit.Subscriptions.Scope
   alias TdAudit.Subscriptions.Subscription
-  alias TdCache.{AclCache, ConceptCache, TaxonomyCache}
+  alias TdCache.AclCache
+  alias TdCache.ConceptCache
+  alias TdCache.TaxonomyCache
 
   @doc """
   Returns the list of subscriptions.
@@ -151,11 +153,11 @@ defmodule TdAudit.Subscriptions do
   def list_recipient_ids(
         %Subscription{
           subscriber: %{type: "taxonomy_role", identifier: role},
-          scope: %{resource_type: type, resource_id: domain_id}
+          scope: %{resource_type: "domains", resource_id: domain_id}
         },
         events
       )
-      when type == "domains" do
+      when is_integer(domain_id) do
     subscription_domain_ids = TaxonomyCache.reachable_domain_ids(domain_id)
 
     Enum.reduce(
@@ -203,11 +205,12 @@ defmodule TdAudit.Subscriptions do
   def list_recipient_ids(
         %Subscription{
           subscriber: %{type: "role", identifier: role},
-          scope: %{resource_type: "data_structure", domain_id: id}
+          scope: %{resource_type: "data_structure", domain_id: domain_id}
         },
         events
-      ) do
-    id
+      )
+      when is_integer(domain_id) do
+    domain_id
     |> TaxonomyCache.reaching_domain_ids()
     |> Enum.flat_map(&list_recipient_ids_by_role(&1, role))
     |> put_recipients_into_events(events)
