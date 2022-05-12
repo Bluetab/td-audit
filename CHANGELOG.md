@@ -10,6 +10,7 @@
 ### Fixed
 
 - [TD-4792] Notifications were failing if subscriptions existed with `domain_id: nil`
+- [TD-4797] Notes notifications are linking to non-existing urls
 
 ## [4.40.0] 2022-03-14
 
