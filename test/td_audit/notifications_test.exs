@@ -54,7 +54,7 @@ defmodule TdAudit.NotificationsTest do
               }} = Notifications.create(periodicity: "minutely")
 
       assert %{^subscription => %{^event_id => user_ids}} = subscription_events_recipient_ids
-      assert_lists_equal(user_ids, users, & &1 == &2.id)
+      assert_lists_equal(user_ids, users, &(&1 == &2.id))
     end
 
     test "create/1 create individual notification for grants events" do
