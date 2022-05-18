@@ -138,6 +138,19 @@ defmodule TdAudit.Factory do
     |> merge_attributes(Map.delete(attrs, :event))
   end
 
+  def payload_factory(%{event: "structure_note_pending_approval"} = attrs) do
+    %{
+      resource: %{
+        "name" => "some_structure",
+        "path" => ["td_metrics", "public"],
+        "external_id" => "postgres://postgres/td_metrics/public/some_structure"
+      },
+      domain_ids: [1, 2, 3],
+      data_structure_id: 123
+    }
+    |> merge_attributes(Map.delete(attrs, :event))
+  end
+
   def payload_factory(%{} = attrs) do
     merge_attributes(%{}, Map.delete(attrs, :event))
   end
