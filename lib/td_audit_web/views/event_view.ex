@@ -55,6 +55,12 @@ defmodule TdAuditWeb.EventView do
     "#{name} : #{implementation_key}"
   end
 
+  def resource_name(%{
+    payload: %{"implementation_key" => implementation_key}
+  }) do
+    "#{implementation_key}"
+  end
+
   def resource_name(%{payload: %{"resource_name" => name}}), do: name
 
   def resource_name(%{payload: %{"name" => name}}), do: name
@@ -109,17 +115,16 @@ defmodule TdAuditWeb.EventView do
 
   def path(%{
         resource_type: "rule_result",
-        payload: %{"rule_id" => rule_id, "implementation_id" => implementation_id}
+        payload: %{"implementation_id" => implementation_id}
       }) do
-    "/rules/#{rule_id}/implementations/#{implementation_id}/results"
+    "/implementations/#{implementation_id}/results"
   end
 
   def path(%{
         resource_type: "implementation",
-        resource_id: resource_id,
-        payload: %{"rule_id" => rule_id}
+        resource_id: resource_id
       }) do
-    "/rules/#{rule_id}/implementations/#{resource_id}"
+    "/implementations/#{resource_id}"
   end
 
   def path(%{
