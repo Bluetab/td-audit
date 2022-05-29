@@ -8,7 +8,7 @@ defmodule TdAuditWeb.EmailViewTest do
       string_params_for(
         :payload,
         event: "rule_result_created",
-        date: "2022-02-12T11:46:39Z",
+        date: "2022-02-12T11:46:39Z"
       )
 
     assert EmailView.render(
@@ -20,10 +20,11 @@ defmodule TdAuditWeb.EmailViewTest do
   end
 
   test "implementation with parent rule, rule_result_created event: renders implementation result anchor: result link href and 'rule_name : implementation_key' content" do
-    implementation_id = 12345
+    implementation_id = 12_345
     rule_name = "rule_name"
     implementation_key = "implementation_key_as_resource_name"
-    payload = # payload with rule "name" param
+    # payload with rule "name" param
+    payload =
       string_params_for(
         :payload,
         date: "2022-02-12T11:46:39Z",
@@ -35,24 +36,26 @@ defmodule TdAuditWeb.EmailViewTest do
         result: 100.00,
         name: rule_name,
         implementation_key: implementation_key,
-        implementation_id: implementation_id,
+        implementation_id: implementation_id
       )
 
-    email = EmailView.render(
-             "rule_result_created.html",
-             %{event: build(:event, event: "rule_result_created", payload: payload)}
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary()
+    email =
+      EmailView.render(
+        "rule_result_created.html",
+        %{event: build(:event, event: "rule_result_created", payload: payload)}
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
 
-    assert email =~ ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{rule_name} : #{implementation_key}\n*\s*</a>|
+    assert email =~ # credo:disable-for-next-line
+             ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{rule_name} : #{implementation_key}\n*\s*</a>|
   end
 
-
   test "implementation wihout parent rule, rule_result_created event: renders implementation result anchor: result link href and 'implementation_key' content" do
-    implementation_id = 12345
+    implementation_id = 12_345
     implementation_key = "implementation_key_as_resource_name"
-    payload = # payload without rule "name" param
+    # payload without rule "name" param
+    payload =
       string_params_for(
         :payload,
         date: "2022-02-12T11:46:39Z",
@@ -63,30 +66,40 @@ defmodule TdAuditWeb.EmailViewTest do
         records: 1,
         result: 100.00,
         implementation_key: implementation_key,
-        implementation_id: implementation_id,
+        implementation_id: implementation_id
       )
 
-    email = EmailView.render(
-             "rule_result_created.html",
-             %{event: build(:event, event: "rule_result_created", payload: payload)}
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary()
+    email =
+      EmailView.render(
+        "rule_result_created.html",
+        %{event: build(:event, event: "rule_result_created", payload: payload)}
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
 
-    assert email =~ ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{implementation_key}\n*\s*</a>|
+    assert email =~
+             ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{implementation_key}\n*\s*</a>|
   end
 
   test "implementation created event: renders implementation link: /implementations/<implementation_id>" do
-    implementation_id = 12345
+    implementation_id = 12_345
+
     payload =
       string_params_for(
         :payload,
-        implementation_id: implementation_id,
+        implementation_id: implementation_id
       )
 
     assert EmailView.render(
              "implementation_created.html",
-             %{event: build(:event, event: "implementation_created", resource_id: implementation_id, payload: payload)}
+             %{
+               event:
+                 build(:event,
+                   event: "implementation_created",
+                   resource_id: implementation_id,
+                   payload: payload
+                 )
+             }
            )
            |> Safe.to_iodata()
            |> IO.iodata_to_binary() =~ ~r|<a href=".*/implementations/#{implementation_id}"|
