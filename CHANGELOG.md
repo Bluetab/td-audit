@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-3633] Take into account ruleless implementations in events and subscriptions
+
 ## [4.44.0] 2022-05-23
 
 ### Changed
