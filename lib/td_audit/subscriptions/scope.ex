@@ -48,7 +48,8 @@ defmodule TdAudit.Subscriptions.Scope do
       "ingest",
       "concept",
       "rule",
-      "source"
+      "source",
+      "implementation"
     ])
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)

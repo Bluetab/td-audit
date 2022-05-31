@@ -179,6 +179,31 @@ defmodule TdAudit.Subscriptions.EventsTest do
     end
   end
 
+  describe "subscription_events/1 for rule_result_created and implementation resource_type subscription" do
+    setup do
+      scope =
+        build(:scope,
+          events: ["rule_result_created"],
+          status: ["error"],
+          resource_type: "implementation",
+          resource_id: 19_188
+        )
+
+      %{id: last_event_id} = _old_event = insert(:event, event: "rule_result_created")
+
+      [subscription: insert(:subscription, scope: scope, last_event_id: last_event_id)]
+    end
+
+    test "returns new events", %{subscription: subscription} do
+      events =
+        Enum.map(1..3, fn _ ->
+          insert(:event, event: "rule_result_created", resource_type: "implementation")
+        end)
+
+      assert Events.subscription_events(subscription, 1_000_000) == events
+    end
+  end
+
   describe "subscription_events/1 for ingest_sent_for_approval subscription" do
     setup do
       scope =

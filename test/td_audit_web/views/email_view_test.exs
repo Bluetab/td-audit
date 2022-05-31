@@ -7,13 +7,8 @@ defmodule TdAuditWeb.EmailViewTest do
     payload =
       string_params_for(
         :payload,
-        date: "2022-02-12T11:46:39Z",
-        result_type: "percentage",
-        goal: 10.0,
-        minimum: 0.0,
-        errors: 0,
-        records: 1,
-        result: 100.00
+        event: "rule_result_created",
+        date: "2022-02-12T11:46:39Z"
       )
 
     assert EmailView.render(
@@ -22,6 +17,92 @@ defmodule TdAuditWeb.EmailViewTest do
            )
            |> Safe.to_iodata()
            |> IO.iodata_to_binary() =~ TdAudit.Helpers.shift_zone(payload["date"])
+  end
+
+  test "implementation with parent rule, rule_result_created event: renders implementation result anchor: result link href and 'rule_name : implementation_key' content" do
+    implementation_id = 12_345
+    rule_name = "rule_name"
+    implementation_key = "implementation_key_as_resource_name"
+    # payload with rule "name" param
+    payload =
+      string_params_for(
+        :payload,
+        date: "2022-02-12T11:46:39Z",
+        result_type: "percentage",
+        goal: 10.0,
+        minimum: 0.0,
+        errors: 0,
+        records: 1,
+        result: 100.00,
+        name: rule_name,
+        implementation_key: implementation_key,
+        implementation_id: implementation_id
+      )
+
+    email =
+      EmailView.render(
+        "rule_result_created.html",
+        %{event: build(:event, event: "rule_result_created", payload: payload)}
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert email =~ # credo:disable-for-next-line
+             ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{rule_name} : #{implementation_key}\n*\s*</a>|
+  end
+
+  test "implementation wihout parent rule, rule_result_created event: renders implementation result anchor: result link href and 'implementation_key' content" do
+    implementation_id = 12_345
+    implementation_key = "implementation_key_as_resource_name"
+    # payload without rule "name" param
+    payload =
+      string_params_for(
+        :payload,
+        date: "2022-02-12T11:46:39Z",
+        result_type: "percentage",
+        goal: 10.0,
+        minimum: 0.0,
+        errors: 0,
+        records: 1,
+        result: 100.00,
+        implementation_key: implementation_key,
+        implementation_id: implementation_id
+      )
+
+    email =
+      EmailView.render(
+        "rule_result_created.html",
+        %{event: build(:event, event: "rule_result_created", payload: payload)}
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert email =~
+             ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{implementation_key}\n*\s*</a>|
+  end
+
+  test "implementation created event: renders implementation link: /implementations/<implementation_id>" do
+    implementation_id = 12_345
+
+    payload =
+      string_params_for(
+        :payload,
+        implementation_id: implementation_id
+      )
+
+    assert EmailView.render(
+             "implementation_created.html",
+             %{
+               event:
+                 build(:event,
+                   event: "implementation_created",
+                   resource_id: implementation_id,
+                   payload: payload
+                 )
+             }
+           )
+           |> Safe.to_iodata()
+           |> IO.iodata_to_binary() =~ ~r|<a href=".*/implementations/#{implementation_id}"|
   end
 
   test "data structure event: renders data structure link: /structures/<data_structure_id>" do
@@ -48,8 +129,7 @@ defmodule TdAuditWeb.EmailViewTest do
              }
            )
            |> Safe.to_iodata()
-           # Escaped quote is the anchor href ending quote
-           |> IO.iodata_to_binary() =~ "/structures/#{data_structure_id}\""
+           |> IO.iodata_to_binary() =~ ~r|<a href=".*/structures/#{data_structure_id}"|
   end
 
   test "note event: renders note link: /structures/<data_structure_id>/notes" do
@@ -75,6 +155,6 @@ defmodule TdAuditWeb.EmailViewTest do
              }
            )
            |> Safe.to_iodata()
-           |> IO.iodata_to_binary() =~ "/structures/#{data_structure_id}/notes"
+           |> IO.iodata_to_binary() =~ ~r|<a href=".*/structures/#{data_structure_id}/notes"|
   end
 end
