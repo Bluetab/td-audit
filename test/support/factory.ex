@@ -159,6 +159,7 @@ defmodule TdAudit.Factory do
   defp resource_type(%{event: "comment_created"}), do: "comment"
   defp resource_type(%{event: "rule_result_created"}), do: "rule_result"
   defp resource_type(%{event: "ingest_sent_for_approval"}), do: "ingest"
+  defp resource_type(%{event: "implementation_created"}), do: "implementation"
   defp resource_type(_), do: "some resource_type"
 
   def subscriber_factory do
