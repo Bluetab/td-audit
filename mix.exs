@@ -6,7 +6,7 @@ defmodule TdAudit.Mixfile do
       app: :td_audit,
       version:
         case System.get_env("APP_VERSION") do
-          nil -> "4.44.0-local"
+          nil -> "4.45.0-local"
           v -> v
         end,
       elixir: "~> 1.11",
@@ -54,7 +54,7 @@ defmodule TdAudit.Mixfile do
       {:phoenix_ecto, "~> 4.0"},
       {:phoenix_html, "~> 2.11"},
       {:ecto_sql, "~> 3.1"},
-      {:postgrex, "~> 0.15.0"},
+      {:postgrex, "~> 0.16.3"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:guardian, "~> 2.0"},

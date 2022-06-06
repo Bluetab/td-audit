@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [4.45.0] 2022-06-06
 
 ### Added
 
@@ -8,11 +8,6 @@
 - [TD-4655] Support subscribing errored quality execution
 
 ## [4.44.0] 2022-05-23
-
-### Changed
-
-- Additional TLS configuration options are available using environment variables
-  `SMTP_TLS_VERIFY` and `SMTP_TLS_CACERTFILE`
 
 ### Fixed
 
@@ -128,13 +123,13 @@
 - Security patches from `alpine:3.13`
 - Update dependencies
 
-## [4.19.0] 2021-05-04
+### [4.19.0] 2021-05-04
 
 ### Added
 
 - [TD-3346] Search events Api
 
-## Fixed
+### Fixed
 
 - [TD-3618] Exception sending email
 
