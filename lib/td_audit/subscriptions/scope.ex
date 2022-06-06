@@ -54,7 +54,7 @@ defmodule TdAudit.Subscriptions.Scope do
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)
     |> validate_status(params)
-    |> cast_embed(:filters, with: &Filters.changeset/2, required: false)
+    |> cast_embed(:filters, with: &Filters.changeset/2)
   end
 
   defp validate_status(%Changeset{} = changeset, %{} = params) do
