@@ -34,6 +34,7 @@ defmodule TdAuditWeb.EmailView do
     render("rule_result_created.html",
       name: EventView.resource_name(event),
       values: values,
+      message: Map.get(payload, "message"),
       domains: domain_path(event),
       date: TdAudit.Helpers.shift_zone(payload["date"]),
       uri: uri(event)
@@ -178,6 +179,8 @@ defmodule TdAuditWeb.EmailView do
     |> format_number(format)
   end
 
+  defp format_number(%{} = payload, key), do: Map.get(payload, key)
+
   defp format_number(nil, _), do: nil
 
   defp format_number(value, "percentage") do
@@ -270,6 +273,7 @@ defmodule TdAuditWeb.EmailView do
   defp translate("records"), do: "Record Count"
   defp translate("errors"), do: "Error Count"
   defp translate("result"), do: "Result"
+  defp translate("message"), do: "Message"
 
   defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
     case TdCache.StructureCache.get(id) do

@@ -120,10 +120,10 @@ defmodule TdAudit.Subscriptions.Scope do
 
   defp status_validator(:status, status) do
     status
-    |> Enum.all?(&Enum.member?(["fail", "success", "warn"], &1))
+    |> Enum.all?(&Enum.member?(["fail", "success", "warn", "error"], &1))
     |> case do
       true -> []
-      _ -> [status: {"is invalid", [validation: :inclusion, enum: ["fail", "success", "warn"]]}]
+      _ -> [status: {"is invalid", [validation: :inclusion, enum: ["fail", "success", "warn", "error"]]}]
     end
   end
 
