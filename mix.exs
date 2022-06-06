@@ -53,7 +53,7 @@ defmodule TdAudit.Mixfile do
       {:plug_cowboy, "~> 2.1"},
       {:phoenix_ecto, "~> 4.0"},
       {:phoenix_html, "~> 2.11"},
-      {:ecto_sql, "~> 3.1"},
+      {:ecto_sql, "~> 3.8"},
       {:postgrex, "~> 0.16.3"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
