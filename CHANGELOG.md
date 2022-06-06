@@ -5,6 +5,7 @@
 ### Added
 
 - [TD-3633] Take into account ruleless implementations in events and subscriptions
+- [TD-4655] Support subscribing errored quality execution
 
 ## [4.44.0] 2022-05-23
 
