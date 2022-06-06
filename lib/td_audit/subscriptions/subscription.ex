@@ -27,7 +27,7 @@ defmodule TdAudit.Subscriptions.Subscription do
   def changeset(%__MODULE__{} = subscription, attrs) do
     subscription
     |> cast(attrs, [:periodicity, :last_event_id])
-    |> cast_embed(:scope, with: &Scope.changeset/2)
+    |> cast_embed(:scope, with: &Scope.changeset/2, required: true)
     |> common_changeset()
   end
 
@@ -39,7 +39,7 @@ defmodule TdAudit.Subscriptions.Subscription do
 
   defp common_changeset(changeset) do
     changeset
-    |> validate_required([:scope, :periodicity, :last_event_id])
+    |> validate_required([:periodicity, :last_event_id])
     |> validate_inclusion(:periodicity, ["daily", "minutely", "hourly"])
     |> unique_constraint([:scope, :subscriber_id])
   end
