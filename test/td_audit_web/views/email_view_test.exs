@@ -47,7 +47,8 @@ defmodule TdAuditWeb.EmailViewTest do
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
 
-    assert email =~ # credo:disable-for-next-line
+    # credo:disable-for-next-line
+    assert email =~
              ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{rule_name} : #{implementation_key}\n*\s*</a>|
   end
 

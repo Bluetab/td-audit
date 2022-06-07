@@ -19,7 +19,7 @@ defmodule TdAudit.Notifications.NotificationsReadByRecipients do
     %__MODULE__{}
     |> cast(%{recipient_id: recipient_id}, [:recipient_id])
     |> put_assoc(:notification, notification)
-    |> validate_required([:recipient_id])
+    |> validate_required(:recipient_id)
     |> unique_constraint([:notification_id, :recipient_id])
   end
 end
