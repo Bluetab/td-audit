@@ -29,7 +29,7 @@ defmodule TdAudit.Notifications.Status do
   defp cast_notification(%Changeset{} = changeset) do
     case Changeset.get_field(changeset, :notification_id) do
       nil -> cast_assoc(changeset, :notification, with: &Notification.changeset/2, required: true)
-      _id -> validate_required(changeset, [:notification_id])
+      _id -> validate_required(changeset, :notification_id)
     end
   end
 end

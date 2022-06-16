@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Update `td_cache` and `td_df_lib` dependencies
+
 ## [4.45.0] 2022-06-06
 
 ### Added

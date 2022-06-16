@@ -55,9 +55,7 @@ defmodule TdAuditWeb.EventView do
     "#{name} : #{implementation_key}"
   end
 
-  def resource_name(%{
-    payload: %{"implementation_key" => implementation_key}
-  }) do
+  def resource_name(%{payload: %{"implementation_key" => implementation_key}}) do
     "#{implementation_key}"
   end
 
@@ -101,11 +99,8 @@ defmodule TdAuditWeb.EventView do
   def path(%{resource_type: "concept", event: event, resource_id: resource_id})
       when event in ["relation_created", "relation_deleted", "relation_deprecated"] do
     case ConceptCache.get(resource_id, :business_concept_version_id) do
-      {:ok, version} ->
-        "/concepts/#{resource_id}/versions/#{version}"
-
-      _ ->
-        nil
+      {:ok, version} -> "/concepts/#{resource_id}/versions/#{version}"
+      _ -> nil
     end
   end
 
@@ -113,24 +108,15 @@ defmodule TdAuditWeb.EventView do
     "/concepts/#{resource_id}/versions/#{id}"
   end
 
-  def path(%{
-        resource_type: "rule_result",
-        payload: %{"implementation_id" => implementation_id}
-      }) do
+  def path(%{resource_type: "rule_result", payload: %{"implementation_id" => implementation_id}}) do
     "/implementations/#{implementation_id}/results"
   end
 
-  def path(%{
-        resource_type: "implementation",
-        resource_id: resource_id
-      }) do
+  def path(%{resource_type: "implementation", resource_id: resource_id}) do
     "/implementations/#{resource_id}"
   end
 
-  def path(%{
-        resource_type: "rule",
-        resource_id: resource_id
-      }) do
+  def path(%{resource_type: "rule", resource_id: resource_id}) do
     "/rules/#{resource_id}"
   end
 

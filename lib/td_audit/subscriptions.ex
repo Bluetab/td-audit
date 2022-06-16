@@ -82,7 +82,7 @@ defmodule TdAudit.Subscriptions do
     %Subscription{last_event_id: last_event_id}
     |> Subscription.changeset(params)
     |> Changeset.put_assoc(:subscriber, subscriber)
-    |> Changeset.validate_required([:subscriber])
+    |> Changeset.validate_required(:subscriber)
     |> Repo.insert()
     |> preload_subscriber()
   end
