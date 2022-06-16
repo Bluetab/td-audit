@@ -28,6 +28,6 @@ defmodule TdAudit.Notifications.Notification do
   def changeset(%__MODULE__{} = subscription, params) do
     subscription
     |> cast(params, [:subscription_id, :recipient_ids])
-    |> validate_required([:recipient_ids])
+    |> validate_required(:recipient_ids)
   end
 end

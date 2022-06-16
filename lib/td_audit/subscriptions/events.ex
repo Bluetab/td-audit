@@ -125,7 +125,6 @@ defmodule TdAudit.Subscriptions.Events do
            resource_id: resource_id
          } = scope
        ) do
-
     query
     |> where([e], e.event in ^events)
     |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
