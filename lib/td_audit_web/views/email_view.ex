@@ -128,7 +128,7 @@ defmodule TdAuditWeb.EmailView do
       user: user_name(event),
       name: EventView.resource_name(event),
       tag: resource_tag(event),
-      description: description(event),
+      comment: comment(event),
       domains: domain_path(event),
       uri: uri(event)
     )
@@ -288,9 +288,9 @@ defmodule TdAuditWeb.EmailView do
 
   defp resource_tag(_), do: nil
 
-  defp description(%{payload: %{"description" => description}}), do: description
+  defp comment(%{payload: %{"comment" => comment}}), do: comment
 
-  defp description(_), do: nil
+  defp comment(_), do: nil
 
   defp grant_date(%{payload: %{"start_date" => start_date}}, "start_date"), do: start_date
 
