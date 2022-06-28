@@ -106,6 +106,8 @@ defmodule TdAudit.Notifications.Email do
   end
 
   defp template(["implementation_created"]), do: :implementations
+  defp template(["implementation_status_updated"]), do: :implementations
+
   defp template(["ingest_sent_for_approval"]), do: :ingests_pending
 
   defp template(["comment_created"]), do: :comments

@@ -10,6 +10,25 @@ defmodule TdAudit.Subscriptions.Scope do
   alias Ecto.Changeset
   alias TdAudit.Subscriptions.Filters
 
+  @valid_rule_result_statuses ["fail", "success", "warn", "error"]
+  @valid_jobs_statuses [
+    "job_status_started",
+    "job_status_pending",
+    "job_status_failed",
+    "job_status_succeeded",
+    "job_status_warning",
+    "job_status_info"
+  ]
+
+  @valid_implementation_statuses [
+    "draft",
+    "pending_approval",
+    "rejected",
+    "published",
+    "versioned",
+    "deprecated"
+  ]
+
   @primary_key false
 
   embedded_schema do
@@ -60,76 +79,35 @@ defmodule TdAudit.Subscriptions.Scope do
   defp validate_status(%Changeset{} = changeset, %{} = params) do
     case get_field(changeset, :events) do
       ["rule_result_created"] ->
-        changeset
-        |> cast(params, [:status])
-        |> validate_required(:status)
-        |> update_change(:status, &sort_uniq/1)
-        |> validate_length(:status, min: 1)
-        |> validate_change(:status, &status_validator/2)
+        validate_status_changeset(changeset, params, @valid_rule_result_statuses)
+
+      ["implementation_status_updated"] ->
+        validate_status_changeset(changeset, params, @valid_implementation_statuses)
 
       ["status_changed"] ->
-        changeset
-        |> cast(params, [:status])
-        |> validate_required(:status)
-        |> update_change(:status, &sort_uniq/1)
-        |> validate_length(:status, min: 1)
-        |> validate_change(:status, &jobs_status_validator/2)
+        validate_status_changeset(changeset, params, @valid_jobs_statuses)
 
       _ ->
         changeset
     end
   end
 
-  defp jobs_status_validator(:status, status) do
-    status
-    |> Enum.all?(
-      &Enum.member?(
-        [
-          "job_status_started",
-          "job_status_pending",
-          "job_status_failed",
-          "job_status_succeeded",
-          "job_status_warning",
-          "job_status_info"
-        ],
-        &1
-      )
-    )
-    |> case do
-      true ->
-        []
-
-      _ ->
-        [
-          status:
-            {"is invalid",
-             [
-               validation: :inclusion,
-               enum: [
-                 "job_status_started",
-                 "job_status_pending",
-                 "job_status_failed",
-                 "job_status_succeeded",
-                 "job_status_warning",
-                 "job_status_info"
-               ]
-             ]}
-        ]
-    end
+  defp validate_status_changeset(changeset, params, valid_statuses) do
+    changeset
+    |> cast(params, [:status])
+    |> validate_required(:status)
+    |> update_change(:status, &sort_uniq/1)
+    |> validate_length(:status, min: 1)
+    |> validate_change(:status, fn _, status ->
+      status_validator(status, valid_statuses)
+    end)
   end
 
-  defp status_validator(:status, status) do
-    status
-    |> Enum.all?(&Enum.member?(["fail", "success", "warn", "error"], &1))
-    |> case do
-      true ->
-        []
-
-      _ ->
-        [
-          status:
-            {"is invalid", [validation: :inclusion, enum: ["fail", "success", "warn", "error"]]}
-        ]
+  defp status_validator(status, valid_statuses) do
+    if Enum.all?(status, &Enum.member?(valid_statuses, &1)) do
+      []
+    else
+      [status: {"is invalid", [validation: :inclusion, enum: valid_statuses]}]
     end
   end
 

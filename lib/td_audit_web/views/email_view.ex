@@ -15,6 +15,8 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("implementation_status_updated.html", event), do: render_implementation(event)
+
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
@@ -118,6 +120,17 @@ defmodule TdAuditWeb.EmailView do
       name: EventView.resource_name(event),
       event_name: event_name(event),
       domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
+  defp render_implementation(%{event: %{payload: %{"status" => status}} = event}) do
+    render("implementation_status_changed.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      status: status,
       uri: uri(event)
     )
   end
@@ -234,6 +247,7 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "concept_published"}), do: "Concept Published"
   defp event_name(%{event: "delete_concept_draft"}), do: "Draft Deleted"
   defp event_name(%{event: "implementation_created"}), do: "Implementation Created"
+  defp event_name(%{event: "implementation_status_updated"}), do: "Implementation Status Updated"
   defp event_name(%{event: "new_concept_draft"}), do: "New Concept Draft"
   defp event_name(%{event: "relation_created"}), do: "Created Relation"
   defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
