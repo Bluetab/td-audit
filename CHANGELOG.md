@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+## Changed
+
+- [TD-4176] Changed description by comment in tag email template
+
 ## [4.46.0] 2022-06-20
 
 ### Changed
