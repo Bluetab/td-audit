@@ -204,6 +204,7 @@ defmodule TdAuditWeb.EmailView do
     Number.Delimit.number_to_delimited(value)
   end
 
+  defp user_name(%{user_id: 0}), do: "system"
   defp user_name(%{user: %{full_name: full_name}}), do: full_name
   defp user_name(_), do: nil
 
