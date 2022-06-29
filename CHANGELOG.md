@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-4921] Notifications for implementation status updates
+
 ## [4.46.0] 2022-06-20
 
 ### Changed
