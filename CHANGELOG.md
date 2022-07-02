@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## Changed
+
+- [TD-4176] Changed description by comment in tag email template
+
 ### Added
 
 - [TD-4921] Notifications for implementation status updates
