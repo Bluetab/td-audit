@@ -204,6 +204,36 @@ defmodule TdAudit.Subscriptions.EventsTest do
     end
   end
 
+  describe "subscription_events/1 for implementation status updated subscription" do
+    setup do
+      scope =
+        build(:scope,
+          events: ["implementation_status_updated"],
+          status: ["published", "rejected", "submitted", "draft"],
+          resource_type: "domain",
+          resource_id: 19_188
+        )
+
+      [subscription: insert(:subscription, scope: scope)]
+    end
+
+    test "returns new events", %{subscription: subscription} do
+      payload =
+        string_params_for(:payload,
+          event: "implementation_status_updated",
+          status: "rejected",
+          domain_ids: [19_188]
+        )
+
+      events =
+        Enum.map(1..3, fn _ ->
+          insert(:event, event: "implementation_status_updated", payload: payload)
+        end)
+
+      assert Events.subscription_events(subscription, 1_000_000) == events
+    end
+  end
+
   describe "subscription_events/1 for ingest_sent_for_approval subscription" do
     setup do
       scope =

@@ -28,6 +28,34 @@ defmodule TdAudit.Subscriptions.Events do
     |> filter_by_scope(scope)
   end
 
+  # filter for implementation status updated
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["implementation_status_updated"],
+           resource_type: "domain",
+           resource_id: resource_id
+         } = scope
+       ),
+       do: filter_by_scope(query, %{scope | resource_type: "domains", resource_id: [resource_id]})
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["implementation_status_updated"] = events,
+           status: status,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
   # filter for business glossary comments
   defp filter_by_scope(
          query,

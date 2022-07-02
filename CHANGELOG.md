@@ -6,6 +6,10 @@
 
 - [TD-4176] Changed description by comment in tag email template
 
+### Added
+
+- [TD-4921] Notifications for implementation status updates
+
 ## [4.46.0] 2022-06-20
 
 ### Changed

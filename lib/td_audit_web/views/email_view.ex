@@ -15,6 +15,8 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("implementation_status_updated.html", event), do: render_implementation(event)
+
   def render("ingest_sent_for_approval.html", %{event: event}) do
     render("ingest_sent_for_approval.html",
       user: user_name(event),
@@ -122,6 +124,17 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  defp render_implementation(%{event: %{payload: %{"status" => status}} = event}) do
+    render("implementation_status_changed.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      status: status,
+      uri: uri(event)
+    )
+  end
+
   defp render_tag(%{event: event}) do
     render("tag.html",
       event_name: event_name(event),
@@ -191,6 +204,7 @@ defmodule TdAuditWeb.EmailView do
     Number.Delimit.number_to_delimited(value)
   end
 
+  defp user_name(%{user_id: 0}), do: "system"
   defp user_name(%{user: %{full_name: full_name}}), do: full_name
   defp user_name(_), do: nil
 
@@ -227,17 +241,18 @@ defmodule TdAuditWeb.EmailView do
 
   defp host_name, do: Application.fetch_env!(:td_audit, :host_name)
 
-  defp event_name(%{event: "concept_rejected"}), do: "Concept Rejected"
-  defp event_name(%{event: "concept_submitted"}), do: "Concept Sent For Approval"
-  defp event_name(%{event: "concept_rejection_canceled"}), do: "Rejection Canceled"
-  defp event_name(%{event: "concept_deprecated"}), do: "Concept Deprecated"
-  defp event_name(%{event: "concept_published"}), do: "Concept Published"
-  defp event_name(%{event: "delete_concept_draft"}), do: "Draft Deleted"
-  defp event_name(%{event: "implementation_created"}), do: "Implementation Created"
-  defp event_name(%{event: "new_concept_draft"}), do: "New Concept Draft"
-  defp event_name(%{event: "relation_created"}), do: "Created Relation"
-  defp event_name(%{event: "relation_deleted"}), do: "Deleted Relation"
-  defp event_name(%{event: "update_concept_draft"}), do: "Concept Draft Updated"
+  defp event_name(%{event: "concept_rejected"}), do: "Concept rejected"
+  defp event_name(%{event: "concept_submitted"}), do: "Concept sent for approval"
+  defp event_name(%{event: "concept_rejection_canceled"}), do: "Rejection canceled"
+  defp event_name(%{event: "concept_deprecated"}), do: "Concept deprecated"
+  defp event_name(%{event: "concept_published"}), do: "Concept published"
+  defp event_name(%{event: "delete_concept_draft"}), do: "Draft deleted"
+  defp event_name(%{event: "implementation_created"}), do: "Implementation created"
+  defp event_name(%{event: "implementation_status_updated"}), do: "Implementation status updated"
+  defp event_name(%{event: "new_concept_draft"}), do: "New concept draft"
+  defp event_name(%{event: "relation_created"}), do: "Created relation"
+  defp event_name(%{event: "relation_deleted"}), do: "Deleted relation"
+  defp event_name(%{event: "update_concept_draft"}), do: "Concept draft updated"
   defp event_name(%{event: "relation_deprecated"}), do: "Relation deprecated"
   defp event_name(%{event: "structure_note_deleted"}), do: "Structure note deleted"
   defp event_name(%{event: "structure_note_deprecated"}), do: "Structure note deprecated"
