@@ -3,8 +3,8 @@ defmodule TdAudit.Auth.Plug.SessionExists do
   A plug to check that the access token has not been revoked.
   """
 
-  alias TdCache.SessionCache
   alias TdAudit.Auth.ErrorHandler
+  alias TdCache.SessionCache
 
   def init(opts), do: opts
 
