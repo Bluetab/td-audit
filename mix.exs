@@ -63,8 +63,11 @@ defmodule TdAudit.Mixfile do
       {:bamboo, "~> 2.2.0"},
       {:bamboo_phoenix, "~> 1.0"},
       {:bamboo_smtp, "~> 4.1.0"},
+      # https://github.com/tolbrino/hut/issues/18
+      {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:tzdata, "~> 1.1"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.45.0"},
+      {:td_cache,
+       git: "https://github.com/Bluetab/td-cache.git", tag: "4.48.0", override: true},
       {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", tag: "4.46.0"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},
