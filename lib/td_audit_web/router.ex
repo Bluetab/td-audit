@@ -6,12 +6,12 @@ defmodule TdAuditWeb.Router do
   end
 
   pipeline :api do
-    plug(TdAudit.Auth.Pipeline.Unsecure)
-    plug(:accepts, ["json"])
+    plug TdAudit.Auth.Pipeline.Unsecure
+    plug :accepts, ["json"]
   end
 
-  pipeline :api_secure do
-    plug(TdAudit.Auth.Pipeline.Secure)
+  pipeline :api_auth do
+    plug TdAudit.Auth.Pipeline.Secure
   end
 
   scope "/api/swagger" do
@@ -19,13 +19,13 @@ defmodule TdAuditWeb.Router do
   end
 
   scope "/api", TdAuditWeb do
-    pipe_through(:api)
+    pipe_through :api
     get("/ping", PingController, :ping)
     post("/echo", EchoController, :echo)
   end
 
   scope "/api", TdAuditWeb do
-    pipe_through([:api, :api_secure])
+    pipe_through [:api, :api_auth]
     resources("/events", EventController, only: [:index, :show])
     resources("/events/search", EventSearchController, only: [:create])
     resources("/subscribers", SubscriberController, except: [:new, :edit, :update])

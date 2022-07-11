@@ -1,8 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-3614] Support for access token revocation
+
 ## [4.47.0] 2022-07-04
 
-## Changed
+### Changed
 
 - [TD-4176] Changed description by comment in tag email template
 
