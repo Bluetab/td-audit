@@ -81,7 +81,7 @@ defmodule TdAudit.NotificationsTest do
                 max_event_id: ^event_id,
                 notifications: _created_notification_ids,
                 no_subscription_events: [%{id: ^event_id}],
-                no_subscription_events_recipient_ids: %{^event_id => [1]},
+                no_subscription_events_recipient_ids: %{^event_id => [1]}
               }} = Notifications.create(periodicity: "minutely")
     end
 

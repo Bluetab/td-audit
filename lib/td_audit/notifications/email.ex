@@ -9,7 +9,6 @@ defmodule TdAudit.Notifications.Email do
   alias TdDfLib.RichText
 
   def create(%Notification{} = notification) do
-
     template = template(notification)
     create(notification, template)
   end

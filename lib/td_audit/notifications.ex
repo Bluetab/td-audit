@@ -20,7 +20,7 @@ defmodule TdAudit.Notifications do
 
   # Array with all events that not need subscription. Are self reported
   @self_reported_events [
-    "grant_approval",
+    "grant_approval"
   ]
 
   def list_notifications(user_id) do
@@ -122,7 +122,10 @@ defmodule TdAudit.Notifications do
         |> Multi.run(:subscription_events, &subscription_events/2)
         |> Multi.run(:subscription_events_recipient_ids, &subscription_events_recipient_ids/2)
         |> Multi.run(:no_subscription_events, &no_subscription_events/2)
-        |> Multi.run(:no_subscription_events_recipient_ids, &no_subscription_events_recipient_ids/2)
+        |> Multi.run(
+          :no_subscription_events_recipient_ids,
+          &no_subscription_events_recipient_ids/2
+        )
         |> Multi.run(:notifications, &bulk_insert_notifications/2)
         |> Repo.transaction()
     end
@@ -274,8 +277,7 @@ defmodule TdAudit.Notifications do
   end
 
   defp no_subscription_events(_repo, %{max_event_id: max_event_id}) do
-
-    events_notifications = from "notifications_events", select: [:event_id]
+    events_notifications = from("notifications_events", select: [:event_id])
 
     not_notified_events =
       Event
@@ -288,18 +290,19 @@ defmodule TdAudit.Notifications do
   end
 
   defp no_subscription_events_recipient_ids(
-      _repo,
-      %{no_subscription_events: no_subscription_events}
-    ) do
-
+         _repo,
+         %{no_subscription_events: no_subscription_events}
+       ) do
     {
       :ok,
       Enum.reduce(
-        no_subscription_events, %{}, fn e, acc ->
+        no_subscription_events,
+        %{},
+        fn e, acc ->
           Map.put(acc, e.id, no_subscription_recipient_ids(e))
         end
       )
-      }
+    }
   end
 
   defp no_subscription_recipient_ids(%{event: "grant_approval"} = events) do
@@ -310,22 +313,23 @@ defmodule TdAudit.Notifications do
          subscription_events_recipient_ids: subscription_events_recipient_ids,
          no_subscription_events_recipient_ids: no_subscription_events_recipient_ids
        }) do
-
     # Event recipient ids with subcriptable and unsubcriptable envents
-    events_recipient_ids = Map.merge(
-      subscription_events_recipient_ids,
-      %{
-        nil => no_subscription_events_recipient_ids
-      })
+    events_recipient_ids =
+      Map.merge(
+        subscription_events_recipient_ids,
+        %{
+          nil => no_subscription_events_recipient_ids
+        }
+      )
 
-      events_recipient_ids
-    |> Enum.flat_map(
-      fn
-        {%Subscription{id: subscription_id}, recipients} ->
-          info_events(subscription_id, group_by_common_events(recipients))
-        {nil, recipients} -> info_events(nil, group_by_common_events(recipients))
-      end
-    )
+    events_recipient_ids
+    |> Enum.flat_map(fn
+      {%Subscription{id: subscription_id}, recipients} ->
+        info_events(subscription_id, group_by_common_events(recipients))
+
+      {nil, recipients} ->
+        info_events(nil, group_by_common_events(recipients))
+    end)
     |> Enum.reduce_while(%{}, &reduce_changesets/2)
     |> case do
       {:error, error} ->

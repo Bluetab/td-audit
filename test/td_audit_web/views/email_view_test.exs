@@ -160,24 +160,23 @@ defmodule TdAuditWeb.EmailViewTest do
         event: grant_approval_event,
         grant_request: grant_request,
         comment: "Test approval comment",
-        status: "rejected",
+        status: "rejected"
       )
 
-      assert EmailView.render(
-        "#{grant_approval_event}.html",
-        %{
-          event:
-            build(:event,
-              resource_type: "grant_requests",
-              resource_id: grant_request_id,
-              event: grant_approval_event,
-              payload: payload
-            )
-        }
-      )
-      |> Safe.to_iodata()
-      |> IO.iodata_to_binary() =~ ~r|<a href=".*/grant_requests/#{grant_request_id}"|
-
+    assert EmailView.render(
+             "#{grant_approval_event}.html",
+             %{
+               event:
+                 build(:event,
+                   resource_type: "grant_requests",
+                   resource_id: grant_request_id,
+                   event: grant_approval_event,
+                   payload: payload
+                 )
+             }
+           )
+           |> Safe.to_iodata()
+           |> IO.iodata_to_binary() =~ ~r|<a href=".*/grant_requests/#{grant_request_id}"|
   end
 
   test "note event: renders note link: /structures/<data_structure_id>/notes" do
