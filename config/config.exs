@@ -3,7 +3,7 @@
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
-use Mix.Config
+import Config
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 config :td_audit, :time_zone, System.get_env("TZ", "Etc/UTC")
@@ -38,7 +38,6 @@ config :phoenix, :json_library, Jason
 config :phoenix_swagger, :json_library, Jason
 
 config :td_audit, TdAudit.Auth.Guardian,
-  # optional
   allowed_algos: ["HS512"],
   issuer: "tdauth",
   ttl: {1, :hours},
