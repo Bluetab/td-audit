@@ -7,6 +7,7 @@ defmodule TdAudit.Notifications do
 
   alias Ecto.Multi
   alias TdAudit.Audit
+  alias TdAudit.Audit.Event
   alias TdAudit.Notifications.Email
   alias TdAudit.Notifications.Notification
   alias TdAudit.Notifications.NotificationsReadByRecipients
@@ -16,6 +17,11 @@ defmodule TdAudit.Notifications do
   alias TdAudit.Subscriptions.Events
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.UserCache
+
+  # Array with all events that not need subcription. Are self reported
+  @self_reported_events [
+    "grant_approval",
+  ]
 
   def list_notifications(user_id) do
     user_id
@@ -115,6 +121,8 @@ defmodule TdAudit.Notifications do
         |> Multi.run(:update_last_event_id, &update_last_event_id/2)
         |> Multi.run(:subscription_events, &subscription_events/2)
         |> Multi.run(:subscription_events_recipient_ids, &subscription_events_recipient_ids/2)
+        |> Multi.run(:no_subcription_events, &no_subcription_events/2)
+        |> Multi.run(:no_subscription_events_recipient_ids, &no_subscription_events_recipient_ids/2)
         |> Multi.run(:notifications, &bulk_insert_notifications/2)
         |> Repo.transaction()
     end
@@ -265,13 +273,59 @@ defmodule TdAudit.Notifications do
     Subscriptions.list_recipient_ids(subscription, subscription_events[id])
   end
 
+  defp no_subcription_events(_repo, %{max_event_id: max_event_id}) do
+
+    events_notifications = from "notifications_events", select: [:event_id]
+
+    not_notified_events =
+      Event
+      |> where([e], e.event in @self_reported_events)
+      |> where([e], e.id <= ^max_event_id)
+      |> where([e], e.id not in subquery(events_notifications))
+      |> Repo.all()
+
+    {:ok, not_notified_events}
+  end
+
+  defp no_subscription_events_recipient_ids(
+      _repo,
+      %{no_subcription_events: no_subcription_events}
+    ) do
+
+    {
+      :ok,
+      Enum.reduce(
+        no_subcription_events, %{}, fn e, acc ->
+          Map.put(acc, e.id, no_subcription_recipient_ids(e))
+        end
+      )
+      }
+  end
+
+  defp no_subcription_recipient_ids(%{event: "grant_approval"} = events) do
+    [events.payload["grant_request"]["applicant_user"]["id"]]
+  end
+
   defp bulk_insert_notifications(_repo, %{
-         subscription_events_recipient_ids: subscription_events_recipient_ids
+         subscription_events_recipient_ids: subscription_events_recipient_ids,
+         no_subscription_events_recipient_ids: no_subscription_events_recipient_ids
        }) do
-    subscription_events_recipient_ids
-    |> Enum.flat_map(fn {%Subscription{id: subscription_id}, recipients} ->
-      info_events(subscription_id, group_by_common_events(recipients))
-    end)
+
+    # Event recipient ids with subcriptable and unsubcriptable envents
+    events_recipient_ids = Map.merge(
+      subscription_events_recipient_ids,
+      %{
+        nil => no_subscription_events_recipient_ids
+      })
+
+      events_recipient_ids
+    |> Enum.flat_map(
+      fn
+        {%Subscription{id: subscription_id}, recipients} ->
+          info_events(subscription_id, group_by_common_events(recipients))
+        {nil, recipients} -> info_events(nil, group_by_common_events(recipients))
+      end
+    )
     |> Enum.reduce_while(%{}, &reduce_changesets/2)
     |> case do
       {:error, error} ->
