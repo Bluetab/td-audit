@@ -18,7 +18,7 @@ defmodule TdAudit.Notifications do
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.UserCache
 
-  # Array with all events that not need subcription. Are self reported
+  # Array with all events that not need subscription. Are self reported
   @self_reported_events [
     "grant_approval",
   ]
@@ -121,7 +121,7 @@ defmodule TdAudit.Notifications do
         |> Multi.run(:update_last_event_id, &update_last_event_id/2)
         |> Multi.run(:subscription_events, &subscription_events/2)
         |> Multi.run(:subscription_events_recipient_ids, &subscription_events_recipient_ids/2)
-        |> Multi.run(:no_subcription_events, &no_subcription_events/2)
+        |> Multi.run(:no_subscription_events, &no_subscription_events/2)
         |> Multi.run(:no_subscription_events_recipient_ids, &no_subscription_events_recipient_ids/2)
         |> Multi.run(:notifications, &bulk_insert_notifications/2)
         |> Repo.transaction()
@@ -273,7 +273,7 @@ defmodule TdAudit.Notifications do
     Subscriptions.list_recipient_ids(subscription, subscription_events[id])
   end
 
-  defp no_subcription_events(_repo, %{max_event_id: max_event_id}) do
+  defp no_subscription_events(_repo, %{max_event_id: max_event_id}) do
 
     events_notifications = from "notifications_events", select: [:event_id]
 
@@ -289,20 +289,20 @@ defmodule TdAudit.Notifications do
 
   defp no_subscription_events_recipient_ids(
       _repo,
-      %{no_subcription_events: no_subcription_events}
+      %{no_subscription_events: no_subscription_events}
     ) do
 
     {
       :ok,
       Enum.reduce(
-        no_subcription_events, %{}, fn e, acc ->
-          Map.put(acc, e.id, no_subcription_recipient_ids(e))
+        no_subscription_events, %{}, fn e, acc ->
+          Map.put(acc, e.id, no_subscription_recipient_ids(e))
         end
       )
       }
   end
 
-  defp no_subcription_recipient_ids(%{event: "grant_approval"} = events) do
+  defp no_subscription_recipient_ids(%{event: "grant_approval"} = events) do
     [events.payload["grant_request"]["applicant_user"]["id"]]
   end
 

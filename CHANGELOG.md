@@ -5,7 +5,7 @@
 ### Changed
 
 - [TD-3614] Support for access token revocation
-- [TD-4441] Added grant_approval event as self-reported (autonotificated without subcription)
+- [TD-4441] Added grant_approval event as self-reported (autonotificated without subscription)
 
 ## [4.47.0] 2022-07-04
 
