@@ -133,6 +133,53 @@ defmodule TdAuditWeb.EmailViewTest do
            |> IO.iodata_to_binary() =~ ~r|<a href=".*/structures/#{data_structure_id}"|
   end
 
+  test "data structure event: renders data structure link: /structures/<data_structure_id>2" do
+    grant_request_id = 1234
+    grant_approval_event = "grant_approval"
+
+    grant_request = %{
+      "applicant_user" => %{
+        "id" => 3,
+        "name" => "foo user"
+      },
+      "grant_request_meta" => %{
+        "access description" => "access description test",
+        "access comment" => "test comment"
+      },
+      "grant_type" => "Data access",
+      "data_structure" => %{
+        "name" => "data structure test",
+        "id" => 1234,
+        "type" => "Database"
+      }
+    }
+
+    payload =
+      string_params_for(
+        :payload,
+        event: grant_approval_event,
+        grant_request: grant_request,
+        comment: "Test approval comment",
+        status: "rejected",
+      )
+
+      assert EmailView.render(
+        "#{grant_approval_event}.html",
+        %{
+          event:
+            build(:event,
+              resource_type: "grant_requests",
+              resource_id: grant_request_id,
+              event: grant_approval_event,
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary() =~ ~r|<a href=".*/grant_requests/#{grant_request_id}"|
+
+  end
+
   test "note event: renders note link: /structures/<data_structure_id>/notes" do
     data_structure_id = 1234
     note_event = "structure_note_pending_approval"

@@ -57,6 +57,34 @@ defmodule TdAudit.NotificationsTest do
       assert_lists_equal(user_ids, users, &(&1 == &2.id))
     end
 
+    test "create/1 creates notifications for self-reported events" do
+      domain_id = System.unique_integer([:positive])
+      user = 1
+      role = "foo"
+      event = "grant_approval"
+      CacheHelpers.put_acl_role_users(domain_id, role, [user])
+
+      payload = %{
+        "domain_ids" => [domain_id],
+        "grant_request" => %{
+          "applicant_user" => %{
+            "id" => 1
+          }
+        }
+      }
+
+      %{id: event_id} = insert(:event, event: event, payload: payload)
+      scope = %{events: [event], resource_id: domain_id, resource_type: "domains"}
+
+      assert {:ok,
+              %{
+                max_event_id: ^event_id,
+                notifications: _created_notification_ids,
+                no_subcription_events: [%{id: ^event_id}],
+                no_subscription_events_recipient_ids: %{^event_id => [1]},
+              }} = Notifications.create(periodicity: "minutely")
+    end
+
     test "create/1 create individual notification for grants events" do
       domain_id = System.unique_integer([:positive])
 
