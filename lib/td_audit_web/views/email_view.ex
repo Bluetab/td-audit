@@ -96,6 +96,7 @@ defmodule TdAuditWeb.EmailView do
   def render("structure_tag_link_updated.html", event), do: render_tag(event)
   def render("structure_tag_link_deleted.html", event), do: render_tag(event)
 
+  def render("grant_approval.html", event), do: render_grant_approval(event)
   def render("grant_created.html", event), do: render_grant(event)
   def render("grant_deleted.html", event), do: render_grant(event)
 
@@ -166,6 +167,23 @@ defmodule TdAuditWeb.EmailView do
       start_date: grant_date(event, "start_date"),
       end_date: grant_date(event, "end_date"),
       uri: uri(event)
+    )
+  end
+
+  defp render_grant_approval(%{event: event}) do
+    render("grant_approvals.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      applicant_user: grant_approval_applicant_user(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event),
+      status: grant_approval_status(event),
+      comment: grant_approval_comment(event),
+      grant_meta: grant_approval_grant_meta(event),
+      grant_type: grant_approval_grant_type(event),
+      data_structure_name: grant_approval_data_structure_name(event),
+      data_structure_type: grant_approval_data_structure_type(event),
     )
   end
 
@@ -268,6 +286,7 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "structure_tag_link_updated"}), do: "Tag linked to structure updated"
   defp event_name(%{event: "structure_tag_link_deleted"}), do: "Tag linked to structure deleted"
 
+  defp event_name(%{event: "grant_approval"}), do: "Grant request approvals"
   defp event_name(%{event: "grant_created"}),
     do: "You have been granted access to the corresponding structure"
 
@@ -310,4 +329,55 @@ defmodule TdAuditWeb.EmailView do
   defp grant_date(%{payload: %{"start_date" => start_date}}, "start_date"), do: start_date
 
   defp grant_date(%{payload: %{"end_date" => end_date}}, "end_date"), do: end_date
+
+  defp grant_approval_applicant_user(%{
+    payload: %{
+      "grant_request" => %{
+        "applicant_user" => %{
+          "name" => name
+        }
+      }
+    }
+  }), do: name
+
+  defp grant_approval_status(%{payload: %{"status" => status}}), do: status
+
+  defp grant_approval_comment(%{payload: %{"comment" => comment}}), do: comment
+
+  defp grant_approval_grant_meta(%{
+    payload: %{
+      "grant_request" => %{
+        "grant_request_meta" => meta
+      }
+    },
+  }), do: meta
+
+  defp grant_approval_grant_type(%{
+    payload: %{
+      "grant_request" => %{
+        "grant_type" => grant_type
+      }
+    }
+  }), do: grant_type
+
+  defp grant_approval_data_structure_name(%{
+    payload: %{
+      "grant_request" => %{
+        "data_structure" => %{
+          "name" => data_structure_name
+        }
+      }
+    }
+  }), do: data_structure_name
+
+  defp grant_approval_data_structure_type(%{
+    payload: %{
+      "grant_request" => %{
+        "data_structure" => %{
+          "type" => data_structure_type
+        }
+      }
+    }
+  }), do: data_structure_type
+
 end
