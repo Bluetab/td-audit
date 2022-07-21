@@ -132,6 +132,10 @@ defmodule TdAuditWeb.EventView do
     "/structures/#{id}"
   end
 
+  def path(%{resource_type: "grant_requests", resource_id: id}) do
+    "/grant_requests/#{id}"
+  end
+
   def path(%{resource_type: "jobs", payload: %{"external_id" => id}}) do
     "/jobs/#{id}"
   end
