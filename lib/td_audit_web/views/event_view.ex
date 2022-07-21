@@ -29,10 +29,6 @@ defmodule TdAuditWeb.EventView do
 
   def resource_name(%{event: "share_document", payload: %{"message" => message}}), do: message
 
-  def resource_name(%{event: "grant_approval", payload: %{"grant_request" => gr}}) do
-    "#{gr["grant_type"]} #{gr["data_structure"]["name"]} (#{gr["data_structure"]["type"]})"
-  end
-
   def resource_name(%{payload: %{"resource" => %{"name" => name, "path" => path = [_ | _]}}}) do
     full_path =
       path

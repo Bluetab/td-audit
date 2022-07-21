@@ -21,15 +21,13 @@ defmodule TdAudit.NotificationsTest do
       scope = %{events: [event], resource_id: domain_id, resource_type: "domains"}
 
       %{id: subscription_id} =
-        subscription =
         insert(:subscription, periodicity: "minutely", subscriber: subscriber, scope: scope)
 
       assert {:ok,
               %{
                 max_event_id: ^event_id,
-                notifications: _created_notification_ids,
+                notifications: notifications,
                 subscription_events: %{^subscription_id => [%{id: ^event_id}]},
-                subscription_events_recipient_ids: subscription_events_recipient_ids,
                 subscriptions: [
                   %{
                     periodicity: "minutely",
@@ -53,36 +51,61 @@ defmodule TdAudit.NotificationsTest do
                    ]}
               }} = Notifications.create(periodicity: "minutely")
 
-      assert %{^subscription => %{^event_id => user_ids}} = subscription_events_recipient_ids
-      assert_lists_equal(user_ids, users, &(&1 == &2.id))
+      assert [%{event_ids: [^event_id], recipient_ids: recipient_ids}] = Map.values(notifications)
+      assert_lists_equal(recipient_ids, users, &(&1 == &2.id))
     end
 
     test "create/1 creates notifications for self-reported events" do
       domain_id = System.unique_integer([:positive])
       user = 1
-      role = "foo"
       event = "grant_approval"
-      CacheHelpers.put_acl_role_users(domain_id, role, [user])
+      CacheHelpers.put_acl_role_users(domain_id, "foo", [user])
 
       payload = %{
-        "domain_ids" => [domain_id],
-        "grant_request" => %{
-          "applicant_user" => %{
-            "id" => 1
-          }
-        }
+        "recipient_ids" => [user],
+        "name" => "foo"
       }
 
       %{id: event_id} = insert(:event, event: event, payload: payload)
-      scope = %{events: [event], resource_id: domain_id, resource_type: "domains"}
 
       assert {:ok,
               %{
                 max_event_id: ^event_id,
-                notifications: _created_notification_ids,
-                no_subscription_events: [%{id: ^event_id}],
-                no_subscription_events_recipient_ids: %{^event_id => [1]}
+                notifications: notifications,
+                self_reported_events: [%{id: ^event_id}]
               }} = Notifications.create(periodicity: "minutely")
+
+      assert [%{event_ids: [^event_id], recipient_ids: [^user]}] = Map.values(notifications)
+    end
+
+    test "create/1 only creates self-reported notifications for not notified events" do
+      domain_id = System.unique_integer([:positive])
+      user = 1
+      event = "grant_approval"
+      CacheHelpers.put_acl_role_users(domain_id, "foo", [user])
+
+      payload = %{
+        "recipient_ids" => [user],
+        "name" => "foo"
+      }
+
+      insert(:event, event: event, payload: payload)
+      insert(:event, event: event, payload: payload)
+      insert(:event, event: event, payload: payload)
+      Notifications.create(periodicity: "minutely")
+
+      %{id: event_id} = insert(:event, event: event, payload: payload)
+      %{id: event_id_2} = insert(:event, event: event, payload: payload)
+
+      assert {:ok,
+              %{
+                max_event_id: ^event_id_2,
+                notifications: notifications,
+                self_reported_events: [%{id: ^event_id}, %{id: ^event_id_2}]
+              }} = Notifications.create(periodicity: "minutely")
+
+      assert [%{event_ids: [^event_id, ^event_id_2], recipient_ids: [^user]}] =
+               Map.values(notifications)
     end
 
     test "create/1 create individual notification for grants events" do

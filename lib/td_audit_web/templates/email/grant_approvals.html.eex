@@ -29,48 +29,6 @@
           <tbody>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Solicitante:
-              </th>
-              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @applicant_user %>
-              </td>
-            </tr>
-            <tr>
-              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Tipo de Acceso:
-              </th>
-              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @grant_type %>
-              </td>
-            </tr>
-            <tr>
-              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Estructura:
-              </th>
-              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @data_structure_name %> (<%= @data_structure_type %> )
-              </td>
-            </tr>
-            <tr>
-              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Dominios:
-              </th>
-              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @domains %>
-              </td>
-            </tr>
-            <%= for {key, value} <- @grant_meta do %>
-              <tr>
-                <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                  <%= key %>:
-                </th>
-                <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                  <%= value %>
-                </td>
-              </tr>
-            <% end %>
-            <tr>
-              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
                 Aprobador:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
