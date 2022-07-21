@@ -7,6 +7,7 @@ defmodule TdAudit.Notifications do
 
   alias Ecto.Multi
   alias TdAudit.Audit
+  alias TdAudit.Audit.Event
   alias TdAudit.Notifications.Email
   alias TdAudit.Notifications.Notification
   alias TdAudit.Notifications.NotificationsReadByRecipients
@@ -16,6 +17,9 @@ defmodule TdAudit.Notifications do
   alias TdAudit.Subscriptions.Events
   alias TdAudit.Subscriptions.Subscription
   alias TdCache.UserCache
+
+  # Array with all events that not need subscription. Are self reported
+  @self_reported_event_types ["grant_approval"]
 
   def list_notifications(user_id) do
     user_id
@@ -114,7 +118,7 @@ defmodule TdAudit.Notifications do
         |> Multi.run(:subscriptions, &list_subscriptions(&1, &2, clauses))
         |> Multi.run(:update_last_event_id, &update_last_event_id/2)
         |> Multi.run(:subscription_events, &subscription_events/2)
-        |> Multi.run(:subscription_events_recipient_ids, &subscription_events_recipient_ids/2)
+        |> Multi.run(:self_reported_events, &get_self_reported_events/2)
         |> Multi.run(:notifications, &bulk_insert_notifications/2)
         |> Repo.transaction()
     end
@@ -245,42 +249,61 @@ defmodule TdAudit.Notifications do
     {:ok, subscription_events}
   end
 
-  defp subscription_events_recipient_ids(_repo, %{
-         subscriptions: subscriptions,
-         subscription_events: subscription_events
-       }) do
-    subscription_events_recipient_ids =
-      subscriptions
-      |> Enum.filter(&Map.has_key?(subscription_events, &1.id))
-      |> Enum.map(fn s -> {s, list_recipient_ids(s, subscription_events)} end)
-      |> Map.new()
-
-    {:ok, subscription_events_recipient_ids}
-  end
-
-  defp list_recipient_ids(
-         %Subscription{id: id, subscriber: %{type: _type}} = subscription,
-         subscription_events
-       ) do
-    Subscriptions.list_recipient_ids(subscription, subscription_events[id])
+  defp get_self_reported_events(_repo, %{max_event_id: max_event_id}) do
+    {:ok,
+     Event
+     |> where([e], e.event in @self_reported_event_types)
+     |> where([e], e.id <= ^max_event_id)
+     |> join(:left, [e], ne in "notifications_events",
+       as: :notification_event,
+       on: e.id == ne.event_id
+     )
+     |> where([notification_event: ne], is_nil(ne.event_id))
+     |> Repo.all()}
   end
 
   defp bulk_insert_notifications(_repo, %{
-         subscription_events_recipient_ids: subscription_events_recipient_ids
+         subscriptions: subscriptions,
+         subscription_events: subscription_events,
+         self_reported_events: self_reported_events
        }) do
+    subscription_events_recipient_ids =
+      subscriptions
+      |> Enum.reduce(%{}, fn %{id: id} = subscription, acc ->
+        case Map.get(subscription_events, id, []) do
+          [_ | _] = event ->
+            Map.put(acc, id, Subscriptions.list_recipient_ids(subscription, event))
+
+          _ ->
+            acc
+        end
+      end)
+
+    self_reported_events_recipient_ids =
+      Enum.reduce(
+        self_reported_events,
+        %{},
+        fn %{id: event_id, payload: payload}, acc ->
+          Map.put(acc, event_id, Map.get(payload, "recipient_ids", []))
+        end
+      )
+
     subscription_events_recipient_ids
-    |> Enum.flat_map(fn {%Subscription{id: subscription_id}, recipients} ->
-      info_events(subscription_id, group_by_common_events(recipients))
+    |> Map.put(nil, self_reported_events_recipient_ids)
+    |> Enum.flat_map(fn
+      {subscription_id, recipients} ->
+        info_events(subscription_id, group_by_common_events(recipients))
     end)
     |> Enum.reduce_while(%{}, &reduce_changesets/2)
     |> case do
       {:error, error} ->
         error
 
-      notification_id_to_event_set ->
-        entries = Enum.flat_map(notification_id_to_event_set, &event_entries/1)
+      notification_id_to_events ->
+        entries = Enum.flat_map(notification_id_to_events, &event_entries/1)
         Repo.insert_all("notifications_events", entries)
-        {:ok, Map.keys(notification_id_to_event_set)}
+
+        {:ok, notification_id_to_events}
     end
   end
 
@@ -318,19 +341,23 @@ defmodule TdAudit.Notifications do
     )
   end
 
-  defp reduce_changesets({event_set, %{} = changeset, _event_set_to_recipient_ids}, %{} = acc) do
+  defp reduce_changesets({event_ids_set, %{} = changeset, _event_set_to_recipient_ids}, %{} = acc) do
     case Repo.insert(changeset) do
-      {:ok, notification_status} ->
-        {:cont, Map.put(acc, notification_status.notification_id, event_set)}
+      {:ok, %{notification_id: notification_id, notification: %{recipient_ids: recipient_ids}}} ->
+        {:cont,
+         Map.put(acc, notification_id, %{
+           event_ids: event_ids_set |> MapSet.to_list(),
+           recipient_ids: recipient_ids
+         })}
 
       error ->
         {:halt, error}
     end
   end
 
-  defp event_entries({notification_id, event_set}) do
+  defp event_entries({notification_id, %{event_ids: event_ids}}) do
     Enum.map(
-      event_set,
+      event_ids,
       fn event_id ->
         %{event_id: event_id, notification_id: notification_id}
       end

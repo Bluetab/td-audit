@@ -96,6 +96,7 @@ defmodule TdAuditWeb.EmailView do
   def render("structure_tag_link_updated.html", event), do: render_tag(event)
   def render("structure_tag_link_deleted.html", event), do: render_tag(event)
 
+  def render("grant_approval.html", event), do: render_grant_approval(event)
   def render("grant_created.html", event), do: render_grant(event)
   def render("grant_deleted.html", event), do: render_grant(event)
 
@@ -166,6 +167,16 @@ defmodule TdAuditWeb.EmailView do
       start_date: grant_date(event, "start_date"),
       end_date: grant_date(event, "end_date"),
       uri: uri(event)
+    )
+  end
+
+  defp render_grant_approval(%{event: %{payload: payload} = event}) do
+    render("grant_approvals.html",
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      uri: uri(event),
+      status: payload["status"],
+      comment: payload["comment"]
     )
   end
 

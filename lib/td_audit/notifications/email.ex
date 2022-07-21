@@ -134,6 +134,7 @@ defmodule TdAudit.Notifications.Email do
   defp template(["structure_tag_linked"]), do: :tags
   defp template(["structure_tag_link_updated"]), do: :tags
   defp template(["structure_tag_link_deleted"]), do: :tags
+  defp template(["grant_approval"]), do: :grant_approval
   defp template(["grant_created"]), do: :grants
   defp template(["grant_deleted"]), do: :grants
   defp template(["job_status_started"]), do: :sources
