@@ -29,7 +29,7 @@
           <tbody>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Aprobador:
+                Approver:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
                 <%= @user %>
@@ -37,7 +37,7 @@
             </tr>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Estado:
+                Status:
               </th>
               <td style="color: red; padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
                 <%= @status %>
@@ -45,7 +45,7 @@
             </tr>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Comentarios de aprobador:
+                Approver comments:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
                 <%= @comment %>
