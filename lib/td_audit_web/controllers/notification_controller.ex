@@ -41,22 +41,11 @@ defmodule TdAuditWeb.NotificationController do
   end
 
   def create(conn, %{
-        "notification" => %{
-          "recipients" => recipients,
-          "uri" => uri,
-          "message" => message,
-          "headers" => headers,
-          "resource" => resource
-        }
-      }) do
+        "notification" => %{} = notification}) do
     with %{user_id: user_id} <- conn.assigns[:current_resource] do
-      %{}
-      |> Map.put(:recipients, recipients)
-      |> Map.put(:uri, uri)
-      |> Map.put(:message, message)
+      notification
+      |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
       |> Map.put(:user_id, user_id)
-      |> Map.put(:headers, headers)
-      |> Map.put(:resource, resource)
       |> Dispatcher.dispatch()
 
       send_resp(conn, :accepted, "")

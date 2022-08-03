@@ -125,9 +125,9 @@ defmodule TdAudit.Notifications do
   end
 
   @doc """
-  Generate a notification when a resource is shared.
+  Generate a notification
   """
-  def share(%{recipients: recipients, user_id: user_id} = message) do
+  def generate_custom_notification(%{recipients: recipients, user_id: user_id} = message) do
     who =
       case UserCache.get(user_id) do
         {:ok, %{} = user} -> Map.take(user, [:full_name, :email])
@@ -153,33 +153,55 @@ defmodule TdAudit.Notifications do
     message
     |> Map.put(:recipient_ids, Map.keys(recipients_with_emails))
     |> Map.put(:who, who)
-    |> create_shared_notification()
+    |> create_custom_notification()
 
-    message
-    |> Map.put(:recipients, _recipient_emails = Map.values(recipients_with_emails))
-    |> Map.put(:who, who)
-    |> Email.create()
+    # Create mail for share notification message
+    case message do
+      %{resources: _resources} ->
+        message
+        |> Map.put(:recipients, _recipient_emails = Map.values(recipients_with_emails))
+        |> Map.put(:who, who)
+        |> Email.create()
+      _ -> {:ok, nil}
+    end
+
   end
 
-  defp create_shared_notification(%{
-         user_id: user_id,
-         recipient_ids: recipient_ids,
-         headers: %{"subject" => subject},
-         resource: %{"name" => name},
-         who: %{full_name: user},
-         uri: uri
-       }) do
-    message =
-      subject
-      |> String.replace("(name)", name)
-      |> String.replace("(user)", user)
-
+  defp create_custom_notification(%{ recipient_ids: recipient_ids, uri: uri} = message) do
     path =
       uri
       |> URI.parse()
       |> Map.get(:path)
 
-    event = %{
+    message =
+      message
+      |> Map.put(:path, path)
+
+    event = create_custom_notification_event(message)
+
+    Multi.new()
+      |> Multi.run(:create_event, fn _, _ -> Audit.create_event(event) end)
+      |> Multi.run(:create_notification, fn _, %{create_event: %{id: event_id}} ->
+        insert_custom_notification(recipient_ids, event_id)
+      end)
+      |> Repo.transaction()
+
+  end
+
+  # Create custom notification event for shared notifications
+  defp create_custom_notification_event(%{
+    user_id: user_id,
+    headers: %{"subject" => subject},
+    resource: %{"name" => name},
+    who: %{full_name: user},
+    path: path
+  }) do
+    message =
+      subject
+      |> String.replace("(name)", name)
+      |> String.replace("(user)", user)
+
+    %{
       service: "td_audit",
       event: "share_document",
       payload: %{
@@ -189,16 +211,30 @@ defmodule TdAudit.Notifications do
       ts: DateTime.utc_now(),
       user_id: user_id
     }
-
-    Multi.new()
-    |> Multi.run(:create_event, fn _, _ -> Audit.create_event(event) end)
-    |> Multi.run(:create_notification, fn _, %{create_event: %{id: event_id}} ->
-      insert_shared_notification(recipient_ids, event_id)
-    end)
-    |> Repo.transaction()
   end
 
-  defp insert_shared_notification(recipient_ids, event_id) do
+  # Create custom notification event for external notifications
+  defp create_custom_notification_event(%{
+    user_id: user_id,
+    headers: %{"subject" => subject},
+    message: message,
+    path: path
+  }) do
+
+    %{
+      service: "td_audit",
+      event: "external_notification",
+      payload: %{
+        subject: subject,
+        message: message,
+        path: path
+      },
+      ts: DateTime.utc_now(),
+      user_id: user_id
+    }
+  end
+
+  defp insert_custom_notification(recipient_ids, event_id) do
     changeset = notification_changeset(nil, recipient_ids, "sent")
 
     # TODO: Refactor. Use Multi.insert, avoid insert_all for a single insert

@@ -51,6 +51,7 @@ defmodule TdAudit.Audit.Event do
     case get_field(changeset, :event) do
       "login_attempt" -> changeset
       "share_document" -> changeset
+      "external_notification" -> changeset
       _ -> validate_required(changeset, [:user_id, :resource_type, :resource_id])
     end
   end
