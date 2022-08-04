@@ -157,7 +157,7 @@ defmodule TdAudit.Notifications do
 
     # Create mail for share notification message
     case message do
-      %{resources: _resources} ->
+      %{resource: _resource} ->
         message
         |> Map.put(:recipients, _recipient_emails = Map.values(recipients_with_emails))
         |> Map.put(:who, who)

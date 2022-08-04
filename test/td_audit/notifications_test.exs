@@ -214,7 +214,7 @@ defmodule TdAudit.NotificationsTest do
         |> String.replace("(user)", sender.full_name)
         |> String.replace("(name)", ~s("#{name}"))
 
-      assert {:ok, email} = Notifications.share(message)
+      assert {:ok, email} = Notifications.generate_custom_notification(message)
       assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: to} = email
       assert [email1, email2] <|> to
 
