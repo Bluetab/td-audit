@@ -2,6 +2,8 @@ defmodule TdAuditWeb.NotificationController do
   use TdAuditWeb, :controller
   use PhoenixSwagger
 
+  import Canada, only: [can?: 2]
+
   alias TdAudit.Notifications
   alias TdAudit.Notifications.Dispatcher
   alias TdAuditWeb.SwaggerDefinitions
@@ -43,7 +45,10 @@ defmodule TdAuditWeb.NotificationController do
   def create(conn, %{
         "notification" => %{} = notification
       }) do
-    with %{user_id: user_id} <- conn.assigns[:current_resource] do
+
+    with claims <- conn.assigns[:current_resource],
+         {:can, true} <- {:can, can?(claims, create({Notifications, notification}))},
+         %{user_id: user_id} <- claims do
       notification
       |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
       |> Map.put(:user_id, user_id)
