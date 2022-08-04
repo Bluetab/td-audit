@@ -282,11 +282,11 @@ defmodule TdAudit.NotificationsTest do
                      event: "external_notification",
                      payload: %{
                        "message" => "foo",
-                       "path" => "/bar",
-                       "subject" => "foo subject"
+                       "subject" => "foo subject",
+                       "path" => "http://foo/bar",
                      },
                      service: "td_audit",
-                     user_id: ^user_id
+                     user_id: ^user_id,
                    }
                  ],
                  recipient_ids: recipient_ids

@@ -218,7 +218,7 @@ defmodule TdAudit.Notifications do
          user_id: user_id,
          headers: %{"subject" => subject},
          message: message,
-         path: path
+         uri: uri
        }) do
     %{
       service: "td_audit",
@@ -226,7 +226,7 @@ defmodule TdAudit.Notifications do
       payload: %{
         subject: subject,
         message: message,
-        path: path
+        path: uri
       },
       ts: DateTime.utc_now(),
       user_id: user_id
