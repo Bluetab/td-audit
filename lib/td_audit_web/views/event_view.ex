@@ -27,7 +27,8 @@ defmodule TdAuditWeb.EventView do
     }
   end
 
-  def resource_name(%{event: "external_notification", payload: %{"message" => message}}), do: message
+  def resource_name(%{event: "external_notification", payload: %{"message" => message}}),
+    do: message
 
   def resource_name(%{event: "share_document", payload: %{"message" => message}}), do: message
 

@@ -283,10 +283,10 @@ defmodule TdAudit.NotificationsTest do
                      payload: %{
                        "message" => "foo",
                        "subject" => "foo subject",
-                       "path" => "http://foo/bar",
+                       "path" => "http://foo/bar"
                      },
                      service: "td_audit",
-                     user_id: ^user_id,
+                     user_id: ^user_id
                    }
                  ],
                  recipient_ids: recipient_ids
