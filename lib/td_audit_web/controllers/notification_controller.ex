@@ -41,7 +41,8 @@ defmodule TdAuditWeb.NotificationController do
   end
 
   def create(conn, %{
-        "notification" => %{} = notification}) do
+        "notification" => %{} = notification
+      }) do
     with %{user_id: user_id} <- conn.assigns[:current_resource] do
       notification
       |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)

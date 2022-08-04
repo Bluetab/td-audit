@@ -162,12 +162,13 @@ defmodule TdAudit.Notifications do
         |> Map.put(:recipients, _recipient_emails = Map.values(recipients_with_emails))
         |> Map.put(:who, who)
         |> Email.create()
-      _ -> {:ok, nil}
-    end
 
+      _ ->
+        {:ok, nil}
+    end
   end
 
-  defp create_custom_notification(%{ recipient_ids: recipient_ids, uri: uri} = message) do
+  defp create_custom_notification(%{recipient_ids: recipient_ids, uri: uri} = message) do
     path =
       uri
       |> URI.parse()
@@ -180,22 +181,21 @@ defmodule TdAudit.Notifications do
     event = create_custom_notification_event(message)
 
     Multi.new()
-      |> Multi.run(:create_event, fn _, _ -> Audit.create_event(event) end)
-      |> Multi.run(:create_notification, fn _, %{create_event: %{id: event_id}} ->
-        insert_custom_notification(recipient_ids, event_id)
-      end)
-      |> Repo.transaction()
-
+    |> Multi.run(:create_event, fn _, _ -> Audit.create_event(event) end)
+    |> Multi.run(:create_notification, fn _, %{create_event: %{id: event_id}} ->
+      insert_custom_notification(recipient_ids, event_id)
+    end)
+    |> Repo.transaction()
   end
 
   # Create custom notification event for shared notifications
   defp create_custom_notification_event(%{
-    user_id: user_id,
-    headers: %{"subject" => subject},
-    resource: %{"name" => name},
-    who: %{full_name: user},
-    path: path
-  }) do
+         user_id: user_id,
+         headers: %{"subject" => subject},
+         resource: %{"name" => name},
+         who: %{full_name: user},
+         path: path
+       }) do
     message =
       subject
       |> String.replace("(name)", name)
@@ -215,12 +215,11 @@ defmodule TdAudit.Notifications do
 
   # Create custom notification event for external notifications
   defp create_custom_notification_event(%{
-    user_id: user_id,
-    headers: %{"subject" => subject},
-    message: message,
-    path: path
-  }) do
-
+         user_id: user_id,
+         headers: %{"subject" => subject},
+         message: message,
+         path: path
+       }) do
     %{
       service: "td_audit",
       event: "external_notification",

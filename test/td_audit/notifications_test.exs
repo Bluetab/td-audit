@@ -248,8 +248,9 @@ defmodule TdAudit.NotificationsTest do
       uri = "http://foo/bar"
       message = "foo"
       subject = "foo subject"
+
       headers = %{
-        "subject" => subject,
+        "subject" => subject
       }
 
       recipients = [
@@ -280,10 +281,10 @@ defmodule TdAudit.NotificationsTest do
                    %TdAudit.Audit.Event{
                      event: "external_notification",
                      payload: %{
-                      "message" => "foo",
-                      "path" => "/bar",
-                      "subject" => "foo subject"
-                    },
+                       "message" => "foo",
+                       "path" => "/bar",
+                       "subject" => "foo subject"
+                     },
                      service: "td_audit",
                      user_id: ^user_id
                    }
