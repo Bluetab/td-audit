@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-5035] Support for external notifications
+
 ## [4.48.0] 2022-07-26
 
 ### Changed
