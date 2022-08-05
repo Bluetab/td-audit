@@ -144,6 +144,14 @@ defmodule TdAudit.Notifications do
 
         %{"users" => users} ->
           Enum.map(users, &Map.get(&1, "id"))
+
+        %{"users_names" => users_names} ->
+          Enum.map(users_names, fn user_name ->
+            case UserCache.get_by_user_name(user_name) do
+              {:ok, %{id: id}} -> id
+              _ -> nil
+            end
+          end)
       end)
       |> Enum.uniq()
       |> Enum.reject(&is_nil/1)
