@@ -42,12 +42,11 @@ defmodule TdAudit.Canada.Abilities do
 
     def can?(%Claims{is_admin: is_admin}, :create, {Notifications, notification}) do
       case notification do
-       %{"resource" => _resource} -> true
-       %{} -> is_admin
+        %{"resource" => _resource} -> true
+        %{} -> is_admin
       end
     end
 
     def can?(%Claims{}, _action, _entity), do: false
-
   end
 end

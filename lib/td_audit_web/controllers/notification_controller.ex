@@ -45,7 +45,6 @@ defmodule TdAuditWeb.NotificationController do
   def create(conn, %{
         "notification" => %{} = notification
       }) do
-
     with claims <- conn.assigns[:current_resource],
          {:can, true} <- {:can, can?(claims, create({Notifications, notification}))},
          %{user_id: user_id} <- claims do
