@@ -152,6 +152,14 @@ defmodule TdAudit.Notifications do
               _ -> nil
             end
           end)
+
+        %{"users_external_ids" => external_ids} ->
+          Enum.map(external_ids, fn external_id ->
+            case UserCache.get_by_external_id(external_id) do
+              {:ok, %{id: id}} -> id
+              _ -> nil
+            end
+          end)
       end)
       |> Enum.uniq()
       |> Enum.reject(&is_nil/1)
