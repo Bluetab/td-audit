@@ -4,6 +4,7 @@ defmodule TdAudit.Canada.Abilities do
   """
 
   alias TdAudit.Auth.Claims
+  alias TdAudit.Notifications
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscription
 
@@ -37,6 +38,13 @@ defmodule TdAudit.Canada.Abilities do
           subscriber: %Subscriber{identifier: identifier, type: "user"}
         }) do
       to_string(user_id) == to_string(identifier)
+    end
+
+    def can?(%Claims{is_admin: is_admin}, :create, {Notifications, notification}) do
+      case notification do
+        %{"resource" => _resource} -> true
+        %{} -> is_admin
+      end
     end
 
     def can?(%Claims{}, _action, _entity), do: false

@@ -49,8 +49,9 @@ defmodule TdAudit.Notifications.Dispatcher do
     Logger.debug("Triggering message...")
 
     message
-    |> Notifications.share()
+    |> Notifications.generate_custom_notification()
     |> case do
+      {:ok, nil} -> :ignore
       {:ok, email} -> send_email(email)
       {:error, _} -> :ignore
     end

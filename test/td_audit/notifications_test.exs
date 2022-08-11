@@ -150,7 +150,7 @@ defmodule TdAudit.NotificationsTest do
       assert %Bamboo.Email{to: [{^full_name, ^email}]} = notification_email
     end
 
-    test "share/1 shares an email with a list of recipients and creates notification" do
+    test "generate_custom_notification/1 shares an email with a list of recipients and creates notification" do
       %{id: user_id} =
         sender = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
 
@@ -214,7 +214,7 @@ defmodule TdAudit.NotificationsTest do
         |> String.replace("(user)", sender.full_name)
         |> String.replace("(name)", ~s("#{name}"))
 
-      assert {:ok, email} = Notifications.share(message)
+      assert {:ok, email} = Notifications.generate_custom_notification(message)
       assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: to} = email
       assert [email1, email2] <|> to
 
@@ -224,6 +224,67 @@ defmodule TdAudit.NotificationsTest do
                    %TdAudit.Audit.Event{
                      event: "share_document",
                      payload: %{"message" => "foo xyz and bar foo", "path" => "/bar"},
+                     service: "td_audit",
+                     user_id: ^user_id
+                   }
+                 ],
+                 recipient_ids: recipient_ids
+               }
+             ] = Notifications.list_notifications(id1)
+
+      assert [id1, id2] <|> recipient_ids
+    end
+
+    test "generate_custom_notification/1 creates notification from external source" do
+      %{id: user_id} =
+        sender = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
+
+      %{id: id1, email: email1} =
+        create_user(%{full_name: "xyz", email: "foo@bar.net", name: "bar"})
+
+      %{id: id2, email: email2} =
+        create_user(%{full_name: "xyz", email: "bar@baz.net", name: "baz"})
+
+      uri = "http://foo/bar"
+      message = "foo"
+      subject = "foo subject"
+
+      headers = %{
+        "subject" => subject
+      }
+
+      recipients = [
+        %{"id" => id1, "role" => "user"},
+        %{
+          "id" => 1,
+          "role" => "group",
+          "users" => [
+            %{"id" => id1, "role" => "user"},
+            %{"id" => id2, "role" => "user"}
+          ]
+        }
+      ]
+
+      message = %{
+        uri: uri,
+        message: message,
+        headers: headers,
+        recipients: recipients,
+        user_id: user_id
+      }
+
+      assert {:ok, nil} = Notifications.generate_custom_notification(message)
+
+      assert [
+               %TdAudit.Notifications.Notification{
+                 events: [
+                   %TdAudit.Audit.Event{
+                     event: "external_notification",
+                     payload: %{
+                       "message" => "foo",
+                       "subject" => "foo subject",
+                       "path" => "http://foo/bar"
+                     },
                      service: "td_audit",
                      user_id: ^user_id
                    }

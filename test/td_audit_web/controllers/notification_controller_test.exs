@@ -72,4 +72,110 @@ defmodule TdAuditWeb.NotificationControllerTest do
       assert [%{read_mark: true}] = Notifications.list_notifications(user_id)
     end
   end
+
+  describe "POST /notifications" do
+    @tag :admin_authenticated
+    test "Create share notification with admin user", %{
+      conn: conn,
+      claims: %{user_id: user_id}
+    } do
+      params = %{
+        "headers" => %{
+          "subject" => "foo subject"
+        },
+        "message" => "bar message",
+        "recipients" => [
+          %{
+            "id" => user_id,
+            "role" => "admin"
+          }
+        ],
+        "resource" => %{
+          "description" => nil,
+          "name" => "td_dd"
+        },
+        "uri" => "/foo/bar"
+      }
+
+      assert conn
+             |> post(Routes.notification_path(conn, :create), notification: params)
+             |> response(:accepted)
+    end
+
+    @tag :authenticated_user
+    test "Create share notification with no admin user", %{
+      conn: conn,
+      claims: %{user_id: user_id}
+    } do
+      params = %{
+        "headers" => %{
+          "subject" => "foo subject"
+        },
+        "message" => "bar message",
+        "recipients" => [
+          %{
+            "id" => user_id,
+            "role" => "admin"
+          }
+        ],
+        "resource" => %{
+          "description" => nil,
+          "name" => "td_dd"
+        },
+        "uri" => "/foo/bar"
+      }
+
+      assert conn
+             |> post(Routes.notification_path(conn, :create), notification: params)
+             |> response(:accepted)
+    end
+
+    @tag :admin_authenticated
+    test "Create external notification with admin user", %{
+      conn: conn,
+      claims: %{user_id: user_id}
+    } do
+      params = %{
+        "headers" => %{
+          "subject" => "foo subject"
+        },
+        "message" => "bar message",
+        "recipients" => [
+          %{
+            "id" => user_id,
+            "role" => "admin"
+          }
+        ],
+        "uri" => "http://foo.bar"
+      }
+
+      assert conn
+             |> post(Routes.notification_path(conn, :create), notification: params)
+             |> response(:accepted)
+    end
+
+    @tag :authenticated_user
+    test "Create external notification with no admin user", %{
+      conn: conn,
+      claims: %{user_id: user_id}
+    } do
+      params = %{
+        "headers" => %{
+          "subject" => "foo subject"
+        },
+        "message" => "bar message",
+        "recipients" => [
+          %{
+            "id" => user_id,
+            "role" => "admin"
+          }
+        ],
+        "uri" => "http://foo.bar"
+      }
+
+      assert conn
+             |> post(Routes.notification_path(conn, :create), notification: params)
+             |> response(:forbidden)
+    end
+  end
 end
