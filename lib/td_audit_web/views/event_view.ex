@@ -27,6 +27,9 @@ defmodule TdAuditWeb.EventView do
     }
   end
 
+  def resource_name(%{event: "external_notification", payload: %{"message" => message}}),
+    do: message
+
   def resource_name(%{event: "share_document", payload: %{"message" => message}}), do: message
 
   def resource_name(%{payload: %{"resource" => %{"name" => name, "path" => path = [_ | _]}}}) do
@@ -71,6 +74,8 @@ defmodule TdAuditWeb.EventView do
   end
 
   def resource_name(_), do: nil
+
+  def path(%{event: "external_notification", payload: %{"path" => path}}), do: path
 
   def path(%{event: "share_document", payload: %{"path" => path}}), do: path
 
