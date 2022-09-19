@@ -10,4 +10,4 @@ mix deps.get
 mix compile
 mix credo --strict
 mix test
-mix sobelow --compact --exit High --ignore Config.Secrets,Config.HTTPS
+mix sobelow --private --compact --exit High --ignore Config.Secrets,Config.HTTPS
