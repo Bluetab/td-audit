@@ -236,14 +236,9 @@ defmodule TdAudit.NotificationsTest do
     end
 
     test "generate_custom_notification/1 creates notification from external source" do
-      %{id: user_id} =
-        sender = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
-
-      %{id: id1, email: email1} =
-        create_user(%{full_name: "xyz", email: "foo@bar.net", name: "bar"})
-
-      %{id: id2, email: email2} =
-        create_user(%{full_name: "xyz", email: "bar@baz.net", name: "baz"})
+      %{id: user_id} = create_user(%{full_name: "xyz", email: "xyz@bar.net", name: "xyz"})
+      %{id: id1} = create_user(%{full_name: "xyz", email: "foo@bar.net", name: "bar"})
+      %{id: id2} = create_user(%{full_name: "xyz", email: "bar@baz.net", name: "baz"})
 
       uri = "http://foo/bar"
       message = "foo"
