@@ -9,5 +9,5 @@ mix local.rebar --force
 mix deps.get
 mix compile
 mix credo --strict
-mix sobelow --compact --exit High --ignore Config.Secrets,Config.HTTPS
 mix test
+mix sobelow --compact --exit High --ignore Config.Secrets,Config.HTTPS
