@@ -11,5 +11,7 @@ else
   echo "Warning: TZDATA_DATA_DIR not set. :tzdata_release_updater will fail if /app/lib/tzdata-<VERSION>/priv/ is inside a read-only filesystem"
 fi
 
+su - app
+
 bin/td_audit eval 'Elixir.TdAudit.Release.migrate()'
 bin/td_audit start

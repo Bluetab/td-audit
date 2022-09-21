@@ -21,7 +21,7 @@ RUN apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ && \
     adduser -h /app -D app && \
     chown -R app: /app
 
-USER app
+# USER app
 
 ENV APP_NAME ${APP_NAME}
 ENTRYPOINT ["/bin/bash", "-c", "bin/start.sh"]
