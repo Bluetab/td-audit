@@ -22,10 +22,10 @@ RUN set -x && \
     rm *.tar.gz && \
     adduser -h /app -D app && \
     chown -R app: /app && \
-    if [ ! -z "${TZDATA_DATA_DIR}" ]; then \
-      mkdir -p "${TZDATA_DATA_DIR}" && \
-      cp -r /app/lib/tzdata*/priv/release_ets "${TZDATA_DATA_DIR}" && \
-      chown -R app: "${TZDATA_DATA_DIR}" ; \
+    if [ ! -z ${TZDATA_DATA_DIR} ]; then \
+      mkdir -p ${TZDATA_DATA_DIR} && \
+      cp -r /app/lib/tzdata*/priv/release_ets ${TZDATA_DATA_DIR} && \
+      chown -R app: ${TZDATA_DATA_DIR} ; \
     fi
 
 USER app
