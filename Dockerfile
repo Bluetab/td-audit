@@ -8,7 +8,6 @@ LABEL maintainer="info@truedat.io"
 ARG MIX_ENV=prod
 ARG APP_VERSION
 ARG APP_NAME
-ARG TZDATA_DATA_DIR
 
 WORKDIR /app
 
@@ -21,12 +20,7 @@ RUN set -x && \
     tar -xzf *.tar.gz && \
     rm *.tar.gz && \
     adduser -h /app -D app && \
-    chown -R app: /app && \
-    if [ ! -z ${TZDATA_DATA_DIR} ]; then \
-      mkdir -p ${TZDATA_DATA_DIR} && \
-      cp -r /app/lib/tzdata*/priv/release_ets ${TZDATA_DATA_DIR} && \
-      chown -R app: ${TZDATA_DATA_DIR} ; \
-    fi
+    chown -R app: /app
 
 USER app
 
