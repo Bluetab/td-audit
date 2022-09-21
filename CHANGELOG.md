@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+###
+
+- [TD-5182] Set tzdata data directory config using environment variable
+`TZDATA_DATA_DIR`
+
 ## [4.51.0] 2022-09-19
 
 ### Added
