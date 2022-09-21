@@ -14,7 +14,7 @@ WORKDIR /app
 COPY _build/${MIX_ENV}/*.tar.gz ./
 
 # grab su-exec for easy step-down from root
-RUN apk --no-cache add 'su-exec>=0.2' \
+RUN apk --no-cache add 'su-exec>=0.2' && \
     apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ && \
     apk --no-cache add tzdata && \
     rm -rf /var/cache/apk/* && \
