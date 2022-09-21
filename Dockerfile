@@ -20,7 +20,7 @@ RUN set -x && \
     tar -xzf *.tar.gz && \
     rm *.tar.gz && \
     adduser -h /app -D app && \
-    chown -R app: /app &&
+    chown -R app: /app
 
 USER app
 
