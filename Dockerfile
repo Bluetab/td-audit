@@ -13,8 +13,7 @@ WORKDIR /app
 
 COPY _build/${MIX_ENV}/*.tar.gz ./
 
-RUN set -x && \
-    apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ && \
+RUN apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ && \
     apk --no-cache add tzdata && \
     rm -rf /var/cache/apk/* && \
     tar -xzf *.tar.gz && \
