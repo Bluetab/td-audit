@@ -21,9 +21,9 @@ RUN apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ && \
     adduser -h /app -D app && \
     chown -R app: /app && \
     if [ ! -z "${TZDATA_DATA_DIR}" ]; then \
-      mkdir -p ${TZDATA_DATA_DIR} && \
-      cp -r /app/lib/tzdata*/release_ets ${TZDATA_DATA_DIR} && \
-      chown -R app: ${TZDATA_DATA_DIR} ; \
+      mkdir -p "${TZDATA_DATA_DIR}" && \
+      cp -r /app/lib/tzdata*/release_ets "${TZDATA_DATA_DIR}" && \
+      chown -R app: "${TZDATA_DATA_DIR}" ; \
     fi
 
 USER app
