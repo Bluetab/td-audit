@@ -1,5 +1,7 @@
 import Config
 
+config :tzdata, :data_dir, System.get_env("TZDATA_DATA_DIR")
+
 config :td_audit, :time_zone, System.get_env("TZ", "Etc/UTC")
 
 config :td_audit, TdAudit.Repo,
