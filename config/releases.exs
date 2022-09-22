@@ -1,6 +1,6 @@
 import Config
 
-config :tzdata, :data_dir, System.get_env("TZDATA_DATA_DIR")
+config :tzdata, :data_dir, "/etc/elixir_tzdata_data"
 
 config :td_audit, :time_zone, System.get_env("TZ", "Etc/UTC")
 
