@@ -14,16 +14,14 @@ WORKDIR /app
 COPY _build/${MIX_ENV}/*.tar.gz ./
 
 # grab su-exec for easy step-down from root
-RUN apk --no-cache add 'su-exec>=0.2' && \
-    apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ && \
-    apk --no-cache add tzdata && \
+RUN apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ tzdata 'su-exec>=0.2' && \
     rm -rf /var/cache/apk/* && \
     tar -xzf *.tar.gz && \
     rm *.tar.gz && \
     adduser -h /app -D app && \
     chown -R app: /app
 
-# USER app
+# Run entrypoint as root and step down to app using su-exec
 
 ENV APP_NAME ${APP_NAME}
 ENTRYPOINT ["/bin/bash", "-c", "bin/start.sh"]
