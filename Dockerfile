@@ -24,7 +24,7 @@ RUN apk --no-cache add ncurses-libs openssl bash ca-certificates libstdc++ tzdat
     cp -r /app/lib/tzdata*/priv/release_ets ${TZDATA_DATA_DIR} && \
     chown -R app: ${TZDATA_DATA_DIR}
 
-USER APP
+USER app
 
 ENV APP_NAME ${APP_NAME}
 ENTRYPOINT ["/bin/bash", "-c", "bin/start.sh"]
