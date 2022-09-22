@@ -3,6 +3,7 @@ variables:
   APP_NAME: "td_audit"
   COMPOSE_FILE: "ci/docker-compose.yml"
   COMPOSE_PROJECT_NAME: "${APP_NAME}_${CI_JOB_ID}"
+  TZDATA_DATA_DIR: "/etc/elixir_tzdata_data"
   # See also variables set in ci/env.sh
 
 stages:
@@ -43,7 +44,7 @@ publish:
   tags:
     - docker
   script:
-    - docker build --build-arg APP_NAME=${APP_NAME} --build-arg APP_VERSION=${APP_VERSION} -t ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} .
+    - docker build --build-arg APP_NAME=${APP_NAME} --build-arg APP_VERSION=${APP_VERSION} --build-arg TZDATA_DATA_DIR=${TZDATA_DATA_DIR} -t ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} .
     - docker tag ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
     - docker push ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
 
