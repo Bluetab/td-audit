@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-###
+### Added
 
 - [TD-5182] Set tzdata data directory config using environment variable
 `TZDATA_DATA_DIR`
