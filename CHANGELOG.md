@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-5182] Allow `Tzdata` data directory and autoupdate to be configured using
+  `TZ_DATA_DIR` and `TZ_AUTOUPDATE` environment variables. Disable autoupdate by
+  default.
+
 ## [4.51.0] 2022-09-19
 
 ### Added

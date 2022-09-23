@@ -62,6 +62,8 @@ services:
       GUARDIAN_SECRET_KEY: topsecret
       REDIS_HOST: redis
       REDIS_PORT: "6380"
+      TZ_DATA_DIR: /tmp
+      TZ_AUTOUPDATE: enabled
     depends_on:
       - postgres
       - redis
