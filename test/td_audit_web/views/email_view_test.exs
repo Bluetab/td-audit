@@ -106,6 +106,111 @@ defmodule TdAuditWeb.EmailViewTest do
            |> IO.iodata_to_binary() =~ ~r|<a href=".*/implementations/#{implementation_id}"|
   end
 
+  test "grant_request_group_creation event: renders grant requests links: /grant_requests/<id>" do
+    grant_request_1_id = 361
+    grant_request_2_id = 362
+
+    payload =
+      string_params_for(
+        :payload,
+        domain_ids: [2, 216],
+        id: 252,
+        requests: [
+          %{
+            id: grant_request_1_id,
+            data_structure: %{current_version: %{name: "structure_1"}}
+          },
+          %{
+            id: grant_request_2_id,
+            data_structure: %{current_version: %{name: "structure_2"}}
+          }
+        ]
+      )
+
+    binary =
+      EmailView.render(
+        "grant_request_group_creation.html",
+        %{
+          event:
+            build(:event,
+              event: "grant_request_group_creation",
+              resource_type: "grant_request_groups",
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_1_id}"|
+    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_2_id}"|
+  end
+
+  test "grant_request_approvals event: renders grant requests links: /grant_requests/<id>" do
+    grant_request_1_id = 361
+
+    payload =
+      string_params_for(
+        :payload,
+        comment: "Aprobación rol data owner",
+        domain_ids: [2],
+        grant_request: %{
+          id: grant_request_1_id,
+          data_structure: %{current_version: %{name: "structure_1"}}
+        },
+        status: "pending"
+      )
+
+    binary =
+      EmailView.render(
+        "grant_request_approval_addition.html",
+        %{
+          event:
+            build(:event,
+              event: "grant_request_approval_addition",
+              resource_type: "grant_request_approvals",
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_1_id}"|
+  end
+
+  test "grant_request_status event: renders grant requests links: /grant_requests/<id>" do
+    grant_request_1_id = 361
+
+    payload =
+      string_params_for(
+        :payload,
+        domain_ids: [2],
+        grant_request: %{
+          id: grant_request_1_id,
+          data_structure: %{current_version: %{name: "structure_1"}}
+        },
+        status: "cancelled"
+      )
+
+    binary =
+      EmailView.render(
+        "grant_request_status_cancellation.html",
+        %{
+          event:
+            build(:event,
+              event: "grant_request_status_cancellation",
+              resource_type: "grant_request_status",
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_1_id}"|
+  end
+
   test "data structure event: renders data structure link: /structures/<data_structure_id>" do
     data_structure_id = 1234
     data_structure_event = "structure_tag_linked"

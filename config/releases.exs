@@ -1,7 +1,10 @@
 import Config
 
 config :tzdata, :data_dir, System.get_env("TZ_DATA_DIR")
-config :tzdata, :autoupdate, System.get_env("TZ_AUTOUPDATE", "disabled") |> String.to_existing_atom()
+
+config :tzdata,
+       :autoupdate,
+       System.get_env("TZ_AUTOUPDATE", "disabled") |> String.to_existing_atom()
 
 config :td_audit, :time_zone, System.get_env("TZ", "Etc/UTC")
 

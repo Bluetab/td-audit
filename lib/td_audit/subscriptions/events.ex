@@ -180,6 +180,64 @@ defmodule TdAudit.Subscriptions.Events do
     |> where_content_condition(scope)
   end
 
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["grant_request_group_creation"] = events,
+           resource_type: "domain",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> join(:inner_lateral, [e], fragment("jsonb_array_elements(? -> 'domain_ids')", e.payload),
+      as: :domain_ids
+    )
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
+    # First element (->> 0) of the domain_ids list is the event resource_id
+    # domain (might be different than scope resource_id), rest of elements
+    # are ancestry.
+    |> where([e, domain_ids], fragment("(? ->> 0)::int = ?", domain_ids, ^resource_id))
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["grant_request_group_creation"] = events,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    # Flatten payload domain_ids list of lists
+    |> join(:inner_lateral, [e], fragment("jsonb_array_elements(? -> 'domain_ids')", e.payload),
+      as: :domain_ids_arrays
+    )
+    |> join(
+      :inner_lateral,
+      [e, domain_ids_arrays],
+      fragment("jsonb_array_elements(?)", domain_ids_arrays),
+      as: :domain_ids_flattened
+    )
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
+    |> where(
+      [e, _domain_ids_arrays, domain_ids_flattened],
+      fragment("?::int = ?", domain_ids_flattened, ^resource_id)
+    )
+    |> where_content_condition(scope)
+    # Distinct in case resource_id is present in multiple ancestries (domain_ids_arrays)
+    # jsonb_array_elements produces one column, named "value"
+    # select all fields that are equal (events.* + domain_ids_flattened.value, exclude domain_ids_arrays)
+    # domain_ids added to TdAudit.Audit.Event as virtual field
+    |> select([e, _domain_ids_arrays, domain_ids_flattened], %{
+      e
+      | domain_ids: domain_ids_flattened.value
+    })
+    |> distinct(true)
+  end
+
   # filter for domain-scoped events, excluding subdomains
   defp filter_by_scope(
          query,

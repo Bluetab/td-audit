@@ -62,6 +62,16 @@ defmodule TdAuditWeb.EventView do
     "#{implementation_key}"
   end
 
+  def resource_name(%{
+        resource_type: resource_type,
+        payload: %{
+          "grant_request" => %{"data_structure" => %{"current_version" => %{"name" => name}}}
+        }
+      })
+      when resource_type in ["grant_request_approvals", "grant_request_status"] do
+    name
+  end
+
   def resource_name(%{payload: %{"resource_name" => name}}), do: name
 
   def resource_name(%{payload: %{"name" => name}}), do: name
@@ -138,6 +148,19 @@ defmodule TdAuditWeb.EventView do
   end
 
   def path(%{resource_type: "grant_requests", resource_id: id}) do
+    "/grant_requests/#{id}"
+  end
+
+  def path(%{resource_type: resource_type, resource_id: id})
+      when resource_type in ["grant_request"] do
+    "/grant_requests/#{id}"
+  end
+
+  def path(%{
+        resource_type: resource_type,
+        payload: %{"grant_request" => %{"id" => id}}
+      })
+      when resource_type in ["grant_request_status", "grant_request_approvals"] do
     "/grant_requests/#{id}"
   end
 

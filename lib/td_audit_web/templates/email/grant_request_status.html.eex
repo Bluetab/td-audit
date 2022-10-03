@@ -28,12 +28,7 @@
         <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
           <tbody>
             <tr>
-              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Domain:
-              </th>
-              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @domains %>
-              </td>
+              <%= @message %>
             </tr>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
@@ -45,10 +40,10 @@
             </tr>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Comment:
+                Status:
               </th>
-              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @comment %>
+              <td style="color: red; padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= @status %>
               </td>
             </tr>
           </tbody>

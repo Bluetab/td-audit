@@ -46,7 +46,7 @@ defmodule TdAudit.Notifications.Dispatcher do
 
   @impl GenServer
   def handle_cast({:share, message}, state) do
-    Logger.debug("Triggering message...")
+    Logger.info("Triggering message...")
 
     message
     |> Notifications.generate_custom_notification()
@@ -61,7 +61,7 @@ defmodule TdAudit.Notifications.Dispatcher do
 
   @impl GenServer
   def handle_cast(periodicity, state) do
-    Logger.debug("Triggering #{periodicity} notifications...")
+    Logger.info("Triggering #{periodicity} notifications...")
 
     with {:ok, _} <- Notifications.create(periodicity: periodicity),
          {:ok, %{emails: emails}} when emails != [] <- Notifications.send_pending() do

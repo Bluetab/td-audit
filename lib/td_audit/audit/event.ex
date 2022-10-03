@@ -17,6 +17,7 @@ defmodule TdAudit.Audit.Event do
     field(:user_id, :integer)
     field(:user_name, :string)
     field(:user, :map, virtual: true)
+    field(:domain_ids, {:array, :integer}, virtual: true)
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end
