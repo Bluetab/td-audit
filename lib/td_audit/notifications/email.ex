@@ -13,7 +13,9 @@ defmodule TdAudit.Notifications.Email do
     create(notification, template)
   end
 
-  def create(%{recipients: []}), do: {:error, :no_recipients}
+  def create(%{recipients: []}) do
+    {:error, :no_recipients}
+  end
 
   def create(%{recipients: recipients, who: who, uri: uri, resource: resource} = message) do
     headers = Map.get(message, :headers, %{})
@@ -143,12 +145,19 @@ defmodule TdAudit.Notifications.Email do
   defp template(["job_status_succeeded"]), do: :sources
   defp template(["job_status_warning"]), do: :sources
   defp template(["job_status_info"]), do: :sources
+  defp template(["grant_request_group_creation"]), do: :grant_request_group_creation
+  defp template(["grant_request_approval_addition"]), do: :grant_request_approvals
+  defp template(["grant_request_approval_consensus"]), do: :grant_request_approvals
+  defp template(["grant_request_rejection"]), do: :grant_request_approvals
+  defp template(["grant_request_status_process_start"]), do: :grant_request_status
+  defp template(["grant_request_status_process_end"]), do: :grant_request_status
+  defp template(["grant_request_status_cancellation"]), do: :grant_request_status
+  defp template(["grant_request_status_failure"]), do: :grant_request_status
 
   defp template(events) when length(events) > 1 do
-    events
-    |> List.delete("relation_deprecated")
-    |> Enum.slice(0, 1)
-    |> template()
+    # Email has just one subject and one header, use the generic (:default)
+    # ones if there are multiple events in the same email
+    :default
   end
 
   defp template(_), do: :default

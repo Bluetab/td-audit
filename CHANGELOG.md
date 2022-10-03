@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+# Added
+
+- [TD-4214] Subscription to grant request workflow events
+
 ### Changed
 
 - [TD-5182] Allow `Tzdata` data directory and autoupdate to be configured using

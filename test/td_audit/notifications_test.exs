@@ -58,7 +58,7 @@ defmodule TdAudit.NotificationsTest do
     test "create/1 creates notifications for self-reported events" do
       domain_id = System.unique_integer([:positive])
       user = 1
-      event = "grant_approval"
+      [event | _] = Notifications.self_reported_event_types()
       CacheHelpers.put_acl_role_users(domain_id, "foo", [user])
 
       payload = %{
@@ -81,7 +81,7 @@ defmodule TdAudit.NotificationsTest do
     test "create/1 only creates self-reported notifications for not notified events" do
       domain_id = System.unique_integer([:positive])
       user = 1
-      event = "grant_approval"
+      [event | _] = Notifications.self_reported_event_types()
       CacheHelpers.put_acl_role_users(domain_id, "foo", [user])
 
       payload = %{

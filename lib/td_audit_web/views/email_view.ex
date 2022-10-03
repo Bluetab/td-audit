@@ -5,6 +5,32 @@ defmodule TdAuditWeb.EmailView do
 
   alias TdAuditWeb.EventView
 
+  @event_name_to_message %{
+    "grant_request_group_creation" => "Grant request for the following structures:",
+    "grant_request_approval_addition" => "Grant request approval addition",
+    "grant_request_rejection" => "Grant request rejection",
+    "grant_request_approval_consensus" => "All approvers acceptance",
+    "grant_request_status_process_start" => "Grant request is being processed",
+    "grant_request_status_process_end" => "Grant request processing finished",
+    "grant_request_status_cancellation" => "Grant request cancellation",
+    "grant_request_status_failure" => "Grant request processing failed"
+  }
+
+  defp structures_from_grant_requests(requests) do
+    Enum.map(
+      requests,
+      fn %{
+           "id" => grant_request_id,
+           "data_structure" => %{"current_version" => %{"name" => name}}
+         } ->
+        %{
+          name: name,
+          uri: uri(%{resource_type: "grant_request", resource_id: grant_request_id})
+        }
+      end
+    )
+  end
+
   def render("implementation_created.html", %{event: event}) do
     render("implementation.html",
       event_name: event_name(event),
@@ -100,6 +126,35 @@ defmodule TdAuditWeb.EmailView do
   def render("grant_created.html", event), do: render_grant(event)
   def render("grant_deleted.html", event), do: render_grant(event)
 
+  def render("grant_request_group_creation.html", %{
+        event: %{event: event_name, payload: payload} = event
+      }) do
+    render("grant_request_group_creation.html",
+      user: user_name(event),
+      structures: structures_from_grant_requests(payload["requests"]),
+      message: @event_name_to_message[event_name]
+    )
+  end
+
+  def render("grant_request_approval_addition.html", event),
+    do: render_grant_request_approval(event)
+
+  def render("grant_request_rejection.html", event), do: render_grant_request_approval(event)
+
+  def render("grant_request_approval_consensus.html", event),
+    do: render_grant_request_approval(event)
+
+  def render("grant_request_status_process_start.html", event),
+    do: render_grant_request_status(event)
+
+  def render("grant_request_status_process_end.html", event),
+    do: render_grant_request_status(event)
+
+  def render("grant_request_status_cancellation.html", event),
+    do: render_grant_request_status(event)
+
+  def render("grant_request_status_failure.html", event), do: render_grant_request_status(event)
+
   def render("job_status_started.html", event), do: render_sources(event)
   def render("job_status_pending.html", event), do: render_sources(event)
   def render("job_status_failed.html", event), do: render_sources(event)
@@ -173,6 +228,28 @@ defmodule TdAuditWeb.EmailView do
   defp render_grant_approval(%{event: %{payload: payload} = event}) do
     render("grant_approvals.html",
       user: user_name(event),
+      name: EventView.resource_name(event),
+      uri: uri(event),
+      status: payload["status"],
+      comment: payload["comment"]
+    )
+  end
+
+  defp render_grant_request_approval(%{event: %{event: event_name, payload: payload} = event}) do
+    render("grant_request_approval.html",
+      user: user_name(event),
+      message: @event_name_to_message[event_name],
+      name: EventView.resource_name(event),
+      uri: uri(event),
+      status: payload["status"],
+      comment: payload["comment"]
+    )
+  end
+
+  defp render_grant_request_status(%{event: %{event: event_name, payload: payload} = event}) do
+    render("grant_request_status.html",
+      user: user_name(event),
+      message: @event_name_to_message[event_name],
       name: EventView.resource_name(event),
       uri: uri(event),
       status: payload["status"],

@@ -19,7 +19,9 @@ defmodule TdAudit.Notifications do
   alias TdCache.UserCache
 
   # Array with all events that not need subscription. Are self reported
-  @self_reported_event_types ["grant_approval"]
+  @self_reported_event_types ["grant_request_rejection"]
+
+  def self_reported_event_types, do: @self_reported_event_types
 
   def list_notifications(user_id) do
     user_id

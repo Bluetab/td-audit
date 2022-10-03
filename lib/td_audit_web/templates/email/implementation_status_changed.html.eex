@@ -1,13 +1,13 @@
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0; border-collapse: separate;">
   <tbody>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 15px; background-color: #ffffff; border-left: 1px solid #cccccc; border-top: 1px solid #cccccc; border-right: 1px solid #cccccc; border-bottom: 0; border-top-right-radius: 5px; border-top-left-radius: 5px; height: 10px; line-height: 10px; padding: 0 15px 0 16px; mso-line-height-rule: exactly;" height="10" bgcolor="#ffffff">
+      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 15px; border-top: 1px solid #cccccc; border-bottom: 0; height: 10px; line-height: 10px; padding: 0 15px 0 16px; mso-line-height-rule: exactly;" height="10" >
         <%# There needs to be content in the cell to render in some clients %>
         &nbsp;
       </td>
     </tr>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; border-left: 1px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; background-color: #ffffff;" bgcolor="#ffffff">
+      <td style="padding: 0px; border-collapse: collapse; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; " >
         <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
           <tbody>
               <td style="vertical-align: top; padding: 0px; border-collapse: collapse; padding-right: 5px; font-size: 20px; line-height: 30px; mso-line-height-rule: exactly;">
@@ -23,7 +23,7 @@
       </td>
     </tr>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; border-left: 1px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; background-color: #ffffff; padding-top: 10px; padding-bottom: 5px;" bgcolor="#ffffff">
+      <td style="padding: 0px; border-collapse: collapse; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; padding-top: 10px; padding-bottom: 5px;" >
         <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
           <tbody>
 
@@ -66,7 +66,7 @@
       </td>
     </tr>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 5px; line-height: 5px; background-color: #ffffff; border-top: 0; border-left: 1px solid #cccccc; border-bottom: 1px solid #cccccc; border-right: 1px solid #cccccc; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; mso-line-height-rule: exactly;" height="5" bgcolor="#ffffff">
+      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 5px; line-height: 5px; border-top: 0; border-bottom: 1px solid #cccccc; mso-line-height-rule: exactly;" height="5" >
         <%# There needs to be content in the cell to render in some clients %>
         &nbsp;
       </td>

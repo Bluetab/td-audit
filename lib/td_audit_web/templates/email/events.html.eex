@@ -1,4 +1,6 @@
 <%= for %{event: event_type} = event <- @events do %>
-  <%= render("#{event_type}.html", event: event) %>
+  <div style="background-color: white; border: 1px solid green; border-radius: 5px;">
+    <%= render("#{event_type}.html", event: event) %>
+  </div>
   &nbsp;
 <% end %>
