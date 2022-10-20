@@ -1,8 +1,14 @@
 # Changelog
 
+## [4.52.1] 2022-10-20
+
+### Fixed
+
+- [TD-5253] Created index on `events(resource_type, resource_id)`
+
 ## [4.52.0] 2022-10-03
 
-# Added
+### Added
 
 - [TD-4214] Subscription to grant request workflow events
 
