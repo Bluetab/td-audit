@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-3765] Support subscribing empty dataset quality execution
+
 ## [4.52.1] 2022-10-20
 
 ### Fixed
