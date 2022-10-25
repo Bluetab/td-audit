@@ -10,7 +10,7 @@ defmodule TdAudit.Subscriptions.Scope do
   alias Ecto.Changeset
   alias TdAudit.Subscriptions.Filters
 
-  @valid_rule_result_statuses ["fail", "success", "warn", "error"]
+  @valid_rule_result_statuses ["fail", "success", "warn", "error", "empty_dataset"]
   @valid_jobs_statuses [
     "job_status_started",
     "job_status_pending",

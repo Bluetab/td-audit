@@ -22,8 +22,11 @@ defmodule TdAudit.Subscriptions.ScopeTest do
 
       assert %{errors: errors} = Scope.changeset(params)
 
-      assert {_message, [validation: :inclusion, enum: ["fail", "success", "warn", "error"]]} =
-               errors[:status]
+      assert {_message,
+              [
+                validation: :inclusion,
+                enum: ["fail", "success", "warn", "error", "empty_dataset"]
+              ]} = errors[:status]
     end
   end
 end
