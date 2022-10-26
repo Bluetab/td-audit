@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- [TD-5284] Phoenix 1.6.x
+
 ### Added
 
 - [TD-3765] Support subscribing empty dataset quality execution

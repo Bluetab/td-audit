@@ -22,7 +22,7 @@ config :td_audit, TdAudit.Repo,
   password: "postgres",
   database: "td_audit_dev",
   hostname: "postgres",
-  pool_size: 4
+  stacktrace: true
 
 config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.LocalAdapter
 
