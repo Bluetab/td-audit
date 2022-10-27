@@ -1,5 +1,5 @@
 # This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
+# and its dependencies with the aid of the Config module.
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
@@ -20,6 +20,8 @@ config :td_audit, TdAuditWeb.Endpoint,
   http: [port: 4007],
   url: [host: "localhost"],
   render_errors: [view: TdAuditWeb.ErrorView, accepts: ~w(json)]
+
+config :td_audit, TdAudit.Repo, pool_size: 4
 
 # Configures Elixir's Logger
 # set EX_LOGGER_FORMAT environment variable to override Elixir's Logger format
@@ -120,4 +122,4 @@ config :number, percentage: [delimiter: " ", separator: ",", precision: 2]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env()}.exs"
+import_config "#{config_env()}.exs"

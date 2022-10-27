@@ -9,7 +9,7 @@ defmodule TdAudit.Mixfile do
           nil -> "4.52.1-local"
           v -> v
         end,
-      elixir: "~> 1.11",
+      elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
@@ -49,13 +49,13 @@ defmodule TdAudit.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.5.0"},
+      {:phoenix, "~> 1.6.0"},
       {:plug_cowboy, "~> 2.1"},
       {:phoenix_ecto, "~> 4.0"},
-      {:phoenix_html, "~> 2.11"},
+      {:phoenix_html, "~> 3.0"},
       {:ecto_sql, "~> 3.8"},
       {:postgrex, "~> 0.16.3"},
-      {:gettext, "~> 0.11"},
+      {:gettext, "~> 0.20"},
       {:jason, "~> 1.0"},
       {:guardian, "~> 2.0"},
       {:phoenix_swagger, "~> 0.8.3"},
@@ -64,8 +64,8 @@ defmodule TdAudit.Mixfile do
       {:bamboo_phoenix, "~> 1.0"},
       {:bamboo_smtp, "~> 4.2.0"},
       {:tzdata, "~> 1.1"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.48.0", override: true},
-      {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", tag: "4.46.0"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "4.54.0"},
+      {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", tag: "4.54.0"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},
       {:quantum, "~> 3.0"},
@@ -89,7 +89,7 @@ defmodule TdAudit.Mixfile do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 end
