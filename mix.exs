@@ -6,7 +6,7 @@ defmodule TdAudit.Mixfile do
       app: :td_audit,
       version:
         case System.get_env("APP_VERSION") do
-          nil -> "4.52.1-local"
+          nil -> "4.54.0-local"
           v -> v
         end,
       elixir: "~> 1.12",
