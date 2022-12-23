@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-5369] New subscription for Remediation created
+
 ## [4.54.0] 2022-10-31
 
 ### Changed

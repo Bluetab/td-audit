@@ -52,6 +52,16 @@ defmodule TdAuditWeb.EmailView do
     )
   end
 
+  def render("remediation_created.html", %{event: %{payload: payload} = event}) do
+    render("remediation_created.html",
+      implementation_key: Map.get(payload, "implementation_key"),
+      content: Map.get(payload, "content"),
+      date: TdAudit.Helpers.shift_zone(payload["date"]),
+      domains: domain_path(event),
+      uri: uri(event)
+    )
+  end
+
   def render("rule_result_created.html", %{event: %{payload: payload} = event}) do
     values =
       ["goal", "minimum", "errors", "records", "result"]
@@ -340,6 +350,7 @@ defmodule TdAuditWeb.EmailView do
   defp event_name(%{event: "new_concept_draft"}), do: "New concept draft"
   defp event_name(%{event: "relation_created"}), do: "Created relation"
   defp event_name(%{event: "relation_deleted"}), do: "Deleted relation"
+  defp event_name(%{event: "remediation_created"}), do: "Remediation plan created"
   defp event_name(%{event: "update_concept_draft"}), do: "Concept draft updated"
   defp event_name(%{event: "relation_deprecated"}), do: "Relation deprecated"
   defp event_name(%{event: "structure_note_deleted"}), do: "Structure note deleted"

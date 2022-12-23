@@ -122,6 +122,7 @@ defmodule TdAudit.Notifications.Email do
   defp template(["new_concept_draft"]), do: :concepts
   defp template(["relation_created"]), do: :concepts
   defp template(["relation_deleted"]), do: :concepts
+  defp template(["remediation_created"]), do: :remediation_created
   defp template(["rule_result_created"]), do: :rule_results
   defp template(["rule_created"]), do: :rules
   defp template(["update_concept_draft"]), do: :concepts
