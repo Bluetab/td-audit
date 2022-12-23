@@ -309,4 +309,38 @@ defmodule TdAuditWeb.EmailViewTest do
            |> Safe.to_iodata()
            |> IO.iodata_to_binary() =~ ~r|<a href=".*/structures/#{data_structure_id}/notes"|
   end
+
+  test "remediation_created event: renders remediation link: /implementations/<implementation_id>/results/<rule_result_id>/remediation_plan" do
+    implementation_id = 123
+    rule_result_id = 456
+
+    payload =
+      string_params_for(
+        :payload,
+        domain_ids: [2],
+        implementation_id: implementation_id,
+        rule_result_id: rule_result_id,
+        implementation_key: "implementation_key",
+        date: "2000-10-10",
+        content: %{"foo" => "bar"}
+      )
+
+    binary =
+      EmailView.render(
+        "remediation_created.html",
+        %{
+          event:
+            build(:event,
+              event: "remediation_created",
+              resource_type: "remediation",
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert binary =~
+             ~r|<a href=".*/implementations/#{implementation_id}/results/#{rule_result_id}/remediation_plan"|
+  end
 end
