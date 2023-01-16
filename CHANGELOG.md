@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-5432] Search implementation rule_result_created event using the payload
+  implementation_ref instead of the implementation_id
+
 ## [4.58.0] 2022-12-27
 
 ### Added

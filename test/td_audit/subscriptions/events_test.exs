@@ -181,12 +181,14 @@ defmodule TdAudit.Subscriptions.EventsTest do
 
   describe "subscription_events/1 for rule_result_created and implementation resource_type subscription" do
     setup do
+      implementation_ref = 123
+
       scope =
         build(:scope,
           events: ["rule_result_created"],
           status: ["error"],
           resource_type: "implementation",
-          resource_id: 19_188
+          resource_id: implementation_ref
         )
 
       %{id: last_event_id} = _old_event = insert(:event, event: "rule_result_created")

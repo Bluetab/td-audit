@@ -120,8 +120,7 @@ defmodule TdAudit.Factory do
       rule_id: 28_280,
       result_type: "percentage",
       implementation_key: "ri123",
-      implementation_id: 19_188,
-      id: 123,
+      implementation_ref: 123,
       business_concept_id: "62"
     }
     |> merge_attributes(Map.delete(attrs, :event))
