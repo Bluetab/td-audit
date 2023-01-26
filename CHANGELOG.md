@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-5473]
+  - Group StructureNote field events with the same parent
+  - Added Floki for better testing email HTML generation
+
 ## [4.59.0] 2023-01-16
 
 ### Changed

@@ -75,6 +75,7 @@ defmodule TdAudit.Mixfile do
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:ex_machina, "~> 2.4", only: :test},
+      {:floki, "~> 0.34.0", only: :test},
       {:sobelow, "~> 0.11", only: [:dev, :test]}
     ]
   end

@@ -6,6 +6,7 @@ defmodule TdAudit.Notifications.Email do
 
   alias TdAudit.Notifications
   alias TdAudit.Notifications.Notification
+  alias TdAudit.Support.NoteEventsAggregator
   alias TdDfLib.RichText
 
   def create(%Notification{} = notification) do
@@ -85,6 +86,8 @@ defmodule TdAudit.Notifications.Email do
         {:error, :no_recipients}
 
       recipients ->
+        events = NoteEventsAggregator.maybe_group_events(events)
+
         email =
           new_email()
           |> put_html_layout({TdAuditWeb.LayoutView, "email.html"})
@@ -102,66 +105,61 @@ defmodule TdAudit.Notifications.Email do
 
   defp template(%Notification{events: events}) do
     events
-    |> Enum.map(& &1.event)
+    |> Enum.map(&template(&1.event))
     |> Enum.uniq()
-    |> template()
+    |> maybe_default_template()
   end
 
-  defp template(["implementation_created"]), do: :implementations
-  defp template(["implementation_status_updated"]), do: :implementations
-
-  defp template(["ingest_sent_for_approval"]), do: :ingests_pending
-
-  defp template(["comment_created"]), do: :comments
-  defp template(["concept_rejected"]), do: :concepts
-  defp template(["concept_submitted"]), do: :concepts
-  defp template(["concept_rejection_canceled"]), do: :concepts
-  defp template(["concept_deprecated"]), do: :concepts
-  defp template(["concept_published"]), do: :concepts
-  defp template(["delete_concept_draft"]), do: :concepts
-  defp template(["new_concept_draft"]), do: :concepts
-  defp template(["relation_created"]), do: :concepts
-  defp template(["relation_deleted"]), do: :concepts
-  defp template(["remediation_created"]), do: :remediation_created
-  defp template(["rule_result_created"]), do: :rule_results
-  defp template(["rule_created"]), do: :rules
-  defp template(["update_concept_draft"]), do: :concepts
-  defp template(["relation_deprecated"]), do: :relations
-  defp template(["structure_note_deleted"]), do: :notes
-  defp template(["structure_note_deprecated"]), do: :notes
-  defp template(["structure_note_draft"]), do: :notes
-  defp template(["structure_note_pending_approval"]), do: :notes
-  defp template(["structure_note_published"]), do: :notes
-  defp template(["structure_note_rejected"]), do: :notes
-  defp template(["structure_note_versioned"]), do: :notes
-  defp template(["structure_tag_linked"]), do: :tags
-  defp template(["structure_tag_link_updated"]), do: :tags
-  defp template(["structure_tag_link_deleted"]), do: :tags
-  defp template(["grant_approval"]), do: :grant_approval
-  defp template(["grant_created"]), do: :grants
-  defp template(["grant_deleted"]), do: :grants
-  defp template(["job_status_started"]), do: :sources
-  defp template(["job_status_pending"]), do: :sources
-  defp template(["job_status_failed"]), do: :sources
-  defp template(["job_status_succeeded"]), do: :sources
-  defp template(["job_status_warning"]), do: :sources
-  defp template(["job_status_info"]), do: :sources
-  defp template(["grant_request_group_creation"]), do: :grant_request_group_creation
-  defp template(["grant_request_approval_addition"]), do: :grant_request_approvals
-  defp template(["grant_request_approval_consensus"]), do: :grant_request_approvals
-  defp template(["grant_request_rejection"]), do: :grant_request_approvals
-  defp template(["grant_request_status_process_start"]), do: :grant_request_status
-  defp template(["grant_request_status_process_end"]), do: :grant_request_status
-  defp template(["grant_request_status_cancellation"]), do: :grant_request_status
-  defp template(["grant_request_status_failure"]), do: :grant_request_status
-
-  defp template(events) when length(events) > 1 do
-    # Email has just one subject and one header, use the generic (:default)
-    # ones if there are multiple events in the same email
-    :default
-  end
-
+  defp template("comment_created"), do: :comments
+  defp template("concept_deprecated"), do: :concepts
+  defp template("concept_published"), do: :concepts
+  defp template("concept_rejected"), do: :concepts
+  defp template("concept_rejection_canceled"), do: :concepts
+  defp template("concept_submitted"), do: :concepts
+  defp template("delete_concept_draft"), do: :concepts
+  defp template("new_concept_draft"), do: :concepts
+  defp template("relation_created"), do: :concepts
+  defp template("relation_deleted"), do: :concepts
+  defp template("update_concept_draft"), do: :concepts
+  defp template("grant_approval"), do: :grant_approval
+  defp template("grant_created"), do: :grants
+  defp template("grant_deleted"), do: :grants
+  defp template("grant_request_approval_addition"), do: :grant_request_approvals
+  defp template("grant_request_approval_consensus"), do: :grant_request_approvals
+  defp template("grant_request_rejection"), do: :grant_request_approvals
+  defp template("grant_request_group_creation"), do: :grant_request_group_creation
+  defp template("grant_request_status_cancellation"), do: :grant_request_status
+  defp template("grant_request_status_failure"), do: :grant_request_status
+  defp template("grant_request_status_process_end"), do: :grant_request_status
+  defp template("grant_request_status_process_start"), do: :grant_request_status
+  defp template("implementation_created"), do: :implementations
+  defp template("implementation_status_updated"), do: :implementations
+  defp template("ingest_sent_for_approval"), do: :ingests_pending
+  defp template("job_status_failed"), do: :sources
+  defp template("job_status_info"), do: :sources
+  defp template("job_status_pending"), do: :sources
+  defp template("job_status_started"), do: :sources
+  defp template("job_status_succeeded"), do: :sources
+  defp template("job_status_warning"), do: :sources
+  defp template("relation_deprecated"), do: :relations
+  defp template("remediation_created"), do: :remediation_created
+  defp template("rule_created"), do: :rules
+  defp template("rule_result_created"), do: :rule_results
+  defp template("structure_note_deleted"), do: :notes
+  defp template("structure_note_deprecated"), do: :notes
+  defp template("structure_note_draft"), do: :notes
+  defp template("structure_note_pending_approval"), do: :notes
+  defp template("structure_note_published"), do: :notes
+  defp template("structure_note_rejected"), do: :notes
+  defp template("structure_note_updated"), do: :notes
+  defp template("structure_note_versioned"), do: :notes
+  defp template("structure_tag_link_deleted"), do: :tags
+  defp template("structure_tag_link_updated"), do: :tags
+  defp template("structure_tag_linked"), do: :tags
   defp template(_), do: :default
+
+  defp maybe_default_template([template]), do: template
+  defp maybe_default_template(_), do: :default
 
   defp config, do: Application.fetch_env!(:td_audit, __MODULE__)
 

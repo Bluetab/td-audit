@@ -43,15 +43,17 @@
                 <%= @domains %>
               </td>
             </tr>
+            <%= if not Enum.empty?(@updated_children) do %>
             <tr>
-                <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                  Solicitante:
-                </th>
-                <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                  <%= @user %>
-                </td>
-              </tr>
-            </tbody>
+              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
+                Estructuras hijas:
+              </th>
+              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= Enum.join(@updated_children, ", ") %>
+              </td>
+            </tr>
+            <% end %>
+          </tbody>
         </table>
       </td>
     </tr>

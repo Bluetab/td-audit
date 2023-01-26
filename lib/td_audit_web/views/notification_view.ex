@@ -1,6 +1,7 @@
 defmodule TdAuditWeb.NotificationView do
   use TdAuditWeb, :view
 
+  alias TdAudit.Support.NoteEventsAggregator
   alias TdAuditWeb.EventView
 
   def render("index.json", %{notifications: notifications}) do
@@ -10,6 +11,7 @@ defmodule TdAuditWeb.NotificationView do
   def render("notifications.json", %{notification: notification}) do
     events =
       notification.events
+      |> NoteEventsAggregator.maybe_group_events()
       |> render_many(EventView, "event.json")
       |> Enum.map(&with_name_and_path/1)
 

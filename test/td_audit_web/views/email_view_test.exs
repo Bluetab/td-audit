@@ -1,22 +1,41 @@
 defmodule TdAuditWeb.EmailViewTest do
   use TdAuditWeb.ConnCase, async: true
   alias Phoenix.HTML.Safe
+  alias TdAudit.EmailParser
   alias TdAuditWeb.EmailView
 
   test "renders rule_result_created.html using configured timezone" do
+    implementation_id = 12_345
+
     payload =
       string_params_for(
         :payload,
         event: "rule_result_created",
-        date: "2022-02-12T11:46:39Z"
+        date: "2022-02-12T11:46:39Z",
+        implementation_id: implementation_id
       )
 
-    assert EmailView.render(
-             "rule_result_created.html",
-             %{event: build(:event, event: "rule_result_created", payload: payload)}
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary() =~ TdAudit.Helpers.shift_zone(payload["date"])
+    [{link, header, content}] =
+      EmailView.render(
+        "rule_result_created.html",
+        %{event: build(:event, event: "rule_result_created", payload: payload)}
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
+
+    shifted_date = TdAudit.Helpers.shift_zone(payload["date"])
+
+    assert link =~ ~r|.*/implementations/#{implementation_id}/results|
+    assert header == "rule_name : ri123"
+
+    assert [
+             {"Date:", ^shifted_date},
+             {"Target:", "100,00%"},
+             {"Threshold:", "80,00%"},
+             {"Result:", "70,00%"}
+           ] = content
   end
 
   test "implementation with parent rule, rule_result_created event: renders implementation result anchor: result link href and 'rule_name : implementation_key' content" do
@@ -39,17 +58,29 @@ defmodule TdAuditWeb.EmailViewTest do
         implementation_id: implementation_id
       )
 
-    email =
+    [{link, header, content}] =
       EmailView.render(
         "rule_result_created.html",
         %{event: build(:event, event: "rule_result_created", payload: payload)}
       )
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
 
-    # credo:disable-for-next-line
-    assert email =~
-             ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{rule_name} : #{implementation_key}\n*\s*</a>|
+    shifted_date = TdAudit.Helpers.shift_zone(payload["date"])
+
+    assert link =~ ~r|.*/implementations/#{implementation_id}/results|
+    assert header == "#{rule_name} : #{implementation_key}"
+
+    assert [
+             {"Date:", ^shifted_date},
+             {"Target:", "10,00%"},
+             {"Threshold:", "0,00%"},
+             {"Error Count:", "0"},
+             {"Record Count:", "1"},
+             {"Result:", "100,00%"}
+           ] = content
   end
 
   test "implementation wihout parent rule, rule_result_created event: renders implementation result anchor: result link href and 'implementation_key' content" do
@@ -70,16 +101,29 @@ defmodule TdAuditWeb.EmailViewTest do
         implementation_id: implementation_id
       )
 
-    email =
+    [{link, header, content}] =
       EmailView.render(
         "rule_result_created.html",
         %{event: build(:event, event: "rule_result_created", payload: payload)}
       )
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
 
-    assert email =~
-             ~r|<a href=".*/implementations/#{implementation_id}/results".*>\n*\s*#{implementation_key}\n*\s*</a>|
+    shifted_date = TdAudit.Helpers.shift_zone(payload["date"])
+
+    assert link =~ ~r|.*/implementations/#{implementation_id}/results|
+    assert header == implementation_key
+
+    assert [
+             {"Date:", ^shifted_date},
+             {"Target:", "10,00%"},
+             {"Threshold:", "0,00%"},
+             {"Error Count:", "0"},
+             {"Record Count:", "1"},
+             {"Result:", "100,00%"}
+           ] = content
   end
 
   test "implementation created event: renders implementation link: /implementations/<implementation_id>" do
@@ -88,22 +132,35 @@ defmodule TdAuditWeb.EmailViewTest do
     payload =
       string_params_for(
         :payload,
-        implementation_id: implementation_id
+        implementation_id: implementation_id,
+        implementation_key: "implementation_key"
       )
 
-    assert EmailView.render(
-             "implementation_created.html",
-             %{
-               event:
-                 build(:event,
-                   event: "implementation_created",
-                   resource_id: implementation_id,
-                   payload: payload
-                 )
-             }
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary() =~ ~r|<a href=".*/implementations/#{implementation_id}"|
+    [{link, header, content}] =
+      EmailView.render(
+        "implementation_created.html",
+        %{
+          event:
+            build(:event,
+              event: "implementation_created",
+              resource_id: implementation_id,
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
+
+    assert link =~ ~r|.*/implementations/#{implementation_id}|
+    assert header == "implementation_key"
+
+    assert [
+             {"Evento:", "Implementation created"},
+             {"Domain:", nil},
+             {"User:", nil}
+           ] = content
   end
 
   test "grant_request_group_creation event: renders grant requests links: /grant_requests/<id>" do
@@ -127,7 +184,15 @@ defmodule TdAuditWeb.EmailViewTest do
         ]
       )
 
-    binary =
+    [
+      {"p", _, ["Grant request for the following structures:"]},
+      {"p", _, ["User: "]},
+      {"ul", _,
+       [
+         {"li", _, [{"a", [{"href", structure_1_link}, _], [structure_1_name]}]},
+         {"li", _, [{"a", [{"href", structure_2_link}, _], [structure_2_name]}]}
+       ]}
+    ] =
       EmailView.render(
         "grant_request_group_creation.html",
         %{
@@ -141,9 +206,12 @@ defmodule TdAuditWeb.EmailViewTest do
       )
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
 
-    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_1_id}"|
-    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_2_id}"|
+    assert structure_1_link =~ ~r|.*/grant_requests/#{grant_request_1_id}|
+    assert String.trim(structure_1_name) == "structure_1"
+    assert structure_2_link =~ ~r|.*/grant_requests/#{grant_request_2_id}|
+    assert String.trim(structure_2_name) == "structure_2"
   end
 
   test "grant_request_approvals event: renders grant requests links: /grant_requests/<id>" do
@@ -161,7 +229,7 @@ defmodule TdAuditWeb.EmailViewTest do
         status: "pending"
       )
 
-    binary =
+    [{link, header, content}] =
       EmailView.render(
         "grant_request_approval_addition.html",
         %{
@@ -175,8 +243,18 @@ defmodule TdAuditWeb.EmailViewTest do
       )
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
 
-    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_1_id}"|
+    assert link =~ ~r|.*/grant_requests/#{grant_request_1_id}|
+    assert header == "structure_1"
+
+    assert [
+             "Grant request approval addition",
+             {"Approver:", nil},
+             {"Status:", "pending"},
+             {"Approver comments:", "Aprobación rol data owner"}
+           ] = content
   end
 
   test "grant_request_status event: renders grant requests links: /grant_requests/<id>" do
@@ -193,7 +271,7 @@ defmodule TdAuditWeb.EmailViewTest do
         status: "cancelled"
       )
 
-    binary =
+    [{link, header, content}] =
       EmailView.render(
         "grant_request_status_cancellation.html",
         %{
@@ -207,8 +285,17 @@ defmodule TdAuditWeb.EmailViewTest do
       )
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
 
-    assert binary =~ ~r|<a href=".*/grant_requests/#{grant_request_1_id}"|
+    assert link =~ ~r|.*/grant_requests/#{grant_request_1_id}|
+    assert header == "structure_1"
+
+    assert [
+             "Grant request cancellation",
+             {"User:", nil},
+             {"Status:", "cancelled"}
+           ] = content
   end
 
   test "data structure event: renders data structure link: /structures/<data_structure_id>" do
@@ -219,23 +306,43 @@ defmodule TdAuditWeb.EmailViewTest do
       string_params_for(
         :payload,
         event: data_structure_event,
-        data_structure_id: data_structure_id
+        data_structure_id: data_structure_id,
+        tag: "tag1",
+        comment: "comment1",
+        resource: %{
+          name: "name",
+          path: ["p1", "p2"]
+        }
       )
 
-    assert EmailView.render(
-             "#{data_structure_event}.html",
-             %{
-               event:
-                 build(:event,
-                   resource_type: "data_structure",
-                   resource_id: data_structure_id,
-                   event: data_structure_event,
-                   payload: payload
-                 )
-             }
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary() =~ ~r|<a href=".*/structures/#{data_structure_id}"|
+    [{link, header, content}] =
+      EmailView.render(
+        "#{data_structure_event}.html",
+        %{
+          event:
+            build(:event,
+              resource_type: "data_structure",
+              resource_id: data_structure_id,
+              event: data_structure_event,
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
+
+    assert link =~ ~r|.*/structures/#{data_structure_id}|
+    assert header == "p1 > p2 > name"
+
+    assert [
+             {"Evento:", "Structure linked to tag"},
+             {"Dominio:", nil},
+             {"Etiqueta:", "tag1"},
+             {"Comentarios:", "comment1"},
+             {"Solicitante:", nil}
+           ] = content
   end
 
   test "data structure event: renders data structure link: /structures/<data_structure_id>2" do
@@ -265,23 +372,36 @@ defmodule TdAuditWeb.EmailViewTest do
         event: grant_approval_event,
         grant_request: grant_request,
         comment: "Test approval comment",
-        status: "rejected"
+        status: "rejected",
+        name: "structure_name"
       )
 
-    assert EmailView.render(
-             "#{grant_approval_event}.html",
-             %{
-               event:
-                 build(:event,
-                   resource_type: "grant_requests",
-                   resource_id: grant_request_id,
-                   event: grant_approval_event,
-                   payload: payload
-                 )
-             }
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary() =~ ~r|<a href=".*/grant_requests/#{grant_request_id}"|
+    [{link, header, content}] =
+      EmailView.render(
+        "#{grant_approval_event}.html",
+        %{
+          event:
+            build(:event,
+              resource_type: "grant_requests",
+              resource_id: grant_request_id,
+              event: grant_approval_event,
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
+
+    assert link =~ ~r|.*/grant_requests/#{grant_request_id}|
+    assert header == "structure_name"
+
+    assert [
+             {"Approver:", nil},
+             {"Status:", "rejected"},
+             {"Approver comments:", "Test approval comment"}
+           ] = content
   end
 
   test "note event: renders note link: /structures/<data_structure_id>/notes" do
@@ -292,22 +412,37 @@ defmodule TdAuditWeb.EmailViewTest do
       string_params_for(
         :payload,
         event: note_event,
-        data_structure_id: data_structure_id
+        data_structure_id: data_structure_id,
+        resource: %{
+          name: "name",
+          path: ["p1", "p2"]
+        }
       )
 
-    assert EmailView.render(
-             "#{note_event}.html",
-             %{
-               event:
-                 build(:event,
-                   resource_type: "data_structure_note",
-                   event: note_event,
-                   payload: payload
-                 )
-             }
-           )
-           |> Safe.to_iodata()
-           |> IO.iodata_to_binary() =~ ~r|<a href=".*/structures/#{data_structure_id}/notes"|
+    [{link, header, content}] =
+      EmailView.render(
+        "#{note_event}.html",
+        %{
+          event:
+            build(:event,
+              resource_type: "data_structure_note",
+              event: note_event,
+              payload: payload
+            )
+        }
+      )
+      |> Safe.to_iodata()
+      |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
+
+    assert link =~ ~r|.*/structures/#{data_structure_id}/notes|
+    assert header == "p1 > p2 > name"
+
+    assert [
+             {"Evento:", "Structure note pending approval"},
+             {"Dominio:", nil}
+           ] = content
   end
 
   test "remediation_created event: renders remediation link: /implementations/<implementation_id>/results/<rule_result_id>/remediation_plan" do
@@ -325,7 +460,7 @@ defmodule TdAuditWeb.EmailViewTest do
         content: %{"foo" => "bar"}
       )
 
-    binary =
+    [{link, header, content}] =
       EmailView.render(
         "remediation_created.html",
         %{
@@ -339,8 +474,20 @@ defmodule TdAuditWeb.EmailViewTest do
       )
       |> Safe.to_iodata()
       |> IO.iodata_to_binary()
+      |> Floki.parse_document!()
+      |> EmailParser.parse_events()
 
-    assert binary =~
-             ~r|<a href=".*/implementations/#{implementation_id}/results/#{rule_result_id}/remediation_plan"|
+    assert link =~
+             ~r|.*/implementations/#{implementation_id}/results/#{rule_result_id}/remediation_plan|
+
+    assert header == "Remediation plan"
+
+    assert [
+             {"Implementation:", "implementation_key"},
+             {"Domains:", nil},
+             {"Rule result date:", nil},
+             "Remediation details:",
+             {"foo:", "bar"}
+           ] = content
   end
 end

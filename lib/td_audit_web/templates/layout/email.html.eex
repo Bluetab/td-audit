@@ -10,7 +10,7 @@
       <tbody>
         <%# Header %>
         <tr>
-          <td style="padding: 0px; border-collapse: collapse; padding: 10px 20px">
+          <td style="border-collapse: collapse; padding: 10px 20px">
             <table cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt">
               <tbody>
                 <tr>
@@ -24,13 +24,13 @@
         </tr>
         <%# Content %>
         <tr>
-          <td style="padding: 0px; border-collapse: collapse; padding: 0 20px">
+          <td style="border-collapse: collapse; padding: 0 20px">
             <%= @inner_content %>
           </td>
         </tr>
         <%# Footer %>
         <tr>
-          <td style="padding: 0px; border-collapse: collapse; padding: 12px 20px">
+          <td style="border-collapse: collapse; padding: 12px 20px">
             <table cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt">
               <tbody>
                 <tr>
