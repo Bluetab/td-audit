@@ -128,6 +128,7 @@ defmodule TdAuditWeb.EmailView do
   def render("structure_note_published.html", event), do: render_notes(event)
   def render("structure_note_rejected.html", event), do: render_notes(event)
   def render("structure_note_versioned.html", event), do: render_notes(event)
+  def render("structure_note_updated.html", event), do: render_notes(event)
   def render("structure_tag_linked.html", event), do: render_tag(event)
   def render("structure_tag_link_updated.html", event), do: render_tag(event)
   def render("structure_tag_link_deleted.html", event), do: render_tag(event)
@@ -216,10 +217,10 @@ defmodule TdAuditWeb.EmailView do
   defp render_notes(%{event: event}) do
     render("notes.html",
       event_name: event_name(event),
-      user: user_name(event),
       name: EventView.resource_name(event),
       domains: domain_path(event),
-      uri: uri(event)
+      uri: uri(event),
+      updated_children: Map.get(event, :updated_children, [])
     )
   end
 
@@ -362,6 +363,7 @@ defmodule TdAuditWeb.EmailView do
 
   defp event_name(%{event: "structure_note_published"}), do: "Structure note published"
   defp event_name(%{event: "structure_note_rejected"}), do: "Structure note rejected"
+  defp event_name(%{event: "structure_note_updated"}), do: "Structure note updated"
   defp event_name(%{event: "structure_note_versioned"}), do: "Structure note versioned"
   defp event_name(%{event: "structure_tag_linked"}), do: "Structure linked to tag"
   defp event_name(%{event: "structure_tag_link_updated"}), do: "Tag linked to structure updated"

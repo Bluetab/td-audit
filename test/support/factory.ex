@@ -182,6 +182,7 @@ defmodule TdAudit.Factory do
     %{
       id: System.unique_integer([:positive]),
       user_name: sequence("user_name"),
+      full_name: sequence("full_name"),
       email: sequence("user_email") <> "@example.com"
     }
   end
