@@ -54,8 +54,8 @@ defmodule TdAuditWeb.EmailView do
 
   def render("remediation_created.html", %{event: %{payload: payload} = event}) do
     render("remediation_created.html",
+      event_name: event_name(event),
       implementation_key: Map.get(payload, "implementation_key"),
-      content: Map.get(payload, "content"),
       date: TdAudit.Helpers.shift_zone(payload["date"]),
       domains: domain_path(event),
       uri: uri(event)

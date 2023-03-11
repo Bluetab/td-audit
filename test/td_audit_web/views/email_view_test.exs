@@ -483,11 +483,10 @@ defmodule TdAuditWeb.EmailViewTest do
     assert header == "Remediation plan"
 
     assert [
+             {"Event:", "Remediation plan created"},
              {"Implementation:", "implementation_key"},
              {"Domains:", nil},
-             {"Rule result date:", nil},
-             "Remediation details:",
-             {"foo:", "bar"}
+             {"Rule result date:", nil}
            ] = content
   end
 end
