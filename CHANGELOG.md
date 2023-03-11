@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- [TD-5566] Remove template content that breaks Phoenix.HTML.Safe if it contains an enriched document
+
 ## [5.0.0] 2023-01-30
 
 ### Added

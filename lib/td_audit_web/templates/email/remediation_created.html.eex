@@ -29,6 +29,14 @@
           <tbody>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
+                Event:
+              </th>
+              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= @event_name %>
+              </td>
+            </tr>
+            <tr>
+              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
                 Implementation:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
@@ -53,19 +61,6 @@
                 <%= @date %>
               </td>
             </tr>
-            <tr>
-              <th span="2"><b>Remediation details:</b></th>
-            </tr>
-            <%= for {key, value} <- @content do %>
-              <tr>
-                <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                  <%= key %>:
-                </th>
-                <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                  <%= value %>
-                </td>
-              </tr>
-            <% end %>
           </tbody>
         </table>
       </td>
