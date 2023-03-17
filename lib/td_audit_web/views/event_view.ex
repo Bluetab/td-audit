@@ -147,13 +147,9 @@ defmodule TdAuditWeb.EventView do
     "/structures/#{id}"
   end
 
-  def path(%{resource_type: "grant_requests", resource_id: id}) do
-    "/grant_requests/#{id}"
-  end
-
   def path(%{resource_type: resource_type, resource_id: id})
-      when resource_type in ["grant_request"] do
-    "/grant_requests/#{id}"
+      when resource_type in ["grant_request", "grant_requests"] do
+    "/grantRequests/#{id}"
   end
 
   def path(%{
@@ -161,7 +157,7 @@ defmodule TdAuditWeb.EventView do
         payload: %{"grant_request" => %{"id" => id}}
       })
       when resource_type in ["grant_request_status", "grant_request_approvals"] do
-    "/grant_requests/#{id}"
+    "/grantRequests/#{id}"
   end
 
   def path(%{resource_type: "jobs", payload: %{"external_id" => id}}) do

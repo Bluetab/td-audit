@@ -163,7 +163,7 @@ defmodule TdAuditWeb.EmailViewTest do
            ] = content
   end
 
-  test "grant_request_group_creation event: renders grant requests links: /grant_requests/<id>" do
+  test "grant_request_group_creation event: renders grant requests links: /grantRequests/<id>" do
     grant_request_1_id = 361
     grant_request_2_id = 362
 
@@ -208,13 +208,13 @@ defmodule TdAuditWeb.EmailViewTest do
       |> IO.iodata_to_binary()
       |> Floki.parse_document!()
 
-    assert structure_1_link =~ ~r|.*/grant_requests/#{grant_request_1_id}|
+    assert structure_1_link =~ ~r|.*/grantRequests/#{grant_request_1_id}|
     assert String.trim(structure_1_name) == "structure_1"
-    assert structure_2_link =~ ~r|.*/grant_requests/#{grant_request_2_id}|
+    assert structure_2_link =~ ~r|.*/grantRequests/#{grant_request_2_id}|
     assert String.trim(structure_2_name) == "structure_2"
   end
 
-  test "grant_request_approvals event: renders grant requests links: /grant_requests/<id>" do
+  test "grant_request_approvals event: renders grant requests links: /grantRequests/<id>" do
     grant_request_1_id = 361
 
     payload =
@@ -246,7 +246,7 @@ defmodule TdAuditWeb.EmailViewTest do
       |> Floki.parse_document!()
       |> EmailParser.parse_events()
 
-    assert link =~ ~r|.*/grant_requests/#{grant_request_1_id}|
+    assert link =~ ~r|.*/grantRequests/#{grant_request_1_id}|
     assert header == "structure_1"
 
     assert [
@@ -257,7 +257,7 @@ defmodule TdAuditWeb.EmailViewTest do
            ] = content
   end
 
-  test "grant_request_status event: renders grant requests links: /grant_requests/<id>" do
+  test "grant_request_status event: renders grant requests links: /grantRequests/<id>" do
     grant_request_1_id = 361
 
     payload =
@@ -288,7 +288,7 @@ defmodule TdAuditWeb.EmailViewTest do
       |> Floki.parse_document!()
       |> EmailParser.parse_events()
 
-    assert link =~ ~r|.*/grant_requests/#{grant_request_1_id}|
+    assert link =~ ~r|.*/grantRequests/#{grant_request_1_id}|
     assert header == "structure_1"
 
     assert [
@@ -345,7 +345,7 @@ defmodule TdAuditWeb.EmailViewTest do
            ] = content
   end
 
-  test "data structure event: renders data structure link: /structures/<data_structure_id>2" do
+  test "grant aproval event: renders grant request link: /grantRequest/<grant_request_id>" do
     grant_request_id = 1234
     grant_approval_event = "grant_approval"
 
@@ -394,7 +394,7 @@ defmodule TdAuditWeb.EmailViewTest do
       |> Floki.parse_document!()
       |> EmailParser.parse_events()
 
-    assert link =~ ~r|.*/grant_requests/#{grant_request_id}|
+    assert link =~ ~r|.*/grantRequests/#{grant_request_id}|
     assert header == "structure_name"
 
     assert [

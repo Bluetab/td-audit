@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- [TD-5486] Fixed link in email and bell icon for grant request approval/rejection notification
+
 ## [5.3.0] 2023-03-13
 
 ### Fixed
