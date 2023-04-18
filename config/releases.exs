@@ -15,7 +15,8 @@ config :td_audit, TdAudit.Repo,
   hostname: System.fetch_env!("DB_HOST"),
   port: System.get_env("DB_PORT", "5432") |> String.to_integer(),
   pool_size: System.get_env("DB_POOL_SIZE", "4") |> String.to_integer(),
-  timeout: System.get_env("DB_TIMEOUT_MILLIS", "15000") |> String.to_integer()
+  timeout: System.get_env("DB_TIMEOUT_MILLIS", "15000") |> String.to_integer(),
+  ssl: System.get_env("DB_SSL", "") |> String.downcase() == "true"
 
 config :td_audit, TdAudit.Notifications.Mailer,
   server: System.get_env("SMTP_SERVER"),
