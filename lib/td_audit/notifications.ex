@@ -19,9 +19,9 @@ defmodule TdAudit.Notifications do
   alias TdCache.UserCache
 
   # Array with all events that not need subscription. Are self reported
-  @self_reported_event_types ["grant_request_rejection"]
+  @self_reported_event_type "grant_request_rejection"
 
-  def self_reported_event_types, do: @self_reported_event_types
+  def self_reported_event_type, do: @self_reported_event_type
 
   def list_notifications(user_id) do
     user_id
@@ -301,7 +301,7 @@ defmodule TdAudit.Notifications do
   defp get_self_reported_events(_repo, %{max_event_id: max_event_id}) do
     {:ok,
      Event
-     |> where([e], e.event in @self_reported_event_types)
+     |> where([e], e.event == @self_reported_event_type)
      |> where([e], e.id <= ^max_event_id)
      |> join(:left, [e], ne in "notifications_events",
        as: :notification_event,
