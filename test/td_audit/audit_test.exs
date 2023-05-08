@@ -72,6 +72,23 @@ defmodule TdAudit.AuditTest do
       assert [%{id: ^id}] = Audit.list_events(%{"resource_id" => 42})
     end
 
+    test "returns note events filtered by data_structure_id in payload" do
+      insert(:event)
+      %{id: id} = insert(:event, resource_type: "data_structure")
+
+      %{id: id2} =
+        insert(:event,
+          event: "some event with note type",
+          payload: %{"data_structure_id" => 42},
+          resource_id: 44,
+          resource_type: "data_structure_note"
+        )
+
+      assert [%{id: ^id}, %{id: ^id2}] =
+               Audit.list_events(%{"resource_id" => "42", "resource_type" => "data_structure"})
+               |> Enum.sort_by(& &1.id)
+    end
+
     test "returns all events filtered by a payload attribute" do
       insert(:event)
       %{id: id1} = insert(:event, payload: %{"subscriber" => "mymail@foo.com"})

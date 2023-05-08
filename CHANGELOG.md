@@ -5,6 +5,7 @@
 ### Added
 
 - [TD-5711] Create index for Events `event` column and change `self_reported_event_type` to single value instead of list
+- [TD-4243] Data Structure Note Events
 
 ## [5.5.0] 2023-04-18
 
