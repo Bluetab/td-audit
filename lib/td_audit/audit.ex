@@ -10,6 +10,8 @@ defmodule TdAudit.Audit do
   alias TdAudit.Repo
   alias TdCache.UserCache
 
+  @payload_resource_types ["data_structure_note"]
+
   @doc """
   Returns the list of events.
 
@@ -37,6 +39,7 @@ defmodule TdAudit.Audit do
 
     Event
     |> where(^dynamic)
+    |> or_where_in_payload(params)
     |> where_cursor(cursor_params)
     |> page_limit(cursor_params)
     |> order(cursor_params)
@@ -119,4 +122,18 @@ defmodule TdAudit.Audit do
       false -> order_by(query, [e], desc: e.ts)
     end
   end
+
+  defp or_where_in_payload(query, %{
+         "resource_id" => data_structure_id,
+         "resource_type" => "data_structure"
+       }) do
+    or_where(
+      query,
+      [e],
+      e.resource_type in ^@payload_resource_types and
+        fragment("payload->>'data_structure_id' = ?", ^data_structure_id)
+    )
+  end
+
+  defp or_where_in_payload(query, _), do: query
 end
