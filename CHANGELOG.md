@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+## Changed
+
+- [TD-5912] `.gitlab-ci-yml` adaptations for develop and main branches
+
 ## [5.9.0] 2023-06-20
 
 ## Added
