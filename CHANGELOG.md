@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.14.0] 2023-09-19
+
+## Changed
+
+- [TD-5913] Update td-df-lib to fix depends validation
+
 ## [5.10.0] 2023-07-06
 
 ## Changed
