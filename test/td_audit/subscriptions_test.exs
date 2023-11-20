@@ -218,5 +218,52 @@ defmodule TdAudit.SubscriptionsTest do
       assert_lists_equal(user_ids_1, users_1, &(&1 == &2.id))
       assert_lists_equal(user_ids_2, users_2, &(&1 == &2.id))
     end
+
+    test "grant_created event sets only granted user as recipient" do
+      %{id: granted_user_id} = CacheHelpers.put_user()
+
+      %{id: user_1_id} = user_1 = CacheHelpers.put_user()
+
+      user_2 = CacheHelpers.put_user()
+
+      %{id: domain_id} = CacheHelpers.put_domain()
+
+      CacheHelpers.put_acl_role_users(domain_id, "xyz", [user_1, user_2])
+
+      %{id: event_id} =
+        event =
+        insert(:event,
+          event: "grant_created",
+          payload: %{"user_id" => granted_user_id, "domain_ids" => [domain_id]}
+        )
+
+      role_subscription =
+        insert(:subscription,
+          subscriber: build(:subscriber, type: "role", identifier: "xyz"),
+          scope: build(:scope, events: ["grant_created"], resource_id: 2, resource_type: "domain")
+        )
+
+      assert %{^event_id => [^granted_user_id]} =
+               Subscriptions.list_recipient_ids(role_subscription, [event])
+
+      taxonomy_role_subscription =
+        insert(:subscription,
+          subscriber: build(:subscriber, type: "taxonomy_role", identifier: "xyz"),
+          scope:
+            build(:scope, events: ["grant_created"], resource_id: 2, resource_type: "domains")
+        )
+
+      assert %{^event_id => [^granted_user_id]} =
+               Subscriptions.list_recipient_ids(taxonomy_role_subscription, [event])
+
+      user_subscription =
+        insert(:subscription,
+          subscriber: build(:subscriber, type: "user", identifier: Integer.to_string(user_1_id)),
+          scope: build(:scope, events: ["grant_created"], resource_id: 2, resource_type: "domain")
+        )
+
+      assert %{^event_id => [^granted_user_id]} =
+               Subscriptions.list_recipient_ids(user_subscription, [event])
+    end
   end
 end

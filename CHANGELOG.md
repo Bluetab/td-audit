@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-6000] Change Grant Created only notify granted user
+
 ## [5.14.0] 2023-09-19
 
 ## Changed

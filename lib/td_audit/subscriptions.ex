@@ -163,16 +163,15 @@ defmodule TdAudit.Subscriptions do
     Enum.reduce(
       events,
       %{},
-      fn %{id: id, payload: payload}, acc ->
-        Map.put(
-          acc,
-          id,
+      fn %{id: id, payload: payload} = event, acc ->
+        recipient_ids =
           MapSet.intersection(
             MapSet.new(payload["domain_ids"]),
             MapSet.new(subscription_domain_ids)
           )
           |> list_recipient_ids_by_domains_role(role)
-        )
+
+        maybe_impacted_user(acc, id, recipient_ids, event)
       end
     )
   end
@@ -185,7 +184,8 @@ defmodule TdAudit.Subscriptions do
         events
       )
       when type in ~w(domain domains) do
-    list_recipient_ids_by_role(domain, role)
+    domain
+    |> list_recipient_ids_by_role(role)
     |> put_recipients_into_events(events)
   end
 
@@ -225,7 +225,7 @@ defmodule TdAudit.Subscriptions do
       events,
       %{},
       fn event, acc ->
-        Map.put(acc, event.id, recipient_ids)
+        maybe_impacted_user(acc, event.id, recipient_ids, event)
       end
     )
   end
@@ -249,5 +249,18 @@ defmodule TdAudit.Subscriptions do
       {:ok, domains} when is_list(domains) -> domains
       _ -> []
     end
+  end
+
+  defp maybe_impacted_user(
+         acc,
+         index,
+         _recipient_ids,
+         %{event: "grant_created", payload: %{"user_id" => granted_user_id}}
+       ) do
+    Map.put(acc, index, [granted_user_id])
+  end
+
+  defp maybe_impacted_user(acc, index, recipient_ids, _event) do
+    Map.put(acc, index, recipient_ids)
   end
 end
