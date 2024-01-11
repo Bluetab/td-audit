@@ -1,105 +1,11 @@
 variables:
-  VERSION: "5.19.1" # used for alpha builds
+  VERSION: "5.20.1-alpha.1" # used for alpha builds
   APP_NAME: "td_audit"
-  COMPOSE_FILE: "ci/docker-compose.yml"
-  COMPOSE_PROJECT_NAME: "${APP_NAME}_${CI_JOB_ID}"
-  # See also variables set in ci/env.sh
+  CLUSTER_NAME: test-truedat-eks
+  K8S_DEPLOYMENT: audit
+  K8S_CONTAINER: audit
 
-stages:
-  - build
-  - publish
-  - acceptance
-  - deploy
-
-before_script:
-  - source ci/env.sh ecr-login
-
-build:
-  stage: build
-  tags:
-    - docker-compose
-  script:
-    - docker-compose run --rm build
-  after_script:
-    - docker-compose down -v
-  artifacts:
-    paths:
-      - _build/prod/*.tar.gz
-
-test:
-  stage: build
-  tags:
-    - docker-compose
-  script:
-    - docker-compose run --rm test
-  after_script:
-    - docker-compose down -v
-
-publish:
-  stage: publish
-  only:
-    - develop
-    - tags
-  tags:
-    - docker
-  script:
-    - docker build --build-arg APP_NAME=${APP_NAME} --build-arg APP_VERSION=${APP_VERSION} -t ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} .
-    - docker tag ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
-    - docker push ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
-
-publish:branches:
-  stage: deploy
-  except:
-    - develop
-    - main
-    - tags
-  when: manual
-  tags:
-    - docker
-  script:
-    - docker build --build-arg APP_NAME=${APP_NAME} --build-arg APP_VERSION=${APP_VERSION} -t ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} .
-    - docker tag ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
-    - docker push ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
-
-acceptance:
-  stage: acceptance
-  only:
-    - develop
-    - tags
-  tags:
-    - docker-compose
-  dependencies: []
-  script:
-    - docker-compose up -d redis postgres
-    - docker-compose run --rm acceptance
-  after_script:
-    - docker-compose logs service
-    - docker-compose down -v
-
-acceptance:branches:
-  stage: acceptance
-  except:
-    - develop
-    - main
-    - tags
-  tags:
-    - docker-compose
-  script:
-    - docker-compose up -d redis postgres
-    - docker build --build-arg APP_NAME=${APP_NAME} --build-arg APP_VERSION=${APP_VERSION} -t ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} .
-    - docker tag ${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${CI_COMMIT_SHA} ${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION}
-    - docker-compose run --rm acceptance
-  after_script:
-    - docker-compose logs service
-    - docker-compose down -v
-
-deploy:
-  stage: deploy
-  tags:
-    - kubectl
-  only:
-    - develop
-    - tags
-  dependencies: []
-  script:
-    - kubectl set image deployment.v1.apps/${K8S_DEPLOYMENT} ${K8S_CONTAINER}=${ECR}/${ECR_NAMESPACE}/${CI_PROJECT_NAME}:${APP_VERSION} --record
+include:
+  - project: 'dgs-core/true-dat/td-tools/cicd-templates'
+    ref: core-services-deploy
+    file: 'core-service.gitlab-ci.yml'
