@@ -58,7 +58,7 @@ defmodule TdAudit.Mixfile do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.0"},
       {:guardian, "~> 2.0"},
-      {:phoenix_swagger, "~> 0.8.3"},
+      {:phoenix_swagger, git: "https://github.com/Bluetab/phx_swagger.git", tag: "6.0.0"},
       {:ex_json_schema, "~> 0.7.3"},
       {:bamboo, "~> 2.2.0"},
       {:bamboo_phoenix, "~> 1.0"},
