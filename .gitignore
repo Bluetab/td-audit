@@ -18,4 +18,5 @@ erl_crash.dump
 priv/static/swagger.json
 local
 config/local.exs
-config/runtime.exs
+
+.tool-versions
