@@ -147,6 +147,10 @@ defmodule TdAuditWeb.EventView do
     "/structures/#{id}"
   end
 
+  def path(%{resource_type: "grant_request_groups", resource_id: id}) do
+    "/grantRequestGroups/#{id}"
+  end
+
   def path(%{resource_type: resource_type, resource_id: id})
       when resource_type in ["grant_request", "grant_requests"] do
     "/grantRequests/#{id}"

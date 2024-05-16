@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-6083] Email for grant request group creation shows link to the group view
+
 ## [6.5.0] 2024-04-30
 
 ### Added

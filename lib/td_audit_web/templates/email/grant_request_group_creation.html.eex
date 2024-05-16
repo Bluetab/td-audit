@@ -1,12 +1,9 @@
 <p style="padding: 0 20px"><%= @message %></p>
 <p style="padding: 0 20px">User: <%= @user %></p>
 <ul>
-<%= for %{name: name, uri: uri} <- @structures do %>
-
   <li>
-    <a href="<%= uri %>" style="color: #3b73af; text-decoration: none;">
-      <%= name %>
+    <a href=<%= @group_link %> style="color: #3b73af; text-decoration: none;">
+      <%= @group_link %>
     </a>
   </li>
-<% end %>
 </ul>
