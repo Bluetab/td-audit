@@ -16,21 +16,6 @@ defmodule TdAuditWeb.EmailView do
     "grant_request_status_failure" => "Grant request processing failed"
   }
 
-  defp structures_from_grant_requests(requests) do
-    Enum.map(
-      requests,
-      fn %{
-           "id" => grant_request_id,
-           "data_structure" => %{"current_version" => %{"name" => name}}
-         } ->
-        %{
-          name: name,
-          uri: uri(%{resource_type: "grant_request", resource_id: grant_request_id})
-        }
-      end
-    )
-  end
-
   def render("implementation_created.html", %{event: event}) do
     render("implementation.html",
       event_name: event_name(event),
@@ -137,12 +122,10 @@ defmodule TdAuditWeb.EmailView do
   def render("grant_created.html", event), do: render_grant(event)
   def render("grant_deleted.html", event), do: render_grant(event)
 
-  def render("grant_request_group_creation.html", %{
-        event: %{event: event_name, payload: payload} = event
-      }) do
+  def render("grant_request_group_creation.html", %{event: %{event: event_name} = event}) do
     render("grant_request_group_creation.html",
       user: user_name(event),
-      structures: structures_from_grant_requests(payload["requests"]),
+      group_link: uri(event),
       message: @event_name_to_message[event_name]
     )
   end

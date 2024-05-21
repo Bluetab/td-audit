@@ -166,12 +166,13 @@ defmodule TdAuditWeb.EmailViewTest do
   test "grant_request_group_creation event: renders grant requests links: /grantRequests/<id>" do
     grant_request_1_id = 361
     grant_request_2_id = 362
+    group_id = 252
 
     payload =
       string_params_for(
         :payload,
         domain_ids: [2, 216],
-        id: 252,
+        id: group_id,
         requests: [
           %{
             id: grant_request_1_id,
@@ -189,8 +190,7 @@ defmodule TdAuditWeb.EmailViewTest do
       {"p", _, ["User: "]},
       {"ul", _,
        [
-         {"li", _, [{"a", [{"href", structure_1_link}, _], [structure_1_name]}]},
-         {"li", _, [{"a", [{"href", structure_2_link}, _], [structure_2_name]}]}
+         {"li", _, [{"a", [{"href", group_link}, _], [group_link_text]}]}
        ]}
     ] =
       EmailView.render(
@@ -200,6 +200,7 @@ defmodule TdAuditWeb.EmailViewTest do
             build(:event,
               event: "grant_request_group_creation",
               resource_type: "grant_request_groups",
+              resource_id: payload["id"],
               payload: payload
             )
         }
@@ -208,10 +209,8 @@ defmodule TdAuditWeb.EmailViewTest do
       |> IO.iodata_to_binary()
       |> Floki.parse_document!()
 
-    assert structure_1_link =~ ~r|.*/grantRequests/#{grant_request_1_id}|
-    assert String.trim(structure_1_name) == "structure_1"
-    assert structure_2_link =~ ~r|.*/grantRequests/#{grant_request_2_id}|
-    assert String.trim(structure_2_name) == "structure_2"
+    assert group_link =~ ~r|.*/grantRequestGroups/#{group_id}|
+    assert String.trim(group_link_text) == group_link
   end
 
   test "grant_request_approvals event: renders grant requests links: /grantRequests/<id>" do
