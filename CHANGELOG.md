@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-6499] Update td-df-lib to add template content origin
+
 ## [6.7.0] 2024-06-13
 
 ### Fixed
