@@ -6,7 +6,7 @@ defmodule TdAudit.Mixfile do
       app: :td_audit,
       version:
         case System.get_env("APP_VERSION") do
-          nil -> "6.8.0-local"
+          nil -> "6.8.1-local"
           v -> v
         end,
       elixir: "~> 1.12",
@@ -64,8 +64,8 @@ defmodule TdAudit.Mixfile do
       {:bamboo_phoenix, "~> 1.0"},
       {:bamboo_smtp, "~> 4.2.0"},
       {:tzdata, "~> 1.1"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "6.3.0"},
-      {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", branch: "hotfix/td-6713"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "6.5.1"},
+      {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", tag: "6.8.3"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},
       {:quantum, "~> 3.0"},
