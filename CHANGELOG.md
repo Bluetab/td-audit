@@ -4,7 +4,7 @@
 
 ### Changed
 
-- [TD-6602] Update td-cache and td-df-lib
+- [TD-6602], [TD-6723] Update td-cache and td-df-lib
 
 ## [6.8.1] 2024-07-18
 
