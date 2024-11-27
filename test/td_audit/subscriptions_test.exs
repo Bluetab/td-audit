@@ -11,7 +11,7 @@ defmodule TdAudit.SubscriptionsTest do
 
   test "list_subscriptions/0 returns all subscriptions" do
     subscription = insert(:subscription)
-    assert Subscriptions.list_subscriptions() <|> [subscription]
+    assert Subscriptions.list_subscriptions() ||| [subscription]
   end
 
   test "list_subscriptions/1 returns all subscriptions filtered by subscriber_id" do
@@ -21,7 +21,7 @@ defmodule TdAudit.SubscriptionsTest do
     s1 = insert(:subscription, subscriber_id: subscriber_id)
     s2 = insert(:subscription, subscriber_id: subscriber_id)
 
-    assert Subscriptions.list_subscriptions(subscriber_id: subscriber_id) <|> [s1, s2]
+    assert Subscriptions.list_subscriptions(subscriber_id: subscriber_id) ||| [s1, s2]
   end
 
   test "list_subscriptions/1 returns subscriptions filtered by events" do
@@ -47,8 +47,8 @@ defmodule TdAudit.SubscriptionsTest do
         scope: %{resource_id: 3, resource_type: "rec", events: ["event1", "event2"]}
       )
 
-    assert Subscriptions.list_subscriptions(scope: %{events: ["event1", "event2"]}) <|> [s1, s3]
-    assert Subscriptions.list_subscriptions(scope: %{events: ["event3"]}) <|> [s2]
+    assert Subscriptions.list_subscriptions(scope: %{events: ["event1", "event2"]}) ||| [s1, s3]
+    assert Subscriptions.list_subscriptions(scope: %{events: ["event3"]}) ||| [s2]
   end
 
   test "get_subscription!/1 returns the subscription with given id" do
@@ -111,7 +111,7 @@ defmodule TdAudit.SubscriptionsTest do
     test "gets user ids for domain role subscription" do
       users = Enum.map(1..2, fn _ -> CacheHelpers.put_user() end)
       %{id: domain_id} = CacheHelpers.put_domain()
-      CacheHelpers.put_acl_role_users(domain_id, "some_role", users)
+      CacheHelpers.put_acl_role_users("domain", domain_id, "some_role", users)
 
       subscriber = build(:subscriber, type: "role", identifier: "some_role")
       scope = build(:scope, resource_type: "domain", resource_id: Integer.to_string(domain_id))
@@ -127,7 +127,7 @@ defmodule TdAudit.SubscriptionsTest do
 
       %{id: domain_id} = CacheHelpers.put_domain()
       %{id: concept_id} = CacheHelpers.put_concept(domain_id: domain_id)
-      CacheHelpers.put_acl_role_users(domain_id, "role_123", users)
+      CacheHelpers.put_acl_role_users("domain", domain_id, "role_123", users)
 
       subscription =
         insert(:subscription,
@@ -148,7 +148,7 @@ defmodule TdAudit.SubscriptionsTest do
       %{id: parent_id} = CacheHelpers.put_domain()
       %{id: domain_id} = CacheHelpers.put_domain(parent_id: parent_id)
 
-      CacheHelpers.put_acl_role_users(parent_id, "xyz", users)
+      CacheHelpers.put_acl_role_users("domain", parent_id, "xyz", users)
 
       subscriber = build(:subscriber, type: "role", identifier: "xyz")
 
@@ -169,7 +169,7 @@ defmodule TdAudit.SubscriptionsTest do
       %{id: parent_id} = CacheHelpers.put_domain()
       %{id: domain_id} = CacheHelpers.put_domain(parent_id: parent_id)
       users = Enum.map(1..2, fn _ -> CacheHelpers.put_user() end)
-      CacheHelpers.put_acl_role_users(domain_id, "xyz", users)
+      CacheHelpers.put_acl_role_users("domain", domain_id, "xyz", users)
 
       subscription =
         insert(:subscription,
@@ -189,8 +189,8 @@ defmodule TdAudit.SubscriptionsTest do
       %{id: parent_domain_id} = CacheHelpers.put_domain()
       %{id: child_1_domain_id} = CacheHelpers.put_domain(parent_id: parent_domain_id)
       %{id: child_2_domain_id} = CacheHelpers.put_domain(parent_id: parent_domain_id)
-      CacheHelpers.put_acl_role_users(child_1_domain_id, "xyz", users_1)
-      CacheHelpers.put_acl_role_users(child_2_domain_id, "xyz", users_2)
+      CacheHelpers.put_acl_role_users("domain", child_1_domain_id, "xyz", users_1)
+      CacheHelpers.put_acl_role_users("domain", child_2_domain_id, "xyz", users_2)
 
       subscription =
         insert(:subscription,
@@ -228,7 +228,7 @@ defmodule TdAudit.SubscriptionsTest do
 
       %{id: domain_id} = CacheHelpers.put_domain()
 
-      CacheHelpers.put_acl_role_users(domain_id, "xyz", [user_1, user_2])
+      CacheHelpers.put_acl_role_users("domain", domain_id, "xyz", [user_1, user_2])
 
       %{id: event_id} =
         event =
@@ -264,6 +264,171 @@ defmodule TdAudit.SubscriptionsTest do
 
       assert %{^event_id => [^granted_user_id]} =
                Subscriptions.list_recipient_ids(user_subscription, [event])
+    end
+
+    test "grant_request_group_creation adds users with subscription rol in structure" do
+      domain_in_subscription_id = System.unique_integer([:positive])
+      structure_in_subscription_id = System.unique_integer([:positive])
+
+      domain_id = System.unique_integer([:positive])
+      structure_id = System.unique_integer([:positive])
+
+      role = "Notify Me"
+
+      %{id: user_role_in_domain_and_structure_subscription_id} = CacheHelpers.put_user()
+      %{id: user_role_in_domain_subscription_id} = CacheHelpers.put_user()
+      %{id: user_role_in_structure_subscription_id} = CacheHelpers.put_user()
+      %{id: user_role_in_domain_and_structure_id} = CacheHelpers.put_user()
+      %{id: user_role_in_domain_id} = CacheHelpers.put_user()
+      %{id: user_role_in_structure_id} = CacheHelpers.put_user()
+      %{id: user_id} = CacheHelpers.put_user()
+
+      CacheHelpers.put_acl_role_users("domain", domain_in_subscription_id, role, [
+        user_role_in_domain_and_structure_subscription_id,
+        user_role_in_domain_subscription_id
+      ])
+
+      CacheHelpers.put_acl_role_users("structure", structure_in_subscription_id, role, [
+        user_role_in_domain_and_structure_subscription_id,
+        user_role_in_structure_subscription_id
+      ])
+
+      CacheHelpers.put_acl_role_users("domain", domain_id, role, [
+        user_role_in_domain_and_structure_id,
+        user_role_in_domain_id
+      ])
+
+      CacheHelpers.put_acl_role_users("structure", structure_id, role, [
+        user_role_in_domain_and_structure_id,
+        user_role_in_structure_id
+      ])
+
+      event = "grant_request_group_creation"
+
+      payload = %{
+        "requests" => [
+          %{"data_structure" => %{"id" => structure_in_subscription_id}},
+          %{"data_structure" => %{"id" => structure_id}}
+        ],
+        "domain_ids" => [
+          [domain_in_subscription_id, System.unique_integer([:positive])],
+          [domain_id]
+        ]
+      }
+
+      %{id: event_id} = inserted_event = insert(:event, event: event, payload: payload)
+
+      subscriber = insert(:subscriber, type: "role", identifier: role)
+
+      scope = %{events: [event], resource_id: domain_in_subscription_id, resource_type: "domain"}
+
+      inserted_subscription =
+        insert(:subscription, periodicity: "minutely", subscriber: subscriber, scope: scope)
+
+      recipient_ids =
+        Subscriptions.list_recipient_ids(
+          inserted_subscription,
+          [inserted_event]
+        )
+        |> Map.get(event_id)
+
+      assert Enum.member?(recipient_ids, user_role_in_domain_and_structure_subscription_id)
+      assert Enum.member?(recipient_ids, user_role_in_domain_subscription_id)
+      assert Enum.member?(recipient_ids, user_role_in_structure_subscription_id)
+      refute Enum.member?(recipient_ids, user_role_in_domain_and_structure_id)
+      refute Enum.member?(recipient_ids, user_role_in_domain_id)
+      refute Enum.member?(recipient_ids, user_role_in_structure_id)
+      refute Enum.member?(recipient_ids, user_id)
+    end
+
+    test "grant_request_group_creation will not add users for not corresponding events" do
+      %{id: user_id_1} = CacheHelpers.put_user()
+      %{id: user_id_2} = CacheHelpers.put_user()
+
+      structure_id_1 = System.unique_integer([:positive])
+      structure_id_2 = System.unique_integer([:positive])
+
+      domain_id = System.unique_integer([:positive])
+      role = "role"
+
+      CacheHelpers.put_acl_role_users("structure", structure_id_1, role, [user_id_1])
+      CacheHelpers.put_acl_role_users("structure", structure_id_2, role, [user_id_2])
+
+      subscriber = insert(:subscriber, type: "role", identifier: role)
+
+      subscription =
+        insert(:subscription,
+          subscriber: subscriber,
+          scope: %{
+            events: ["grant_request_group_creation"],
+            resource_id: domain_id,
+            resource_type: "domain"
+          }
+        )
+
+      %{id: event1_id} =
+        event1 =
+        insert(:event,
+          event: "grant_request_group_creation",
+          payload: %{
+            "requests" => [
+              %{"data_structure" => %{"id" => structure_id_1}}
+            ],
+            "domain_ids" => [[domain_id]]
+          }
+        )
+
+      %{id: event2_id} =
+        event2 =
+        insert(:event,
+          event: "grant_request_group_creation",
+          payload: %{
+            "requests" => [
+              %{"data_structure" => %{"id" => structure_id_2}}
+            ],
+            "domain_ids" => [[domain_id]]
+          }
+        )
+
+      assert %{
+               ^event1_id => [^user_id_1],
+               ^event2_id => [^user_id_2]
+             } = Subscriptions.list_recipient_ids(subscription, [event1, event2])
+    end
+
+    test "grant_request_group_creation events considers child domains" do
+      %{id: parent_id} = CacheHelpers.put_domain()
+      %{id: domain_id} = CacheHelpers.put_domain(parent_id: parent_id)
+
+      %{id: user_id} = CacheHelpers.put_user()
+      structure_id = System.unique_integer([:positive])
+      role = "role"
+
+      CacheHelpers.put_acl_role_users("structure", structure_id, role, [user_id])
+
+      subscriber = insert(:subscriber, type: "taxonomy_role", identifier: role)
+
+      subscription =
+        insert(:subscription,
+          subscriber: subscriber,
+          scope: %{
+            events: ["grant_request_group_creation"],
+            resource_id: parent_id,
+            resource_type: "domains"
+          }
+        )
+
+      %{id: event_id} =
+        event =
+        insert(:event,
+          event: "grant_request_group_creation",
+          payload: %{
+            "requests" => [%{"data_structure" => %{"id" => structure_id}}],
+            "domain_ids" => [[domain_id]]
+          }
+        )
+
+      assert %{^event_id => [^user_id]} = Subscriptions.list_recipient_ids(subscription, [event])
     end
   end
 end

@@ -1,12 +1,18 @@
 # Changelog
 
+## [6.15.0] 2024-11-27
+
+### Added
+
+- [TD-6651] Add Users with Role in Data Structure to recipients list for grant_request_group_creation event
+
 ## [6.13.0] 2024-10-15
 
 ### Changed
 
 - [TD-6617] Update td-cache and td-core
 
- ## [6.9.2] 2024-07-29
+## [6.9.2] 2024-07-29
 
 ### Added
 

@@ -152,6 +152,51 @@ defmodule TdAudit.Subscriptions do
 
   def list_recipient_ids(
         %Subscription{
+          subscriber: %{type: type, identifier: role},
+          scope: %{
+            events: ["grant_request_group_creation"],
+            resource_id: domain_id,
+            resource_type: resource_type
+          }
+        },
+        events
+      )
+      when resource_type in ~w(domain domains) and
+             type in ~w(role taxonomy_role) do
+    domain_ids =
+      case type do
+        "role" -> [domain_id]
+        "taxonomy_role" -> TaxonomyCache.reachable_domain_ids(domain_id)
+      end
+
+    Enum.into(events, %{}, fn %{
+                                id: event_id,
+                                payload: %{
+                                  "domain_ids" => event_domain_ids,
+                                  "requests" => event_requests
+                                }
+                              } ->
+      structure_ids =
+        structures_in_subscription_domain(
+          [event_domain_ids, event_requests],
+          domain_ids
+        )
+
+      recipient_ids =
+        TdCache.AclCache.get_acl_user_ids_by_resources_role(
+          %{
+            "domain" => domain_ids,
+            "structure" => structure_ids
+          },
+          role
+        )
+
+      {event_id, recipient_ids}
+    end)
+  end
+
+  def list_recipient_ids(
+        %Subscription{
           subscriber: %{type: "taxonomy_role", identifier: role},
           scope: %{resource_type: "domains", resource_id: domain_id}
         },
@@ -231,13 +276,15 @@ defmodule TdAudit.Subscriptions do
   end
 
   defp list_recipient_ids_by_domains_role(domains, role) do
-    Enum.reduce(
-      domains,
+    domains
+    |> Enum.uniq()
+    |> Enum.reduce(
       [],
       fn domain, acc ->
         Kernel.++(list_recipient_ids_by_role(domain, role), acc)
       end
     )
+    |> Enum.uniq()
   end
 
   defp list_recipient_ids_by_role(domain_id, role) do
@@ -262,5 +309,20 @@ defmodule TdAudit.Subscriptions do
 
   defp maybe_impacted_user(acc, index, recipient_ids, _event) do
     Map.put(acc, index, recipient_ids)
+  end
+
+  defp structures_in_subscription_domain(req_domains_requests, subscription_domain_ids) do
+    req_domains_requests
+    |> Enum.zip()
+    |> Enum.filter(fn {req_domain_ids, _} ->
+      req_domain_ids
+      |> MapSet.new()
+      |> MapSet.intersection(MapSet.new(subscription_domain_ids))
+      |> MapSet.size()
+      |> Kernel.>(0)
+    end)
+    |> Enum.reduce([], fn {_, %{"data_structure" => %{"id" => ds_id}}}, acc ->
+      [ds_id | acc]
+    end)
   end
 end

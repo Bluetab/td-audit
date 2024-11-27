@@ -29,7 +29,7 @@ config :td_audit, TdAudit.Repo, pool_size: 4
 # EX_LOGGER_FORMAT='$date $time [$level] $message'
 config :logger, :console,
   format:
-    (System.get_env("EX_LOGGER_FORMAT") || "$date\T$time\Z [$level]$levelpad $metadata$message") <>
+    (System.get_env("EX_LOGGER_FORMAT") || "$time $metadata[$level] $message") <>
       "\n",
   level: :info,
   metadata: [:pid, :module],
