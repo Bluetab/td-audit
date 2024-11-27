@@ -14,7 +14,7 @@ defmodule TdAudit.NotificationsTest do
       users = Enum.map(1..3, fn _ -> CacheHelpers.put_user() end)
       role = "foo"
       event = "bar"
-      CacheHelpers.put_acl_role_users(domain_id, role, users)
+      CacheHelpers.put_acl_role_users("domain", domain_id, role, users)
 
       %{id: event_id} = insert(:event, event: event, payload: %{"domain_ids" => [domain_id]})
       subscriber = %{id: subscriber_id} = insert(:subscriber, type: "role", identifier: role)
@@ -59,7 +59,7 @@ defmodule TdAudit.NotificationsTest do
       domain_id = System.unique_integer([:positive])
       user = 1
       event = Notifications.self_reported_event_type()
-      CacheHelpers.put_acl_role_users(domain_id, "foo", [user])
+      CacheHelpers.put_acl_role_users("domain", domain_id, "foo", [user])
 
       payload = %{
         "recipient_ids" => [user],
@@ -82,7 +82,7 @@ defmodule TdAudit.NotificationsTest do
       domain_id = System.unique_integer([:positive])
       user = 1
       event = Notifications.self_reported_event_type()
-      CacheHelpers.put_acl_role_users(domain_id, "foo", [user])
+      CacheHelpers.put_acl_role_users("domain", domain_id, "foo", [user])
 
       payload = %{
         "recipient_ids" => [user],
@@ -122,7 +122,7 @@ defmodule TdAudit.NotificationsTest do
       role = "foobar"
       event = "grant_created"
 
-      CacheHelpers.put_acl_role_users(domain_id, role, [user_id1, user_id2, user_id3])
+      CacheHelpers.put_acl_role_users("domain", domain_id, role, [user_id1, user_id2, user_id3])
 
       payload = %{
         "data_structure_id" => 1,
@@ -216,7 +216,7 @@ defmodule TdAudit.NotificationsTest do
 
       assert {:ok, email} = Notifications.generate_custom_notification(message)
       assert %Bamboo.Email{assigns: ^assigns, subject: ^subject, to: to} = email
-      assert [email1, email2] <|> to
+      assert [email1, email2] ||| to
 
       assert [
                %TdAudit.Notifications.Notification{
@@ -232,7 +232,7 @@ defmodule TdAudit.NotificationsTest do
                }
              ] = Notifications.list_notifications(id1)
 
-      assert [id1, id2] <|> recipient_ids
+      assert [id1, id2] ||| recipient_ids
     end
 
     test "generate_custom_notification/1 creates notification from external source" do
@@ -288,7 +288,7 @@ defmodule TdAudit.NotificationsTest do
                }
              ] = Notifications.list_notifications(id1)
 
-      assert [id1, id2] <|> recipient_ids
+      assert [id1, id2] ||| recipient_ids
     end
   end
 

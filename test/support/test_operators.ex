@@ -7,7 +7,7 @@ defmodule TdAudit.TestOperators do
   alias TdAudit.Subscriptions.Subscription
 
   def a <~> b, do: approximately_equal(a, b)
-  def a <|> b, do: approximately_equal(Enum.sort(a), Enum.sort(b))
+  def a ||| b, do: approximately_equal(Enum.sort(a), Enum.sort(b))
 
   ## Equality test for subscriptions without comparing Ecto associations.
   defp approximately_equal(%Subscription{} = a, %Subscription{} = b) do

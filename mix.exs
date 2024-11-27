@@ -64,7 +64,7 @@ defmodule TdAudit.Mixfile do
       {:bamboo_phoenix, "~> 1.0"},
       {:bamboo_smtp, "~> 4.2.0"},
       {:tzdata, "~> 1.1"},
-      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "6.13.0"},
+      {:td_cache, git: "https://github.com/Bluetab/td-cache.git", tag: "6.15.2", override: true},
       {:td_df_lib, git: "https://github.com/Bluetab/td-df-lib.git", tag: "6.13.4"},
       {:gen_stage, "~> 1.0"},
       {:broadway, "~> 0.6.0"},

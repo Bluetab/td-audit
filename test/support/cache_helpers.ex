@@ -11,7 +11,7 @@ defmodule CacheHelpers do
   alias TdCache.TaxonomyCache
   alias TdCache.UserCache
 
-  def put_acl_role_users(domain_id, role, users_or_user_ids) do
+  def put_acl_role_users(resource_type, resource_id, role, users_or_user_ids) do
     user_ids =
       Enum.map(users_or_user_ids, fn
         %{id: id} -> id
@@ -19,11 +19,11 @@ defmodule CacheHelpers do
       end)
 
     on_exit(fn ->
-      AclCache.delete_acl_roles("domain", domain_id)
-      AclCache.delete_acl_role_users("domain", domain_id, role)
+      AclCache.delete_acl_roles(resource_type, resource_id)
+      AclCache.delete_acl_role_users(resource_type, resource_id, role)
     end)
 
-    AclCache.set_acl_role_users("domain", domain_id, role, user_ids)
+    AclCache.set_acl_role_users(resource_type, resource_id, role, user_ids)
   end
 
   def put_domain(params \\ %{})
