@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-6911]
+  - update Elixir 1.18
+  - update dependencies
+  - update Docker RUNTIME_BASE=alpine:3.21
+  - remove unused dependencies
+  - remove swagger
+
 ## [6.15.0] 2024-11-27
 
 ### Added

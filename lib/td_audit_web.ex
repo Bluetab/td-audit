@@ -21,7 +21,6 @@ defmodule TdAuditWeb do
     quote bind_quoted: [log: log] do
       use Phoenix.Controller, namespace: TdAuditWeb, log: log
       import Plug.Conn
-      import TdAuditWeb.Gettext
       alias TdAuditWeb.Router.Helpers, as: Routes
     end
   end
@@ -54,7 +53,6 @@ defmodule TdAuditWeb do
       import Phoenix.View
 
       import TdAuditWeb.ErrorHelpers
-      import TdAuditWeb.Gettext
       alias TdAuditWeb.Router.Helpers, as: Routes
     end
   end

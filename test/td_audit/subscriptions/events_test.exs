@@ -1,6 +1,8 @@
 defmodule TdAudit.Subscriptions.EventsTest do
   use TdAudit.DataCase
 
+  import TdAudit.TestOperators
+
   alias TdAudit.Subscriptions.Events
   alias TdCache.TemplateCache
 
@@ -316,7 +318,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
       payload = string_params_for(:payload, domain_ids: [5, 4, 1])
       e2 = insert(:event, event: "update_concept_draft", payload: payload)
 
-      assert Events.subscription_events(subscription, 1_000_000) == [e1, e2]
+      assert Events.subscription_events(subscription, 1_000_000) ||| [e1, e2]
     end
   end
 
@@ -340,7 +342,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
           &insert(:event, event: &1, resource_id: 1, resource_type: "concept")
         )
 
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      assert Events.subscription_events(subscription, 1_000_000) ||| events
     end
   end
 
@@ -366,7 +368,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
           insert(:event, event: "relation_deprecated", resource_type: "concept", resource_id: 1)
         end)
 
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      assert Events.subscription_events(subscription, 1_000_000) ||| events
     end
   end
 
@@ -416,7 +418,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
           end)
       ]
 
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      assert Events.subscription_events(subscription, 1_000_000) ||| events
     end
   end
 
@@ -436,7 +438,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
       event =
         insert(:event, event: "some_event", resource_type: "some_resource_type", resource_id: 42)
 
-      assert Events.subscription_events(subscription, 1_000_000) == [event]
+      assert Events.subscription_events(subscription, 1_000_000) ||| [event]
     end
   end
 

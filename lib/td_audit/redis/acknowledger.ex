@@ -30,7 +30,7 @@ defmodule TdAudit.Redis.Acknowledger do
         :ok
 
       n ->
-        Logger.warn("Ignored #{n} failed messages")
+        Logger.warning("Ignored #{n} failed messages")
     end
 
     # Acknowledge successfully processed messages, if any.

@@ -44,7 +44,7 @@ defmodule TdAudit.Broadway do
   @impl Broadway
   def handle_message(_processor, %{data: data} = message, _context) do
     unless data == :test do
-      Logger.warn("Invalid message #{inspect(data)}")
+      Logger.warning("Invalid message #{inspect(data)}")
     end
 
     failed(message, :invalid)

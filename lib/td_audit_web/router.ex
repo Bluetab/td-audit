@@ -14,10 +14,6 @@ defmodule TdAuditWeb.Router do
     plug TdAudit.Auth.Pipeline.Secure
   end
 
-  scope "/api/swagger" do
-    forward("/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :td_audit, swagger_file: "swagger.json")
-  end
-
   scope "/api", TdAuditWeb do
     pipe_through :api
     get("/ping", PingController, :ping)
@@ -34,27 +30,5 @@ defmodule TdAuditWeb.Router do
     resources("/notifications", NotificationController, only: [:create])
     post("/notifications/:id/read", NotificationController, :read)
     post("/notifications/user/me/search", NotificationController, :index_by_user)
-  end
-
-  def swagger_info do
-    %{
-      schemes: ["http", "https"],
-      info: %{
-        version: Application.spec(:td_audit, :vsn),
-        title: "Truedat Audit Service"
-      },
-      securityDefinitions: %{
-        bearer: %{
-          type: "apiKey",
-          name: "Authorization",
-          in: "header"
-        }
-      },
-      security: [
-        %{
-          bearer: []
-        }
-      ]
-    }
   end
 end
