@@ -37,18 +37,12 @@ config :logger, :console,
 
 # Configuration for Phoenix
 config :phoenix, :json_library, Jason
-config :phoenix_swagger, :json_library, Jason
 
 config :td_audit, TdAudit.Auth.Guardian,
   allowed_algos: ["HS512"],
   issuer: "tdauth",
   ttl: {1, :hours},
   secret_key: "SuperSecretTruedat"
-
-config :td_audit, :phoenix_swagger,
-  swagger_files: %{
-    "priv/static/swagger.json" => [router: TdAuditWeb.Router]
-  }
 
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"

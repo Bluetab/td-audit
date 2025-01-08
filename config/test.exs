@@ -5,7 +5,7 @@ import Config
 config :td_audit, TdAuditWeb.Endpoint, server: false
 
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :logger, level: :warning
 
 # Track all Plug compile-time dependencies
 config :phoenix, :plug_init_mode, :runtime

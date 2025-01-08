@@ -3,7 +3,6 @@ defmodule TdAuditWeb.SubscriptionController do
   Controller for the subscritions of the system
   """
   use TdAuditWeb, :controller
-  use PhoenixSwagger
 
   import Canada, only: [can?: 2]
 
@@ -12,21 +11,12 @@ defmodule TdAuditWeb.SubscriptionController do
   alias TdAudit.Subscriptions.Subscriber
   alias TdAudit.Subscriptions.Subscribers
   alias TdAudit.Subscriptions.Subscription
-  alias TdAuditWeb.SwaggerDefinitions
+
   alias TdCache.ConceptCache
   alias TdCache.DomainCache
   alias TdCache.RuleCache
 
   action_fallback(TdAuditWeb.FallbackController)
-
-  def swagger_definitions do
-    SwaggerDefinitions.subscription_swagger_definitions()
-  end
-
-  swagger_path :index do
-    description("List of subscriptions")
-    response(200, "OK", Schema.ref(:SubscriptionsResponse))
-  end
 
   def index(conn, params) do
     with claims <- conn.assigns[:current_resource],
@@ -52,18 +42,6 @@ defmodule TdAuditWeb.SubscriptionController do
       {:subscriber, nil} ->
         render(conn, "index.json", subscriptions: [])
     end
-  end
-
-  swagger_path :create do
-    description("Creates a Subscription")
-    produces("application/json")
-
-    parameters do
-      subscription(:body, Schema.ref(:SubscriptionCreate), "Subscription create attrs")
-    end
-
-    response(201, "OK", Schema.ref(:SubscriptionResponse))
-    response(400, "Client Error")
   end
 
   def create(conn, %{"subscription" => subscription_params}) do
@@ -98,36 +76,12 @@ defmodule TdAuditWeb.SubscriptionController do
     {:ok, nil}
   end
 
-  swagger_path :show do
-    description("Show a Subscription")
-    produces("application/json")
-
-    parameters do
-      id(:path, :integer, "Subscription ID", required: true)
-    end
-
-    response(200, "OK", Schema.ref(:SubscriptionResponse))
-    response(400, "Client Error")
-  end
-
   def show(conn, %{"id" => id}) do
     with claims <- conn.assigns[:current_resource],
          subscription <- Subscriptions.get_subscription!(id),
          {:can, true} <- {:can, can?(claims, show(subscription))} do
       render(conn, "show.json", subscription: with_resource(subscription))
     end
-  end
-
-  swagger_path :update do
-    description("update a Subscription")
-    produces("application/json")
-
-    parameters do
-      subscription(:body, Schema.ref(:SubscriptionUpdate), "Subscription update attrs")
-    end
-
-    response(200, "OK", Schema.ref(:SubscriptionResponse))
-    response(400, "Client Error")
   end
 
   def update(conn, %{"id" => id, "subscription" => subscription_params}) do
@@ -140,18 +94,6 @@ defmodule TdAuditWeb.SubscriptionController do
       |> put_resp_header("location", Routes.subscription_path(conn, :show, subscription))
       |> render("show.json", subscription: subscription)
     end
-  end
-
-  swagger_path :delete do
-    description("Delete Subscription")
-    produces("application/json")
-
-    parameters do
-      id(:path, :integer, "Subscription ID", required: true)
-    end
-
-    response(204, "No Content")
-    response(400, "Client Error")
   end
 
   def delete(conn, %{"id" => id}) do
@@ -214,13 +156,4 @@ defmodule TdAuditWeb.SubscriptionController do
   end
 
   defp with_resource(subscription), do: subscription
-
-  swagger_path :index_by_user do
-    description("List of user subscriptions")
-    response(200, "OK", Schema.ref(:SubscriptionsResponse))
-
-    parameters do
-      filters(:body, Schema.ref(:SubscriptionSearchFilters), "Subscription update attrs")
-    end
-  end
 end

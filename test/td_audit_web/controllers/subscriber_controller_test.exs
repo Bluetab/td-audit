@@ -3,7 +3,6 @@ defmodule TdAuditWeb.SubscriberControllerTest do
   New test for the subscriber controller
   """
   use TdAuditWeb.ConnCase
-  use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
   setup %{conn: conn} do
     subscriber = insert(:subscriber)
@@ -12,13 +11,12 @@ defmodule TdAuditWeb.SubscriberControllerTest do
 
   describe "GET /api/subscribers" do
     @tag :admin_authenticated
-    test "lists all subscribers", %{conn: conn, swagger_schema: schema, subscriber: subscriber} do
+    test "lists all subscribers", %{conn: conn, subscriber: subscriber} do
       %{id: id, type: type, identifier: identifier} = subscriber
 
       assert %{"data" => [data]} =
                conn
                |> get(Routes.subscriber_path(conn, :index))
-               |> validate_resp_schema(schema, "SubscribersResponse")
                |> json_response(:ok)
 
       assert %{"id" => ^id, "type" => ^type, "identifier" => ^identifier} = data
@@ -27,13 +25,12 @@ defmodule TdAuditWeb.SubscriberControllerTest do
 
   describe "GET /api/subscribers/:id" do
     @tag :admin_authenticated
-    test "renders a subscriber", %{conn: conn, swagger_schema: schema, subscriber: subscriber} do
+    test "renders a subscriber", %{conn: conn, subscriber: subscriber} do
       %{id: id, type: type, identifier: identifier} = subscriber
 
       assert %{"data" => data} =
                conn
                |> get(Routes.subscriber_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriberResponse")
                |> json_response(:ok)
 
       assert %{"id" => ^id, "type" => ^type, "identifier" => ^identifier} = data
@@ -42,7 +39,7 @@ defmodule TdAuditWeb.SubscriberControllerTest do
 
   describe "POST /api/subscribers" do
     @tag :admin_authenticated
-    test "renders a subscriber when data is valid", %{conn: conn, swagger_schema: schema} do
+    test "renders a subscriber when data is valid", %{conn: conn} do
       params = %{
         "type" => "role",
         "identifier" => "data_owner"
@@ -51,7 +48,6 @@ defmodule TdAuditWeb.SubscriberControllerTest do
       assert %{"data" => data} =
                conn
                |> post(Routes.subscriber_path(conn, :create), subscriber: params)
-               |> validate_resp_schema(schema, "SubscriberResponse")
                |> json_response(:created)
 
       assert %{"id" => _id} = data
