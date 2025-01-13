@@ -32,17 +32,14 @@ Run all aplication tests with `mix test`
 - DB_SSL_CACERTFILE: path of the certification authority cert file "/path/to/ca.crt", required when DB_SSL is true.
 - DB_SSL_VERSION: available versions are tlsv1.2, tlsv1.3 by default is tlsv1.2.
 
-
 ## Built With
 
 - [Phoenix](http://www.phoenixframework.org/) - Web framework
 - [Ecto](http://www.phoenixframework.org/) - Phoenix and Ecto integration
 - [Postgrex](http://hexdocs.pm/postgrex/) - PostgreSQL driver for Elixir
-- [Gettext](https://hexdocs.pm/gettext) - Internationalization and localization support for Elixir
 - [Cowboy](https://ninenines.eu) - HTTP server for Erlang/OTP
 - [credo](http://credo-ci.org/) - Static code analysis tool for the Elixir language
 - [guardian](https://github.com/ueberauth/guardian) - Authentication library
-- [phoenix_swagger](https://github.com/xerions/phoenix_swagger) - Swagger integration to Phoenix framework
 
 ## Authors
 

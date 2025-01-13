@@ -157,7 +157,7 @@ defmodule TdAuditWeb.EmailView do
   def render("job_status_info.html", event), do: render_sources(event)
 
   def render(template, %{event: event}) do
-    Logger.warn("Template #{template} not supported")
+    Logger.warning("Template #{template} not supported")
 
     event
     |> Map.take([:event, :payload])

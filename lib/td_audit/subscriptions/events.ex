@@ -192,7 +192,8 @@ defmodule TdAudit.Subscriptions.Events do
        ) do
     query
     |> join(:inner_lateral, [e], fragment("jsonb_array_elements(? -> 'domain_ids')", e.payload),
-      as: :domain_ids
+      as: :domain_ids,
+      on: true
     )
     |> where([e], e.event in ^events)
     |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
@@ -214,13 +215,15 @@ defmodule TdAudit.Subscriptions.Events do
     query
     # Flatten payload domain_ids list of lists
     |> join(:inner_lateral, [e], fragment("jsonb_array_elements(? -> 'domain_ids')", e.payload),
-      as: :domain_ids_arrays
+      as: :domain_ids_arrays,
+      on: true
     )
     |> join(
       :inner_lateral,
       [e, domain_ids_arrays],
       fragment("jsonb_array_elements(?)", domain_ids_arrays),
-      as: :domain_ids_flattened
+      as: :domain_ids_flattened,
+      on: true
     )
     |> where([e], e.event in ^events)
     |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))

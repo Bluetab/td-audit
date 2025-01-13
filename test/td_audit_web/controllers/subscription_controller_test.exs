@@ -1,6 +1,5 @@
 defmodule TdAuditWeb.SubscriptionControllerTest do
   use TdAuditWeb.ConnCase
-  use PhoenixSwagger.SchemaTest, "priv/static/swagger.json"
 
   setup %{conn: conn} do
     [conn: put_req_header(conn, "accept", "application/json")]
@@ -9,15 +8,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
   describe "index" do
     @tag :admin_authenticated
     test "lists all subscriptions", %{
-      conn: conn,
-      swagger_schema: schema
+      conn: conn
     } do
       %{id: subscription_id} = insert(:subscription)
 
       assert %{"data" => [data]} =
                conn
                |> get(Routes.subscription_path(conn, :index))
-               |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
       assert %{"id" => ^subscription_id} = data
@@ -31,14 +28,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :admin_authenticated
-    test "lists all subscriptions filtered", %{conn: conn, swagger_schema: schema} do
+    test "lists all subscriptions filtered", %{conn: conn} do
       %{id: id, subscriber_id: subscriber_id} = insert(:subscription)
       _other = insert(:subscription)
 
       assert %{"data" => [data]} =
                conn
                |> get(Routes.subscription_path(conn, :index, subscriber_id: subscriber_id))
-               |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
       assert %{"id" => ^id, "subscriber" => %{"id" => ^subscriber_id}} = data
@@ -49,8 +45,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag :authenticated_user
     test "lists all user subscriptions", %{
       conn: conn,
-      claims: %{user_id: user_id},
-      swagger_schema: schema
+      claims: %{user_id: user_id}
     } do
       %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
 
@@ -76,7 +71,6 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{"data" => data} =
                conn
                |> post(Routes.subscription_path(conn, :index_by_user), filters)
-               |> validate_resp_schema(schema, "SubscriptionsResponse")
                |> json_response(:ok)
 
       data_ids = Enum.map(data, &Map.get(&1, "id"))
@@ -93,13 +87,12 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :admin_authenticated
-    test "renders a subscription", %{conn: conn, swagger_schema: schema} do
+    test "renders a subscription", %{conn: conn} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} = insert(:subscription)
 
       assert %{"data" => data} =
                conn
                |> get(Routes.subscription_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:ok)
 
       assert %{
@@ -112,14 +105,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :admin_authenticated
-    test "renders a subscription with concept resource", %{conn: conn, swagger_schema: schema} do
+    test "renders a subscription with concept resource", %{conn: conn} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:concept_subscription, resource_id: 1)
 
       assert %{"data" => data} =
                conn
                |> get(Routes.subscription_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:ok)
 
       assert %{
@@ -135,14 +127,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :admin_authenticated
-    test "renders a subscription with domains resource", %{conn: conn, swagger_schema: schema} do
+    test "renders a subscription with domains resource", %{conn: conn} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:domains_subscription, resource_id: 2)
 
       assert %{"data" => data} =
                conn
                |> get(Routes.subscription_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:ok)
 
       assert %{
@@ -157,14 +148,13 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :admin_authenticated
-    test "renders a subscription with rule resource", %{conn: conn, swagger_schema: schema} do
+    test "renders a subscription with rule resource", %{conn: conn} do
       %{id: id, periodicity: periodicity, subscriber_id: subscriber_id} =
         insert(:rule_subscription, resource_id: 3)
 
       assert %{"data" => data} =
                conn
                |> get(Routes.subscription_path(conn, :show, id))
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:ok)
 
       assert %{
@@ -181,7 +171,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
 
   describe "create subscription" do
     @tag :admin_authenticated
-    test "renders a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
+    test "renders a subscription when data is valid", %{conn: conn} do
       %{id: subscriber_id} = insert(:subscriber)
 
       params = string_params_for(:subscription, subscriber_id: subscriber_id)
@@ -189,7 +179,6 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{"data" => data} =
                conn
                |> post(Routes.subscription_path(conn, :create), subscription: params)
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:created)
 
       assert %{
@@ -204,8 +193,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag :authenticated_user
     test "creating a subscription without subscriber identifier will use current user", %{
       conn: conn,
-      claims: claims,
-      swagger_schema: schema
+      claims: claims
     } do
       params =
         :subscription
@@ -215,7 +203,6 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{"data" => data} =
                conn
                |> post(Routes.subscription_path(conn, :create), subscription: params)
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:created)
 
       subscriber_id = "#{claims.user_id}"
@@ -279,8 +266,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag :authenticated_user
     test "can create a subscription with source resource", %{
       conn: conn,
-      claims: claims,
-      swagger_schema: schema
+      claims: claims
     } do
       scope_params =
         string_params_for(:scope,
@@ -297,7 +283,6 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
       assert %{"data" => data} =
                conn
                |> post(Routes.subscription_path(conn, :create), subscription: params)
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:created)
 
       subscriber_id = "#{claims.user_id}"
@@ -309,8 +294,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     @tag :authenticated_user
     test "updates a subscription when data is valid", %{
       conn: conn,
-      claims: %{user_id: user_id},
-      swagger_schema: schema
+      claims: %{user_id: user_id}
     } do
       %{id: subscriber_id} = insert(:subscriber, identifier: "#{user_id}", type: "user")
 
@@ -339,7 +323,6 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
                |> put(Routes.subscription_path(conn, :update, subscription),
                  subscription: update_params
                )
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:ok)
 
       assert %{
@@ -374,7 +357,7 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
     end
 
     @tag :admin_authenticated
-    test "admin updates a subscription when data is valid", %{conn: conn, swagger_schema: schema} do
+    test "admin updates a subscription when data is valid", %{conn: conn} do
       %{id: subscriber_id} = insert(:subscriber, identifier: "Data Owner", type: "role")
 
       scope =
@@ -405,7 +388,6 @@ defmodule TdAuditWeb.SubscriptionControllerTest do
                |> put(Routes.subscription_path(conn, :update, subscription),
                  subscription: update_params
                )
-               |> validate_resp_schema(schema, "SubscriptionResponse")
                |> json_response(:ok)
 
       assert %{
