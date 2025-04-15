@@ -84,7 +84,9 @@ defmodule TdAudit.Subscriptions.Filters do
 
   defp do_valid_content(nil, name, _value),
     do:
-      Keyword.new([{String.to_atom(name), {"missing field on template", [validation: :required]}}])
+      Keyword.new([
+        {String.to_atom(name), {"missing field on template", [validation: :required]}}
+      ])
 
   defp do_valid_content(%{"values" => %{"fixed" => values}}, name, value) do
     case value in values do
