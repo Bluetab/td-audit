@@ -50,12 +50,20 @@ if config_env() == :prod do
       ]
     ]
 
+  email_tls_versions =
+    "SMTP_TLS_VERSIONS"
+    |> System.get_env("tlsv1.2")
+    |> String.split(",")
+    |> Enum.map(&String.to_atom/1)
+
   config :td_audit, TdAudit.Notifications.Mailer,
     server: System.get_env("SMTP_SERVER"),
     port: System.get_env("SMTP_PORT"),
     username: System.get_env("SMTP_USERNAME"),
     password: System.get_env("SMTP_PASSWORD"),
     tls: System.get_env("SMTP_TLS", "always") |> String.to_atom(),
+    allowed_tls_versions: email_tls_versions,
+    tls_verify: System.get_env("SMTP_TLS_VERIFY", "verify_none") |> String.to_atom(),
     ssl: false,
     retries: 3
 
