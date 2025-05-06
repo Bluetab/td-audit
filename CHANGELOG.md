@@ -12,6 +12,12 @@
 
 - License td-cache and td-df-lib
 
+## [7.0.1] 2025-05-06
+
+### Fixed
+
+- [TD-7244] Fixed email notifications are not being sent
+
 ## [7.0.0] 2025-01-13
 
 ### Changed
