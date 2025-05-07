@@ -1,5 +1,11 @@
 # Changelog
 
+## [7.0.2] 2025-05-07
+
+### Fixed
+
+- [TD-7244] Fixed email notifications are not being sent
+
 ## [7.0.0] 2025-01-13
 
 ### Changed
