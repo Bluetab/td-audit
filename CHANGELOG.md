@@ -1,10 +1,22 @@
 # Changelog
 
+## [7.5.1] 2025-05-07
+
+### Fixed
+
+- [TD-7244] Fixed email notifications are not being sent
+
 ## [7.5.0] 2025-04-30
 
 ### Fixed
 
 [TD-7226] Enhance SSL configuration handling in production
+
+## [7.4.2] 2025-05-07
+
+### Fixed
+
+- [TD-7244] (Hotfix 7.0.2 propagation) Fixed email notifications are not being sent
 
 ## [7.4.0] 2025-04-09
 
@@ -12,7 +24,7 @@
 
 - License td-cache and td-df-lib
 
-## [7.0.1] 2025-05-06
+## [7.0.2] 2025-05-07
 
 ### Fixed
 
