@@ -1,10 +1,22 @@
 # Changelog
 
+## [7.4.2] 2025-05-07
+
+### Fixed
+
+- [TD-7244] (Hotfix 7.0.2 propagation) Fixed email notifications are not being sent
+
 ## [7.4.0] 2025-04-09
 
 ### Changed
 
 - License td-cache and td-df-lib
+
+## [7.0.2] 2025-05-07
+
+### Fixed
+
+- [TD-7244] Fixed email notifications are not being sent
 
 ## [7.0.0] 2025-01-13
 
