@@ -73,6 +73,12 @@ if config_env() == :prod do
     |> String.split(",")
     |> Enum.map(&String.to_atom/1)
 
+  email_tls_versions =
+    "SMTP_TLS_VERSIONS"
+    |> System.get_env("tlsv1.2")
+    |> String.split(",")
+    |> Enum.map(&String.to_atom/1)
+
   config :td_audit, TdAudit.Notifications.Mailer,
     server: System.get_env("SMTP_SERVER"),
     port: System.get_env("SMTP_PORT"),

@@ -24,7 +24,7 @@
 
 - License td-cache and td-df-lib
 
-## [7.0.1] 2025-05-06
+## [7.0.2] 2025-05-07
 
 ### Fixed
 
