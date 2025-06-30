@@ -33,3 +33,5 @@ td_audit-*.tar
 .elixir_ls
 TODO.*
 mise.toml
+
+env.sh
