@@ -1,14 +1,11 @@
 # Changelog
 
-<<<<<<< HEAD
-## [Unreleased]
+## [7.11.0] 2025-10-13
 
 ### Changed
 
 - [TD-7401] Update `td-cache` and `td-df-lib` versions
 
-=======
->>>>>>> d6da57910e5b39bc6d0226a98f749d1449851aaf
 ## [7.7.0] 2025-06-30
 
 ### Added
