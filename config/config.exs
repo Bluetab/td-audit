@@ -47,6 +47,15 @@ config :td_audit, TdAudit.Auth.Guardian,
 config :td_audit, concepts_path: "/concepts"
 config :td_audit, rules_path: "/rules"
 
+config :td_cache, :audit,
+  service: "td_audit",
+  stream: "audit:events"
+
+config :td_cache, :event_stream,
+  consumer_id: "default",
+  consumer_group: "audit",
+  streams: []
+
 config :td_audit, TdAudit.Notifications.Mailer, adapter: Bamboo.SMTPAdapter
 
 config :td_audit, TdAudit.Notifications.Email,
