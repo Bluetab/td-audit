@@ -271,4 +271,108 @@ defmodule TdAudit.AuditTest do
       assert Audit.max_event_id() == 123_456_789
     end
   end
+
+  describe "list_events/1 enriches target_name" do
+    test "returns payload with target_name when already provided" do
+      target_name = "Already Provided Name"
+
+      %{id: event_id} =
+        insert(:event,
+          payload: %{
+            "target_id" => 123,
+            "target_type" => "business_concept",
+            "target_name" => target_name
+          }
+        )
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["target_name"] == target_name
+    end
+
+    test "enriches target_name for business_concept from ConceptCache" do
+      %{id: concept_id, name: concept_name} = CacheHelpers.put_concept()
+
+      %{id: event_id} =
+        insert(:event,
+          payload: %{
+            "target_id" => concept_id,
+            "target_type" => "business_concept"
+          }
+        )
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["target_name"] == concept_name
+    end
+
+    test "returns payload unchanged when concept not found in cache" do
+      non_existent_id = 999_999
+
+      %{id: event_id} =
+        insert(:event,
+          payload: %{
+            "target_id" => non_existent_id,
+            "target_type" => "business_concept"
+          }
+        )
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["target_id"] == non_existent_id
+      assert payload["target_type"] == "business_concept"
+      refute Map.has_key?(payload, "target_name")
+    end
+
+    test "returns payload unchanged when data_structure not found in cache" do
+      non_existent_id = 999_999
+
+      %{id: event_id} =
+        insert(:event,
+          payload: %{
+            "target_id" => non_existent_id,
+            "target_type" => "data_structure"
+          }
+        )
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["target_id"] == non_existent_id
+      assert payload["target_type"] == "data_structure"
+      refute Map.has_key?(payload, "target_name")
+    end
+
+    test "returns payload unchanged when target_type is unknown" do
+      %{id: event_id} =
+        insert(:event,
+          payload: %{
+            "target_id" => 123,
+            "target_type" => "unknown_type"
+          }
+        )
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["target_id"] == 123
+      assert payload["target_type"] == "unknown_type"
+      refute Map.has_key?(payload, "target_name")
+    end
+
+    test "returns payload unchanged when no target_id in payload" do
+      %{id: event_id} = insert(:event, payload: %{"some_field" => "some_value"})
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["some_field"] == "some_value"
+      refute Map.has_key?(payload, "target_name")
+    end
+
+    test "returns payload unchanged when target_id is not an integer" do
+      %{id: event_id} =
+        insert(:event,
+          payload: %{
+            "target_id" => "string_id",
+            "target_type" => "business_concept"
+          }
+        )
+
+      assert [%{id: ^event_id, payload: payload}] = Audit.list_events(%{"resource_id" => 42})
+      assert payload["target_id"] == "string_id"
+      refute Map.has_key?(payload, "target_name")
+    end
+  end
 end
