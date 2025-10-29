@@ -6,7 +6,6 @@
 
 - [TD-7298] Add `target_name` enrichment to audit events for data structures and business concepts
 
-
 ## [7.11.0] 2025-10-13
 
 ### Changed
