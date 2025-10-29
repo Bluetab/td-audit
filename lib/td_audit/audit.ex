@@ -8,6 +8,8 @@ defmodule TdAudit.Audit do
   alias TdAudit.Audit.Event
   alias TdAudit.QuerySupport
   alias TdAudit.Repo
+  alias TdCache.ConceptCache
+  alias TdCache.StructureCache
   alias TdCache.UserCache
 
   @payload_resource_types ["data_structure_note"]
@@ -44,6 +46,10 @@ defmodule TdAudit.Audit do
     |> page_limit(cursor_params)
     |> order(cursor_params)
     |> Repo.all()
+    |> Enum.map(fn event ->
+      payload = get_target_name(event.payload)
+      Map.put(event, :payload, payload)
+    end)
     |> Enum.map(fn %{user_id: user_id} = e -> %{e | user: get_user(user_map, user_id)} end)
   end
 
@@ -60,6 +66,32 @@ defmodule TdAudit.Audit do
   defp get_user(user_map, id) do
     Map.get(user_map, id, %{id: id, full_name: "deleted", user_name: "deleted"})
   end
+
+  defp get_target_name(payload = %{"target_name" => target_name}) when is_binary(target_name) do
+    payload
+  end
+
+  defp get_target_name(payload = %{"target_id" => target_id, "target_type" => target_type})
+       when is_integer(target_id) do
+    case target_type do
+      "data_structure" ->
+        case StructureCache.get(target_id) do
+          {:ok, %{name: name}} when is_binary(name) -> Map.put(payload, "target_name", name)
+          _ -> payload
+        end
+
+      "business_concept" ->
+        case ConceptCache.get(target_id) do
+          {:ok, %{name: name}} when is_binary(name) -> Map.put(payload, "target_name", name)
+          _ -> payload
+        end
+
+      _ ->
+        payload
+    end
+  end
+
+  defp get_target_name(payload) when is_map(payload), do: payload
 
   @doc """
   Gets a single event.
