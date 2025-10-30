@@ -37,4 +37,47 @@ defmodule TdAudit.BroadwayTest do
     ref = Broadway.test_message(TdAudit.Broadway, :test)
     assert_receive {:ack, ^ref, [] = _successful_messages, [%{data: :test}] = _failure_messages}
   end
+
+  test "handles invalid data that is not :test" do
+    ref = Broadway.test_message(TdAudit.Broadway, "invalid_data")
+
+    assert_receive {:ack, ^ref, [] = _successful_messages,
+                    [%{data: "invalid_data"}] = _failure_messages}
+  end
+
+  test "handles empty data" do
+    ref = Broadway.test_message(TdAudit.Broadway, %{})
+    assert_receive {:ack, ^ref, [] = _successful_messages, [%{data: data}] = _failure_messages}
+    assert {:error, _changeset} = data
+  end
+
+  test "handles changeset errors" do
+    # Create a message that will result in a changeset error
+    ref =
+      Broadway.test_message(TdAudit.Broadway, %{
+        event: "test_event",
+        id: "1598765432100-0",
+        payload: "invalid_json",
+        resource_id: "12345",
+        resource_type: "foo",
+        service: "td_audit_test",
+        stream: "audit:events",
+        ts: "invalid_timestamp",
+        user_id: "54321"
+      })
+
+    assert_receive {:ack, ^ref, [] = _successful_messages, [%{data: data}] = _failure_messages}
+    assert {:error, _changeset} = data
+  end
+
+  test "transform function creates message correctly" do
+    acknowledger = %{ack: fn -> :ok end}
+
+    message =
+      TdAudit.Broadway.transform(%{id: "test_id", event: "test"}, acknowledger: acknowledger)
+
+    assert message.data == %{id: "test_id", event: "test"}
+    assert message.acknowledger == acknowledger
+    assert message.metadata == %{id: "test_id"}
+  end
 end
