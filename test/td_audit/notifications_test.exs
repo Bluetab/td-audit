@@ -101,8 +101,11 @@ defmodule TdAudit.NotificationsTest do
               %{
                 max_event_id: ^event_id_2,
                 notifications: notifications,
-                self_reported_events: [%{id: ^event_id}, %{id: ^event_id_2}]
+                self_reported_events: self_reported_events
               }} = Notifications.create(periodicity: "minutely")
+
+      sorted_events = Enum.sort_by(self_reported_events, & &1.id)
+      assert [%{id: ^event_id}, %{id: ^event_id_2}] = sorted_events
 
       assert [%{event_ids: [^event_id, ^event_id_2], recipient_ids: [^user]}] =
                Map.values(notifications)
