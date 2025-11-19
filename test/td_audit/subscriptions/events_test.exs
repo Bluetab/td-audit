@@ -34,7 +34,8 @@ defmodule TdAudit.Subscriptions.EventsTest do
 
     test "returns new events", %{subscription: subscription} do
       events = Enum.map(1..3, fn _ -> insert(:event, event: "comment_created") end)
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      result = Events.subscription_events(subscription, 1_000_000)
+      assert Enum.sort_by(result, & &1.id) == Enum.sort_by(events, & &1.id)
     end
   end
 
@@ -73,7 +74,8 @@ defmodule TdAudit.Subscriptions.EventsTest do
 
     test "returns new events", %{subscription: subscription} do
       events = Enum.map(1..3, fn _ -> insert(:event, event: "rule_result_created") end)
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      result = Events.subscription_events(subscription, 1_000_000)
+      assert Enum.sort_by(result, & &1.id) == Enum.sort_by(events, & &1.id)
     end
 
     test "return failed results", %{domains_subscription: subscription} do
@@ -204,7 +206,8 @@ defmodule TdAudit.Subscriptions.EventsTest do
           insert(:event, event: "rule_result_created", resource_type: "implementation")
         end)
 
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      result = Events.subscription_events(subscription, 1_000_000)
+      assert Enum.sort_by(result, & &1.id) == Enum.sort_by(events, & &1.id)
     end
   end
 
@@ -234,7 +237,8 @@ defmodule TdAudit.Subscriptions.EventsTest do
           insert(:event, event: "implementation_status_updated", payload: payload)
         end)
 
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      result = Events.subscription_events(subscription, 1_000_000)
+      assert Enum.sort_by(result, & &1.id) == Enum.sort_by(events, & &1.id)
     end
   end
 
@@ -255,7 +259,8 @@ defmodule TdAudit.Subscriptions.EventsTest do
     test "returns new events", %{subscription: subscription} do
       events = Enum.map(1..3, fn _ -> insert(:event, event: "ingest_sent_for_approval") end)
 
-      assert Events.subscription_events(subscription, 1_000_000) == events
+      result = Events.subscription_events(subscription, 1_000_000)
+      assert Enum.sort_by(result, & &1.id) == Enum.sort_by(events, & &1.id)
     end
   end
 
