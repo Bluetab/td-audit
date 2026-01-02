@@ -306,6 +306,257 @@ defmodule TdAudit.Notifications.EmailTest do
                {"Dominio:", ^domain_name}
              ] = events
     end
+
+    test "renders score status updated notification" do
+      %{id: user_id} = CacheHelpers.put_user()
+      control_mode = "count"
+      result = 10
+
+      score_criteria = %{
+        "goal" => 10,
+        "maximum" => 100
+      }
+
+      payload =
+        string_params_for(
+          :payload,
+          control_mode: control_mode,
+          result: %{"result" => result, "result_message" => "meets_goal"},
+          score_criteria: %{"count" => score_criteria},
+          status: "succeeded",
+          execution_timestamp: "2025-02-12T11:46:39Z",
+          quality_control_id: 10,
+          version: 1,
+          name: "quality control name",
+          message: "Execution successful",
+          score_id: 1
+        )
+
+      event =
+        build(:event,
+          event: "score_status_updated",
+          payload: payload,
+          resource_type: "score",
+          resource_id: 1
+        )
+
+      {:ok, email} =
+        :notification
+        |> insert(events: [event], recipient_ids: [user_id])
+        |> Email.create()
+
+      assert email.subject == "👓 Alert: New score result"
+
+      assert [{link, header, content}] =
+               email
+               |> then(fn %{html_body: html_body} -> html_body end)
+               |> Floki.parse_document!()
+               |> EmailParser.parse_layout()
+               |> EmailParser.parse_events()
+
+      assert link =~ ~r|.*/scores/1|
+      assert header == "quality control name"
+
+      assert content == [
+               {"Date:", "2025-02-12T11:46:39Z"},
+               {"Status:", "succeeded"},
+               {"Control Mode:", "Record Count"},
+               {"Target:", "10"},
+               {"Threshold:", "100"},
+               {"Record Count:", "10"},
+               {"Result:", "Meets goal"},
+               {"Message:", "Execution successful"}
+             ]
+    end
+
+    test "renders quality control version deleted notification" do
+      user = CacheHelpers.put_user()
+      %{id: domain_id, name: domain_name} = CacheHelpers.put_domain()
+      quality_control_id = System.unique_integer([:positive])
+
+      payload =
+        string_params_for(:payload,
+          quality_control_id: quality_control_id,
+          domain_ids: [domain_id],
+          version: 1,
+          name: "quality control name"
+        )
+
+      event =
+        build(:event,
+          event: "quality_control_version_deleted",
+          payload: payload,
+          resource_type: "quality_control",
+          resource_id: quality_control_id,
+          user: user
+        )
+
+      {:ok, email} =
+        :notification
+        |> insert(events: [event], recipient_ids: [user.id])
+        |> Email.create()
+
+      assert email.subject == "👓 Alert: Quality control notification"
+
+      assert [{link, header, content}] =
+               email
+               |> then(fn %{html_body: html_body} -> html_body end)
+               |> Floki.parse_document!()
+               |> EmailParser.parse_layout()
+               |> EmailParser.parse_events()
+
+      assert link == nil
+      assert header == "quality control name"
+
+      assert content == [
+               {"Event:", "Quality control version deleted"},
+               {"Domain:", domain_name},
+               {"User:", user.full_name}
+             ]
+    end
+
+    test "renders quality control created notification" do
+      user = CacheHelpers.put_user()
+      %{id: domain_id, name: domain_name} = CacheHelpers.put_domain()
+      quality_control_id = System.unique_integer([:positive])
+
+      payload =
+        string_params_for(:payload,
+          quality_control_id: quality_control_id,
+          domain_ids: [domain_id],
+          version: 1,
+          name: "quality control name",
+          status: "published"
+        )
+
+      event =
+        build(:event,
+          event: "quality_control_created",
+          payload: payload,
+          resource_type: "quality_control",
+          resource_id: quality_control_id,
+          user: user
+        )
+
+      {:ok, email} =
+        :notification
+        |> insert(events: [event], recipient_ids: [user.id])
+        |> Email.create()
+
+      assert email.subject == "👓 Alert: Quality control notification"
+
+      assert [{link, header, content}] =
+               email
+               |> then(fn %{html_body: html_body} -> html_body end)
+               |> Floki.parse_document!()
+               |> EmailParser.parse_layout()
+               |> EmailParser.parse_events()
+
+      assert link =~ ~r|.*/qualityControls/#{quality_control_id}/version/1|
+      assert header == "quality control name"
+
+      assert content == [
+               {"Event:", "Quality control created"},
+               {"Domain:", domain_name},
+               {"User:", user.full_name},
+               {"Status:", "published"}
+             ]
+    end
+
+    test "renders quality control version draft created notification" do
+      user = CacheHelpers.put_user()
+      %{id: domain_id, name: domain_name} = CacheHelpers.put_domain()
+      quality_control_id = System.unique_integer([:positive])
+
+      payload =
+        string_params_for(:payload,
+          quality_control_id: quality_control_id,
+          domain_ids: [domain_id],
+          version: 1,
+          name: "quality control name",
+          status: "draft"
+        )
+
+      event =
+        build(:event,
+          event: "quality_control_version_draft_created",
+          payload: payload,
+          resource_type: "quality_control",
+          resource_id: quality_control_id,
+          user: user
+        )
+
+      {:ok, email} =
+        :notification
+        |> insert(events: [event], recipient_ids: [user.id])
+        |> Email.create()
+
+      assert email.subject == "👓 Alert: Quality control notification"
+
+      assert [{link, header, content}] =
+               email
+               |> then(fn %{html_body: html_body} -> html_body end)
+               |> Floki.parse_document!()
+               |> EmailParser.parse_layout()
+               |> EmailParser.parse_events()
+
+      assert link =~ ~r|.*/qualityControls/#{quality_control_id}/version/1|
+      assert header == "quality control name"
+
+      assert content == [
+               {"Event:", "New quality control draft version"},
+               {"Domain:", domain_name},
+               {"User:", user.full_name}
+             ]
+    end
+
+    test "renders quality control version status updated notification" do
+      user = CacheHelpers.put_user()
+      %{id: domain_id, name: domain_name} = CacheHelpers.put_domain()
+      quality_control_id = System.unique_integer([:positive])
+
+      payload =
+        string_params_for(:payload,
+          quality_control_id: quality_control_id,
+          domain_ids: [domain_id],
+          version: 1,
+          name: "quality control name",
+          status: "published"
+        )
+
+      event =
+        build(:event,
+          event: "quality_control_version_status_updated",
+          payload: payload,
+          resource_type: "quality_control",
+          resource_id: quality_control_id,
+          user: user
+        )
+
+      {:ok, email} =
+        :notification
+        |> insert(events: [event], recipient_ids: [user.id])
+        |> Email.create()
+
+      assert email.subject == "👓 Alert: Quality control notification"
+
+      assert [{link, header, content}] =
+               email
+               |> then(fn %{html_body: html_body} -> html_body end)
+               |> Floki.parse_document!()
+               |> EmailParser.parse_layout()
+               |> EmailParser.parse_events()
+
+      assert link =~ ~r|.*/qualityControls/#{quality_control_id}/version/1|
+      assert header == "quality control name"
+
+      assert content == [
+               {"Event:", "Quality control status updated"},
+               {"Status:", "published"},
+               {"Domain:", domain_name},
+               {"User:", user.full_name}
+             ]
+    end
   end
 
   describe "create/1 with custom message" do
@@ -533,6 +784,7 @@ defmodule TdAudit.Notifications.EmailTest do
         build(:event, event: "comment_created"),
         build(:event, event: "concept_published")
       ]
+
       notification = build(:notification, events: events, recipient_ids: [])
 
       assert {:error, :no_recipients} = Email.create(notification)
@@ -601,6 +853,7 @@ defmodule TdAudit.Notifications.EmailTest do
 
     test "truncate function with long text" do
       long_text = String.duplicate("a", 100)
+
       message = %{
         recipients: ["test@example.com"],
         who: %{full_name: "John Doe"},
@@ -614,6 +867,7 @@ defmodule TdAudit.Notifications.EmailTest do
 
     test "truncate function with short text" do
       short_text = "short"
+
       message = %{
         recipients: ["test@example.com"],
         who: %{full_name: "John Doe"},

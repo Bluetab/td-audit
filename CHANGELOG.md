@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- [TD-7682] Email notifications form quality control and score events
+
 ## [7.13.0] 2025-11-18
 
 ### Added

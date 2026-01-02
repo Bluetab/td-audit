@@ -73,6 +73,112 @@ defmodule TdAudit.SubscriptionsTest do
     assert {:error, %Ecto.Changeset{}} = Subscriptions.create_subscription(subscriber, %{})
   end
 
+  test "create_subscription/1 with quality_control_version_status_updated event creates a subscription" do
+    subscriber = insert(:subscriber)
+
+    params = %{
+      "periodicity" => "daily",
+      "scope" => %{
+        "events" => ["quality_control_version_status_updated"],
+        "resource_type" => "quality_control",
+        "resource_id" => 1,
+        "status" => [
+          "draft",
+          "pending_approval",
+          "rejected",
+          "published",
+          "versioned",
+          "deprecated"
+        ]
+      }
+    }
+
+    assert {:ok, %Subscription{} = _subscription} =
+             Subscriptions.create_subscription(subscriber, params)
+  end
+
+  test "create_subscription/1 with invalid quality_control_version_status_updated event returns error changeset" do
+    subscriber = insert(:subscriber)
+
+    params = %{
+      "periodicity" => "daily",
+      "scope" => %{
+        "events" => ["quality_control_version_status_updated"],
+        "resource_type" => "quality_control",
+        "resource_id" => 1,
+        "status" => ["invalid"]
+      }
+    }
+
+    assert {:error, %Ecto.Changeset{changes: %{scope: %{errors: errors}}}} =
+             Subscriptions.create_subscription(subscriber, params)
+
+    assert errors == [
+             status:
+               {"is invalid",
+                [
+                  validation: :inclusion,
+                  enum: [
+                    "draft",
+                    "pending_approval",
+                    "rejected",
+                    "published",
+                    "versioned",
+                    "deprecated"
+                  ]
+                ]}
+           ]
+  end
+
+  test "create_subscription/1 with score_status_updated event creates a subscription" do
+    subscriber = insert(:subscriber)
+
+    params = %{
+      "periodicity" => "daily",
+      "scope" => %{
+        "events" => ["score_status_updated"],
+        "resource_type" => "quality_control",
+        "resource_id" => 1,
+        "status" => [
+          "failed",
+          "succeeded"
+        ]
+      }
+    }
+
+    assert {:ok, %Subscription{} = _subscription} =
+             Subscriptions.create_subscription(subscriber, params)
+  end
+
+  test "create_subscription/1 with invalid score_status_updated event returns error changeset" do
+    subscriber = insert(:subscriber)
+
+    params = %{
+      "periodicity" => "daily",
+      "scope" => %{
+        "events" => ["score_status_updated"],
+        "status" => ["invalid"],
+        "resource_type" => "quality_control",
+        "resource_id" => 1
+      }
+    }
+
+    assert {:error, %Ecto.Changeset{changes: %{scope: %{errors: errors}}}} =
+             Subscriptions.create_subscription(subscriber, params)
+
+    assert errors == [
+             status:
+               {"is invalid",
+                [
+                  validation: :inclusion,
+                  enum: [
+                    "failed",
+                    "succeeded"
+                  ]
+                ]}
+           ]
+  end
+
   test "update_subscription/1 with valid data updates a subscription" do
     subscription = insert(:subscription, periodicity: "daily")
 
