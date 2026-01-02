@@ -83,10 +83,7 @@ defmodule TdAudit.EmailParser do
                        [
                          {"td", _,
                           [
-                            {"span", _,
-                             [
-                               {"a", [{"href", link}, _], header}
-                             ]}
+                            {"span", _, header_content}
                           ]}
                        ]}
                     ]}
@@ -98,7 +95,20 @@ defmodule TdAudit.EmailParser do
         ]}
      ]} = event
 
+    {link, header} = parse_header_with_link(header_content)
     {link, parse_header(header), parse_event_content(content)}
+  end
+
+  defp parse_header_with_link([{"a", [{"href", link}, _], header}]) do
+    {link, header}
+  end
+
+  defp parse_header_with_link(header) when is_list(header) do
+    {nil, header}
+  end
+
+  defp parse_header_with_link(header) do
+    {nil, [header]}
   end
 
   defp parse_event_content(content) do
@@ -129,5 +139,13 @@ defmodule TdAudit.EmailParser do
   end
 
   defp parse_header([header]) when is_binary(header), do: String.trim(header)
+
+  defp parse_header(header) when is_list(header) do
+    header
+    |> Enum.filter(&is_binary/1)
+    |> Enum.join()
+    |> String.trim()
+  end
+
   defp parse_header(_), do: nil
 end

@@ -1,6 +1,8 @@
 defmodule TdAudit.BroadwayTest do
   use TdAudit.DataCase
 
+  import ExUnit.CaptureLog
+
   alias TdAudit.Audit.Event
 
   test "creates an event and sends an ack for a valid audit message" do
@@ -39,10 +41,15 @@ defmodule TdAudit.BroadwayTest do
   end
 
   test "handles invalid data that is not :test" do
-    ref = Broadway.test_message(TdAudit.Broadway, "invalid_data")
+    log =
+      capture_log(fn ->
+        ref = Broadway.test_message(TdAudit.Broadway, "invalid_data")
 
-    assert_receive {:ack, ^ref, [] = _successful_messages,
-                    [%{data: "invalid_data"}] = _failure_messages}
+        assert_receive {:ack, ^ref, [] = _successful_messages,
+                        [%{data: "invalid_data"}] = _failure_messages}
+      end)
+
+    assert log =~ "Invalid message \"invalid_data\""
   end
 
   test "handles empty data" do

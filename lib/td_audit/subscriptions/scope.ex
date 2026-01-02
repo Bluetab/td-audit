@@ -29,6 +29,20 @@ defmodule TdAudit.Subscriptions.Scope do
     "deprecated"
   ]
 
+  @valid_quality_control_version_statuses [
+    "draft",
+    "pending_approval",
+    "rejected",
+    "published",
+    "versioned",
+    "deprecated"
+  ]
+
+  @valid_score_statuses [
+    "failed",
+    "succeeded"
+  ]
+
   @primary_key false
 
   embedded_schema do
@@ -68,7 +82,9 @@ defmodule TdAudit.Subscriptions.Scope do
       "concept",
       "rule",
       "source",
-      "implementation"
+      "implementation",
+      "quality_control",
+      "score"
     ])
     |> validate_required([:events, :resource_type, :resource_id])
     |> update_change(:events, &sort_uniq/1)
@@ -81,8 +97,14 @@ defmodule TdAudit.Subscriptions.Scope do
       ["rule_result_created"] ->
         validate_status_changeset(changeset, params, @valid_rule_result_statuses)
 
+      ["score_status_updated"] ->
+        validate_status_changeset(changeset, params, @valid_score_statuses)
+
       ["implementation_status_updated"] ->
         validate_status_changeset(changeset, params, @valid_implementation_statuses)
+
+      ["quality_control_version_status_updated"] ->
+        validate_status_changeset(changeset, params, @valid_quality_control_version_statuses)
 
       ["status_changed"] ->
         validate_status_changeset(changeset, params, @valid_jobs_statuses)
