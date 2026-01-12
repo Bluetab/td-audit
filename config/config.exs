@@ -76,7 +76,9 @@ config :td_audit, TdAudit.Notifications.Email,
     rule_results: "👓 Alert: Data quality results detected",
     rules: "⚡ Alert: Rule notification",
     sources: "⚡ Alert: Source notification",
-    tags: "👓 Alert: Changes in tags"
+    tags: "👓 Alert: Changes in tags",
+    score_status: "👓 Alert: New score result",
+    quality_control: "👓 Alert: Quality control notification"
   ],
   headers: [
     comments: "The following comments have been added:",
@@ -91,7 +93,9 @@ config :td_audit, TdAudit.Notifications.Email,
     rule_results: "The following data quality results have been detected:",
     rules: "The following changes in rules have been detected",
     sources: "The following status changes have been detected over origin",
-    tags: "The following changes in tags have been detected over a structure:"
+    tags: "The following changes in tags have been detected over a structure:",
+    score_status: "The following score result has been detected",
+    quality_control: "The following changes in quality control have been detected"
   ],
   footer: "This message was sent by Truedat"
 

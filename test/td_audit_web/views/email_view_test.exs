@@ -157,7 +157,7 @@ defmodule TdAuditWeb.EmailViewTest do
     assert header == "implementation_key"
 
     assert [
-             {"Evento:", "Implementation created"},
+             {"Event:", "Implementation created"},
              {"Domain:", nil},
              {"User:", nil}
            ] = content
@@ -487,5 +487,62 @@ defmodule TdAuditWeb.EmailViewTest do
              {"Domains:", nil},
              {"Rule result date:", nil}
            ] = content
+  end
+
+  test "score_status_updated event: renders score result values" do
+    control_mode = "count"
+    result = 10
+
+    score_criteria = %{
+      "goal" => 10,
+      "maximum" => 100
+    }
+
+    payload =
+      string_params_for(
+        :payload,
+        control_mode: control_mode,
+        result: %{"result" => result, "result_message" => "meets_goal"},
+        score_criteria: %{"count" => score_criteria},
+        status: "succeeded",
+        execution_timestamp: "2025-02-12T11:46:39Z",
+        quality_control_id: 10,
+        version: 1,
+        name: "quality control name",
+        message: "Execution successful",
+        score_id: 1
+      )
+
+    assert [{link, header, content}] =
+             EmailView.render(
+               "score_status_updated.html",
+               %{
+                 event:
+                   build(:event,
+                     event: "score_status_updated",
+                     payload: payload,
+                     resource_type: "score",
+                     resource_id: 1
+                   )
+               }
+             )
+             |> Safe.to_iodata()
+             |> IO.iodata_to_binary()
+             |> Floki.parse_document!()
+             |> EmailParser.parse_events()
+
+    assert link =~ ~r|.*/scores/1|
+    assert header == "quality control name"
+
+    assert content == [
+             {"Date:", "2025-02-12T11:46:39Z"},
+             {"Status:", "succeeded"},
+             {"Control Mode:", "Record Count"},
+             {"Target:", "10"},
+             {"Threshold:", "100"},
+             {"Record Count:", "10"},
+             {"Result:", "Meets goal"},
+             {"Message:", "Execution successful"}
+           ]
   end
 end

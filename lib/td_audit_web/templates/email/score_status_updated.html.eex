@@ -1,15 +1,16 @@
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0; border-collapse: separate;">
   <tbody>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 15px; border-top: 1px solid #cccccc; border-bottom: 0; height: 10px; line-height: 10px; padding: 0 15px 0 16px; mso-line-height-rule: exactly;" height="10" >
+      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 15px;height: 10px; line-height: 10px; padding: 0 15px 0 16px; mso-line-height-rule: exactly;" height="10" >
         <% # There needs to be content in the cell to render in some clients %>
         &nbsp;
       </td>
     </tr>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; " >
+      <td style="padding: 0px; border-collapse: collapse; padding: 0 15px 0 16px; " >
         <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
           <tbody>
+            <tr>
               <td style="vertical-align: top; padding: 0px; border-collapse: collapse; padding-right: 5px; font-size: 20px; line-height: 30px; mso-line-height-rule: exactly;">
                 <span style="font-family: Arial, sans-serif; padding: 0; font-size: 20px; line-height: 30px; mso-text-raise: 2px; mso-line-height-rule: exactly; vertical-align: middle;">
                   <a href="<%= @uri %>" style="color: #3b73af; text-decoration: none;">
@@ -23,40 +24,73 @@
       </td>
     </tr>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; padding-top: 10px; padding-bottom: 5px;" >
+      <td style="padding: 0px; border-collapse: collapse; padding: 0 15px 0 16px; padding-top: 10px; padding-bottom: 5px;" >
         <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
           <tbody>
+            <%= if @domains do %>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Event:
+                <%= if is_list(@domains) and length(@domains) > 1, do: "Domains:", else: "Domain:" %>
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @event_name %>
+                <%= if is_list(@domains) do %>
+                  <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                    <%= for domain <- @domains do %>
+                      <li style="margin: 2px 0;"><%= domain %></li>
+                    <% end %>
+                  </ul>
+                <% else %>
+                  <%= @domains %>
+                <% end %>
               </td>
             </tr>
-            <tr>
+            <% end %>
+            <%= if @date do %>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Domain:
+                Date:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @domains %>
+                <%= @date %>
               </td>
             </tr>
+            <% end %>
+            <%= if @status do %>
             <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                User:
+                Status:
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @user %>
+                <%= @status %>
               </td>
             </tr>
+            <% end %>
+            <%= for {label, value} <- @values do %>
+            <tr>
+              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
+                <%= label %>:
+              </th>
+              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= value %>
+              </td>
+            </tr>
+            <% end %>
+            <%= if @message do %>
+            <tr>
+              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
+                Message:
+              </th>
+              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= @message %>
+              </td>
+            </tr>
+            <% end %>
           </tbody>
         </table>
       </td>
     </tr>
     <tr>
-      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 5px; line-height: 5px; border-top: 0; border-bottom: 1px solid #cccccc; mso-line-height-rule: exactly;" height="5" >
+      <td style="padding: 0px; border-collapse: collapse; color: #ffffff; padding: 0 15px 0 16px; height: 5px; line-height: 5px; mso-line-height-rule: exactly;" height="5" >
         <% # There needs to be content in the cell to render in some clients %>
         &nbsp;
       </td>

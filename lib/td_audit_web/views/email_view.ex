@@ -156,6 +156,64 @@ defmodule TdAuditWeb.EmailView do
   def render("job_status_warning.html", event), do: render_sources(event)
   def render("job_status_info.html", event), do: render_sources(event)
 
+  def render("quality_control_created.html", %{event: %{payload: payload} = event}) do
+    render("quality_control.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event),
+      status: payload["status"]
+    )
+  end
+
+  def render("quality_control_version_deleted.html", %{event: event}) do
+    render("quality_control.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: nil,
+      status: nil
+    )
+  end
+
+  def render("quality_control_version_draft_created.html", %{event: event}) do
+    render("quality_control.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      uri: uri(event),
+      status: nil
+    )
+  end
+
+  def render("quality_control_version_status_updated.html", %{event: %{payload: payload} = event}) do
+    render("quality_control_version_status_updated.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      status: payload["status"],
+      uri: uri(event)
+    )
+  end
+
+  def render("score_status_updated.html", %{event: %{payload: payload} = event}) do
+    render("score_status_updated.html",
+      event_name: event_name(event),
+      user: user_name(event),
+      name: EventView.resource_name(event),
+      domains: domain_path(event),
+      status: payload["status"],
+      date: TdAudit.Helpers.shift_zone(payload["execution_timestamp"]),
+      uri: uri(event),
+      message: payload["message"],
+      values: score_result_values(payload)
+    )
+  end
+
   def render(template, %{event: event}) do
     Logger.warning("Template #{template} not supported")
 
@@ -290,6 +348,12 @@ defmodule TdAuditWeb.EmailView do
   defp user_name(%{user: %{full_name: full_name}}), do: full_name
   defp user_name(_), do: nil
 
+  defp domain_path(%{payload: %{"current_domains_ids" => current_domains_ids}}) do
+    current_domains_ids
+    |> Map.values()
+    |> Enum.map(&build_domain_path/1)
+  end
+
   defp domain_path(%{payload: %{"domain_ids" => domain_ids}}) do
     build_domain_path(domain_ids)
   end
@@ -367,12 +431,35 @@ defmodule TdAuditWeb.EmailView do
 
   defp event_name(%{event: "rule_created"}), do: "Rule created"
 
+  defp event_name(%{event: "quality_control_created"}), do: "Quality control created"
+
+  defp event_name(%{event: "quality_control_version_deleted"}),
+    do: "Quality control version deleted"
+
+  defp event_name(%{event: "quality_control_version_draft_created"}),
+    do: "New quality control draft version"
+
+  defp event_name(%{event: "quality_control_version_status_updated"}),
+    do: "Quality control status updated"
+
+  defp event_name(%{event: "score_status_updated"}), do: "New score result"
+
   defp translate("goal"), do: "Target"
   defp translate("minimum"), do: "Threshold"
+  defp translate("maximum"), do: "Threshold"
   defp translate("records"), do: "Record Count"
   defp translate("errors"), do: "Error Count"
   defp translate("result"), do: "Result"
   defp translate("message"), do: "Message"
+  defp translate("count"), do: "Record Count"
+  defp translate("control_mode"), do: "Control Mode"
+  defp translate("result_message"), do: "Result"
+  defp translate("meets_goal"), do: "Meets goal"
+  defp translate("under_goal"), do: "Under goal"
+  defp translate("under_threshold"), do: "Under threshold"
+  defp translate("deviation"), do: "Deviation"
+  defp translate("percentage"), do: "Percentage"
+  defp translate("error_count"), do: "Error Count"
 
   defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
     case TdCache.StructureCache.get(id) do
@@ -394,4 +481,55 @@ defmodule TdAuditWeb.EmailView do
   defp grant_date(%{payload: %{"start_date" => start_date}}, "start_date"), do: start_date
 
   defp grant_date(%{payload: %{"end_date" => end_date}}, "end_date"), do: end_date
+
+  defp score_result_values(%{
+         "control_mode" => mode,
+         "result" => %{} = result,
+         "score_criteria" => %{} = score_criteria
+       }) do
+    result_values =
+      result
+      |> Map.merge(score_criteria)
+      |> Map.take(["result", "result_message", "deviation", "count", "percentage", "error_count"])
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Enum.map(fn
+        {"result", count} when mode == "count" ->
+          {translate(mode), Number.Delimit.number_to_delimited(count)}
+
+        {"result", ratio} ->
+          {translate(mode), Number.Percentage.number_to_percentage(ratio)}
+
+        {"result_message", message} ->
+          {translate("result_message"), translate(message)}
+
+        {"count", %{"goal" => goal, "maximum" => maximum}} ->
+          [
+            {translate("goal"), Number.Delimit.number_to_delimited(goal)},
+            {translate("maximum"), Number.Delimit.number_to_delimited(maximum)}
+          ]
+
+        {"error_count", %{"goal" => goal, "maximum" => maximum}} ->
+          [
+            {translate("goal"), Number.Delimit.number_to_delimited(goal)},
+            {translate("maximum"), Number.Delimit.number_to_delimited(maximum)}
+          ]
+
+        {"deviation", %{"goal" => goal, "maximum" => maximum}} ->
+          [
+            {translate("goal"), Number.Delimit.number_to_delimited(goal)},
+            {translate("maximum"), Number.Delimit.number_to_delimited(maximum)}
+          ]
+
+        {"percentage", %{"goal" => goal, "minimum" => minimum}} ->
+          [
+            {translate("goal"), Number.Delimit.number_to_delimited(goal)},
+            {translate("minimum"), Number.Delimit.number_to_delimited(minimum)}
+          ]
+      end)
+      |> List.flatten()
+
+    [{translate("control_mode"), translate(mode)} | result_values]
+  end
+
+  defp score_result_values(_), do: []
 end
