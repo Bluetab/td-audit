@@ -10,11 +10,16 @@
       <td style="padding: 0px; border-collapse: collapse; border-top: 0; border-bottom: 0; padding: 0 15px 0 16px; " >
         <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
           <tbody>
+            <tr>
               <td style="vertical-align: top; padding: 0px; border-collapse: collapse; padding-right: 5px; font-size: 20px; line-height: 30px; mso-line-height-rule: exactly;">
                 <span style="font-family: Arial, sans-serif; padding: 0; font-size: 20px; line-height: 30px; mso-text-raise: 2px; mso-line-height-rule: exactly; vertical-align: middle;">
-                  <a href="<%= @uri %>" style="color: #3b73af; text-decoration: none;">
+                  <%= if @uri do %>
+                    <a href="<%= @uri %>" style="color: #3b73af; text-decoration: none;">
+                      <%= @name %>
+                    </a>
+                  <% else %>
                     <%= @name %>
-                  </a>
+                  <% end %>
                 </span>
               </td>
             </tr>
@@ -35,12 +40,19 @@
               </td>
             </tr>
             <tr>
-            <tr>
               <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
-                Domain:
+                <%= if is_list(@domains) and length(@domains) > 1, do: "Domains:", else: "Domain:" %>
               </th>
               <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
-                <%= @domains %>
+                <%= if is_list(@domains) do %>
+                  <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                    <%= for domain <- @domains do %>
+                      <li style="margin: 2px 0;"><%= domain %></li>
+                    <% end %>
+                  </ul>
+                <% else %>
+                  <%= @domains %>
+                <% end %>
               </td>
             </tr>
             <tr>
@@ -51,6 +63,16 @@
                 <%= @user %>
               </td>
             </tr>
+            <%= if @status do %>
+            <tr>
+              <th style="color: #707070; font: normal 14px/20px Arial, sans-serif; text-align: left; vertical-align: top; padding: 2px 0;">
+                Status:
+              </th>
+              <td style="padding: 0px; border-collapse: collapse; font: normal 14px/20px Arial, sans-serif; padding: 2px 0 2px 5px; vertical-align: top;">
+                <%= @status %>
+              </td>
+            </tr>
+            <% end %>
           </tbody>
         </table>
       </td>

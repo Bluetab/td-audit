@@ -156,6 +156,11 @@ defmodule TdAudit.Notifications.Email do
   defp template("structure_tag_link_deleted"), do: :tags
   defp template("structure_tag_link_updated"), do: :tags
   defp template("structure_tag_linked"), do: :tags
+  defp template("score_status_updated"), do: :score_status
+  defp template("quality_control_version_status_updated"), do: :quality_control
+  defp template("quality_control_version_draft_created"), do: :quality_control
+  defp template("quality_control_created"), do: :quality_control
+  defp template("quality_control_version_deleted"), do: :quality_control
   defp template(_), do: :default
 
   defp maybe_default_template([template]), do: template
@@ -164,8 +169,7 @@ defmodule TdAudit.Notifications.Email do
   defp config, do: Application.fetch_env!(:td_audit, __MODULE__)
 
   defp subj(template) do
-    config()
-    |> get_in([:subjects, template])
+    get_in(config(), [:subjects, template])
   end
 
   defp header(template) do

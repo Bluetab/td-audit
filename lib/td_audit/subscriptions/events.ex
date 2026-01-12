@@ -17,7 +17,8 @@ defmodule TdAudit.Subscriptions.Events do
   """
 
   def subscription_events(subscription, max_id) do
-    subscription_events_query(subscription, max_id)
+    subscription
+    |> subscription_events_query(max_id)
     |> Repo.all()
   end
 
@@ -301,6 +302,104 @@ defmodule TdAudit.Subscriptions.Events do
     query
     |> where([e], e.event in ^events)
     |> where([e], fragment("(?->>'source_id')::integer = ?", e.payload, ^resource_id))
+    |> where_content_condition(scope)
+  end
+
+  # filter for score events
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["score_status_updated"] = events,
+           status: status,
+           resource_type: "quality_control",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], e.resource_id == ^resource_id)
+    |> where([e], e.payload["quality_control_id"] == ^resource_id)
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["score_status_updated"] = events,
+           status: status,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], e.resource_id == ^resource_id)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "status"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_version_status_updated"] = events,
+           status: status,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "status"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_version_draft_created"] = events,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_created"] = events,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_version_deleted"] = events,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
     |> where_content_condition(scope)
   end
 

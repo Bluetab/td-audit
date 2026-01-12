@@ -179,5 +179,19 @@ defmodule TdAuditWeb.EventView do
     "/implementations/#{implementation_id}/results/#{rule_result_id}/remediation_plan"
   end
 
+  def path(%{
+        resource_type: "quality_control",
+        payload: %{"quality_control_id" => id, "version" => version}
+      }) do
+    "/qualityControls/#{id}/version/#{version}"
+  end
+
+  def path(%{
+        resource_type: "score",
+        resource_id: id
+      }) do
+    "/scores/#{id}"
+  end
+
   def path(_), do: nil
 end

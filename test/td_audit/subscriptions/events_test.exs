@@ -609,4 +609,225 @@ defmodule TdAudit.Subscriptions.EventsTest do
       assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
   end
+
+  describe "subscription_events/1 for score_status_updated subscription" do
+    test "returns events for resource type quality_control" do
+      scope =
+        build(:scope,
+          events: ["score_status_updated"],
+          resource_type: "quality_control",
+          resource_id: 1,
+          status: ["succeeded"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"status" => "succeeded", "quality_control_id" => 1}
+
+      event =
+        insert(:event,
+          event: "score_status_updated",
+          resource_type: "quality_control",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "returns events for resource type domains" do
+      scope =
+        build(:scope,
+          events: ["score_status_updated"],
+          resource_type: "domains",
+          resource_id: 1,
+          status: ["succeeded"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"status" => "succeeded", "domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "score_status_updated",
+          resource_type: "domains",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+  end
+
+  describe "subscription_events/1 for quality_control_version_status_updated subscription" do
+    test "returns events for resource type domains" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_status_updated"],
+          resource_type: "domains",
+          resource_id: 1,
+          status: ["pusblished"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"status" => "published", "domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_status_updated",
+          resource_type: "domains",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "returns events for resource type quality_control" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_status_updated"],
+          resource_type: "quality_control",
+          resource_id: 1,
+          status: ["succeeded"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"status" => "succeeded", "quality_control_id" => 1}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_status_updated",
+          resource_type: "quality_control",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+  end
+
+  describe "subscription_events/1 for quality_control_version_draft_created subscription" do
+    test "returns events for resource type domains" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_draft_created"],
+          resource_type: "domains",
+          resource_id: 1
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_draft_created",
+          resource_type: "domains",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "returns events for resource type quality_control" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_draft_created"],
+          resource_type: "quality_control",
+          resource_id: 1
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"quality_control_id" => 1}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_draft_created",
+          resource_type: "quality_control",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+  end
+
+  describe "subscription_events/1 for quality_control_created subscription" do
+    test "returns events for resource type domains" do
+      scope =
+        build(:scope,
+          events: ["quality_control_created"],
+          resource_type: "domains",
+          resource_id: 1
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_created",
+          resource_type: "domains",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+  end
+
+  describe "subscription_events/1 for quality_control_version_deleted subscription" do
+    test "returns events for resource type domains" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_deleted"],
+          resource_type: "domains",
+          resource_id: 1
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_deleted",
+          resource_type: "domains",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "returns events for resource type quality_control" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_deleted"],
+          resource_type: "quality_control",
+          resource_id: 1
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{"quality_control_id" => 1}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_deleted",
+          resource_type: "quality_control",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+  end
 end
