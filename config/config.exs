@@ -11,6 +11,9 @@ config :td_audit, :time_zone, System.get_env("TZ", "Etc/UTC")
 # Environment
 config :td_audit, :env, Mix.env()
 
+config :td_cluster, :env, Mix.env()
+config :td_cluster, groups: [:audit]
+
 # General application configuration
 config :td_audit,
   ecto_repos: [TdAudit.Repo]
