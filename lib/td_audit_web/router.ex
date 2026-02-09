@@ -30,5 +30,8 @@ defmodule TdAuditWeb.Router do
     resources("/notifications", NotificationController, only: [:create])
     post("/notifications/:id/read", NotificationController, :read)
     post("/notifications/user/me/search", NotificationController, :index_by_user)
+
+    get("/upload_jobs/", UploadJobController, :index)
+    get("/upload_jobs/:id", UploadJobController, :show)
   end
 end
