@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.1.0] 2026-02-10
+
+### Added
+
+- [TD-7286]
+  - Added to Elixir Cluster
+  - Centralized UploadJobs
+
 ## [8.0.0] 2026-01-12
 
 ### Added
