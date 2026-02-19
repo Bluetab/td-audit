@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- [TD-7854] Allow SMTP configuration without username and password
+
 ## [8.1.0] 2026-02-10
 
 ### Added
