@@ -321,8 +321,9 @@ defmodule TdAudit.Subscriptions do
       |> MapSet.size()
       |> Kernel.>(0)
     end)
-    |> Enum.reduce([], fn {_, %{"data_structure" => %{"id" => ds_id}}}, acc ->
-      [ds_id | acc]
+    |> Enum.reduce([], fn
+      {_, %{"data_structure" => %{"id" => ds_id}}}, acc -> [ds_id | acc]
+      _, acc -> acc
     end)
   end
 end

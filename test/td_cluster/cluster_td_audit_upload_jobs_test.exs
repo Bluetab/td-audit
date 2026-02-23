@@ -14,7 +14,6 @@ defmodule TdCluster.ClusterTdAuditUploadJobsTest do
                  filename: "filename",
                  scope: "implementations"
                })
-
     end
 
     test "with invalid data returns error" do
