@@ -11,6 +11,10 @@
 - [TD-7854] Allow SMTP configuration without username and password
 - [TD-7826] Status report for score events
 
+### Fixed
+
+- [TD-7023] grant_request_group_creation handling 
+
 ## [8.1.0] 2026-02-10
 
 ### Added
