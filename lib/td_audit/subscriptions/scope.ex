@@ -39,8 +39,11 @@ defmodule TdAudit.Subscriptions.Scope do
   ]
 
   @valid_score_statuses [
-    "failed",
-    "succeeded"
+    "no_results",
+    "meets_goal",
+    "under_goal",
+    "under_threshold",
+    "failed"
   ]
 
   @primary_key false

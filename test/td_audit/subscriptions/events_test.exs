@@ -617,12 +617,16 @@ defmodule TdAudit.Subscriptions.EventsTest do
           events: ["score_status_updated"],
           resource_type: "quality_control",
           resource_id: 1,
-          status: ["succeeded"]
+          status: ["no_results"]
         )
 
       subscription = insert(:subscription, scope: scope)
 
-      payload = %{"status" => "succeeded", "quality_control_id" => 1}
+      payload = %{
+        "result" => %{"result_message" => "no_results"},
+        "quality_control_id" => 1,
+        "status" => "succeeded"
+      }
 
       event =
         insert(:event,
@@ -635,18 +639,60 @@ defmodule TdAudit.Subscriptions.EventsTest do
       assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
 
+    test "returns events for resource type domain" do
+      scope =
+        build(:scope,
+          events: ["score_status_updated"],
+          resource_type: "domain",
+          resource_id: 1,
+          status: ["meets_goal"]
+        )
+
+      invalid_scope =
+        build(:scope,
+          events: ["score_status_updated"],
+          resource_type: "domain",
+          resource_id: 2,
+          status: ["meets_goal"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+      invalid_subscription = insert(:subscription, scope: invalid_scope)
+
+      payload = %{
+        "result" => %{"result_message" => "meets_goal"},
+        "domain_ids" => [1, 2, 3],
+        "status" => "succeeded"
+      }
+
+      event =
+        insert(:event,
+          event: "score_status_updated",
+          resource_type: "domain",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+      assert Events.subscription_events(invalid_subscription, 1_000_000) == []
+    end
+
     test "returns events for resource type domains" do
       scope =
         build(:scope,
           events: ["score_status_updated"],
           resource_type: "domains",
           resource_id: 1,
-          status: ["succeeded"]
+          status: ["under_threshold"]
         )
 
       subscription = insert(:subscription, scope: scope)
 
-      payload = %{"status" => "succeeded", "domain_ids" => [1, 2, 3]}
+      payload = %{
+        "result" => %{"result_message" => "under_threshold"},
+        "domain_ids" => [1, 2, 3],
+        "status" => "succeeded"
+      }
 
       event =
         insert(:event,
@@ -658,6 +704,33 @@ defmodule TdAudit.Subscriptions.EventsTest do
 
       assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
+
+    test "does not return event if status is null" do
+      scope =
+        build(:scope,
+          events: ["score_status_updated"],
+          resource_type: "domains",
+          resource_id: 1,
+          status: ["under_threshold"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+
+      payload = %{
+        "result" => nil,
+        "domain_ids" => [1, 2, 3],
+        "status" => "succeeded"
+      }
+
+      insert(:event,
+        event: "score_status_updated",
+        resource_type: "score",
+        resource_id: 1,
+        payload: payload
+      )
+
+      assert Events.subscription_events(subscription, 1_000_000) == []
+    end
   end
 
   describe "subscription_events/1 for quality_control_version_status_updated subscription" do
@@ -667,7 +740,7 @@ defmodule TdAudit.Subscriptions.EventsTest do
           events: ["quality_control_version_status_updated"],
           resource_type: "domains",
           resource_id: 1,
-          status: ["pusblished"]
+          status: ["published"]
         )
 
       subscription = insert(:subscription, scope: scope)
@@ -683,6 +756,39 @@ defmodule TdAudit.Subscriptions.EventsTest do
         )
 
       assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "returns events for resource type domain" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_status_updated"],
+          resource_type: "domain",
+          resource_id: 1,
+          status: ["succeeded"]
+        )
+
+      invalid_scope =
+        build(:scope,
+          events: ["quality_control_version_status_updated"],
+          resource_type: "domain",
+          resource_id: 2,
+          status: ["succeeded"]
+        )
+
+      subscription = insert(:subscription, scope: scope)
+      invalid_subscription = insert(:subscription, scope: invalid_scope)
+      payload = %{"status" => "succeeded", "domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_status_updated",
+          resource_type: "domain",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+      assert Events.subscription_events(invalid_subscription, 1_000_000) == []
     end
 
     test "returns events for resource type quality_control" do
@@ -734,6 +840,38 @@ defmodule TdAudit.Subscriptions.EventsTest do
       assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
 
+    test "returns events for resource type domain" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_draft_created"],
+          resource_type: "domain",
+          resource_id: 1
+        )
+
+      invalid_scope =
+        build(:scope,
+          events: ["quality_control_version_draft_created"],
+          resource_type: "domain",
+          resource_id: 2
+        )
+
+      subscription = insert(:subscription, scope: scope)
+      invalid_subscription = insert(:subscription, scope: invalid_scope)
+
+      payload = %{"domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_draft_created",
+          resource_type: "domain",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+      assert Events.subscription_events(invalid_subscription, 1_000_000) == []
+    end
+
     test "returns events for resource type quality_control" do
       scope =
         build(:scope,
@@ -781,6 +919,38 @@ defmodule TdAudit.Subscriptions.EventsTest do
 
       assert Events.subscription_events(subscription, 1_000_000) == [event]
     end
+
+    test "returns events for resource type domain" do
+      scope =
+        build(:scope,
+          events: ["quality_control_created"],
+          resource_type: "domain",
+          resource_id: 1
+        )
+
+      invalid_scope =
+        build(:scope,
+          events: ["quality_control_created"],
+          resource_type: "domain",
+          resource_id: 2
+        )
+
+      subscription = insert(:subscription, scope: scope)
+      invalid_subscription = insert(:subscription, scope: invalid_scope)
+
+      payload = %{"domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_created",
+          resource_type: "domain",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+      assert Events.subscription_events(invalid_subscription, 1_000_000) == []
+    end
   end
 
   describe "subscription_events/1 for quality_control_version_deleted subscription" do
@@ -805,6 +975,38 @@ defmodule TdAudit.Subscriptions.EventsTest do
         )
 
       assert Events.subscription_events(subscription, 1_000_000) == [event]
+    end
+
+    test "returns events for resource type domain" do
+      scope =
+        build(:scope,
+          events: ["quality_control_version_deleted"],
+          resource_type: "domain",
+          resource_id: 1
+        )
+
+      invalid_scope =
+        build(:scope,
+          events: ["quality_control_version_deleted"],
+          resource_type: "domain",
+          resource_id: 2
+        )
+
+      subscription = insert(:subscription, scope: scope)
+      invalid_subscription = insert(:subscription, scope: invalid_scope)
+
+      payload = %{"domain_ids" => [1, 2, 3]}
+
+      event =
+        insert(:event,
+          event: "quality_control_version_deleted",
+          resource_type: "domain",
+          resource_id: 1,
+          payload: payload
+        )
+
+      assert Events.subscription_events(subscription, 1_000_000) == [event]
+      assert Events.subscription_events(invalid_subscription, 1_000_000) == []
     end
 
     test "returns events for resource type quality_control" do

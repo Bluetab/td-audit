@@ -244,6 +244,92 @@ defmodule TdAudit.Subscriptions.Events do
     |> distinct(true)
   end
 
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["score_status_updated"] = events,
+           status: status,
+           resource_type: "domain",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "result"]))
+    |> where([e], fragment("(? #>>'{domain_ids,0}')::integer = ?", e.payload, ^resource_id))
+    |> where([e], e.payload["result"]["result_message"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["score_status_updated"] = events,
+           status: status,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "result"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], e.payload["result"]["result_message"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_version_status_updated"] = events,
+           status: status,
+           resource_type: "domains",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "status"]))
+    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_version_status_updated"] = events,
+           status: status,
+           resource_type: "domain",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "status"]))
+    |> where([e], fragment("(? #>>'{domain_ids,0}')::integer = ?", e.payload, ^resource_id))
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
+  defp filter_by_scope(
+         query,
+         %{
+           events: ["quality_control_version_status_updated"] = events,
+           status: status,
+           resource_type: "quality_control",
+           resource_id: resource_id
+         } = scope
+       ) do
+    query
+    |> where([e], e.event in ^events)
+    |> where([e], e.resource_id == ^resource_id)
+    |> where([e], e.resource_type == "quality_control")
+    |> where([e], fragment("? \\?& ?", e.payload, ["status"]))
+    |> where([e], e.payload["status"] in ^status)
+    |> where_content_condition(scope)
+  end
+
   # filter for domain-scoped events, excluding subdomains
   defp filter_by_scope(
          query,
@@ -317,89 +403,9 @@ defmodule TdAudit.Subscriptions.Events do
        ) do
     query
     |> where([e], e.event in ^events)
-    |> where([e], e.resource_id == ^resource_id)
+    |> where([e], fragment("? \\?& ?", e.payload, ["result", "quality_control_id"]))
     |> where([e], e.payload["quality_control_id"] == ^resource_id)
-    |> where([e], e.payload["status"] in ^status)
-    |> where_content_condition(scope)
-  end
-
-  defp filter_by_scope(
-         query,
-         %{
-           events: ["score_status_updated"] = events,
-           status: status,
-           resource_type: "domains",
-           resource_id: resource_id
-         } = scope
-       ) do
-    query
-    |> where([e], e.event in ^events)
-    |> where([e], e.resource_id == ^resource_id)
-    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "status"]))
-    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
-    |> where([e], e.payload["status"] in ^status)
-    |> where_content_condition(scope)
-  end
-
-  defp filter_by_scope(
-         query,
-         %{
-           events: ["quality_control_version_status_updated"] = events,
-           status: status,
-           resource_type: "domains",
-           resource_id: resource_id
-         } = scope
-       ) do
-    query
-    |> where([e], e.event in ^events)
-    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids", "status"]))
-    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
-    |> where([e], e.payload["status"] in ^status)
-    |> where_content_condition(scope)
-  end
-
-  defp filter_by_scope(
-         query,
-         %{
-           events: ["quality_control_version_draft_created"] = events,
-           resource_type: "domains",
-           resource_id: resource_id
-         } = scope
-       ) do
-    query
-    |> where([e], e.event in ^events)
-    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
-    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
-    |> where_content_condition(scope)
-  end
-
-  defp filter_by_scope(
-         query,
-         %{
-           events: ["quality_control_created"] = events,
-           resource_type: "domains",
-           resource_id: resource_id
-         } = scope
-       ) do
-    query
-    |> where([e], e.event in ^events)
-    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
-    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
-    |> where_content_condition(scope)
-  end
-
-  defp filter_by_scope(
-         query,
-         %{
-           events: ["quality_control_version_deleted"] = events,
-           resource_type: "domains",
-           resource_id: resource_id
-         } = scope
-       ) do
-    query
-    |> where([e], e.event in ^events)
-    |> where([e], fragment("? \\?& ?", e.payload, ["domain_ids"]))
-    |> where([e], fragment("? @> ?", e.payload["domain_ids"], ^resource_id))
+    |> where([e], e.payload["result"]["result_message"] in ^status)
     |> where_content_condition(scope)
   end
 

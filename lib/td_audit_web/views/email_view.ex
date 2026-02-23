@@ -460,6 +460,8 @@ defmodule TdAuditWeb.EmailView do
   defp translate("deviation"), do: "Deviation"
   defp translate("percentage"), do: "Percentage"
   defp translate("error_count"), do: "Error Count"
+  defp translate("failed"), do: "Failed"
+  defp translate("no_results"), do: "No results"
 
   defp relation_side(%{payload: %{"target_id" => id, "target_type" => "data_structure"}}) do
     case TdCache.StructureCache.get(id) do
