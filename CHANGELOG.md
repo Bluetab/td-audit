@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- [TD-7826] Support for domain resource in quality control and score events
+
 ### Changed
 
 - [TD-7854] Allow SMTP configuration without username and password
+- [TD-7826] Status report for score events
 
 ## [8.1.0] 2026-02-10
 

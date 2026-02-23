@@ -140,8 +140,11 @@ defmodule TdAudit.SubscriptionsTest do
         "resource_type" => "quality_control",
         "resource_id" => 1,
         "status" => [
-          "failed",
-          "succeeded"
+          "no_results",
+          "meets_goal",
+          "under_goal",
+          "under_threshold",
+          "failed"
         ]
       }
     }
@@ -172,8 +175,11 @@ defmodule TdAudit.SubscriptionsTest do
                 [
                   validation: :inclusion,
                   enum: [
-                    "failed",
-                    "succeeded"
+                    "no_results",
+                    "meets_goal",
+                    "under_goal",
+                    "under_threshold",
+                    "failed"
                   ]
                 ]}
            ]
