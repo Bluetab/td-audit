@@ -145,7 +145,7 @@ defmodule TdAuditWeb.SubscriptionController do
          %{scope: %{resource_type: resource_type, resource_name: name, resource_id: id}} =
            subscription
        )
-       when resource_type in ["data_structure", "implementation"] do
+       when resource_type in ["data_structure", "implementation", "quality_control"] do
     Map.put(subscription, :resource, %{id: id, name: name})
   end
 

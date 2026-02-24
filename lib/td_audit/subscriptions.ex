@@ -261,6 +261,24 @@ defmodule TdAudit.Subscriptions do
     |> put_recipients_into_events(events)
   end
 
+  def list_recipient_ids(
+        %Subscription{
+          subscriber: %{type: "role", identifier: role},
+          scope: %{resource_type: "quality_control", resource_id: _quality_control_id}
+        },
+        events
+      ) do
+    Enum.reduce(
+      events,
+      %{},
+      fn %{id: id, payload: payload} = event, acc ->
+        domain_ids = Map.get(payload, "domain_ids", [])
+        recipient_ids = list_recipient_ids_by_domains_role(domain_ids, role)
+        maybe_impacted_user(acc, id, recipient_ids, event)
+      end
+    )
+  end
+
   def list_recipient_ids(_subscription, _events) do
     []
   end
@@ -321,8 +339,9 @@ defmodule TdAudit.Subscriptions do
       |> MapSet.size()
       |> Kernel.>(0)
     end)
-    |> Enum.reduce([], fn {_, %{"data_structure" => %{"id" => ds_id}}}, acc ->
-      [ds_id | acc]
+    |> Enum.reduce([], fn
+      {_, %{"data_structure" => %{"id" => ds_id}}}, acc -> [ds_id | acc]
+      _, acc -> acc
     end)
   end
 end

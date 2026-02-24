@@ -25,6 +25,7 @@ defmodule TdAudit.Redis.Acknowledger do
   def ack({stream, group}, succeeded, failed) do
     # Log failures. Note that Redis will leave unacknowledged entries in the
     # Pending Entry List (PEL), so nothing else needs to be done.
+
     case length(failed) do
       0 ->
         :ok

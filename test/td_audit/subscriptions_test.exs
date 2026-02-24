@@ -140,8 +140,11 @@ defmodule TdAudit.SubscriptionsTest do
         "resource_type" => "quality_control",
         "resource_id" => 1,
         "status" => [
-          "failed",
-          "succeeded"
+          "no_results",
+          "meets_goal",
+          "under_goal",
+          "under_threshold",
+          "failed"
         ]
       }
     }
@@ -172,8 +175,11 @@ defmodule TdAudit.SubscriptionsTest do
                 [
                   validation: :inclusion,
                   enum: [
-                    "failed",
-                    "succeeded"
+                    "no_results",
+                    "meets_goal",
+                    "under_goal",
+                    "under_threshold",
+                    "failed"
                   ]
                 ]}
            ]
@@ -500,6 +506,89 @@ defmodule TdAudit.SubscriptionsTest do
                ^event1_id => [^user_id_1],
                ^event2_id => [^user_id_2]
              } = Subscriptions.list_recipient_ids(subscription, [event1, event2])
+    end
+
+    test "grant_request_group_creation handles requests without data_structure key" do
+      domain_id = System.unique_integer([:positive])
+      role = "role"
+
+      %{id: user_id} = CacheHelpers.put_user()
+      CacheHelpers.put_acl_role_users("domain", domain_id, role, [user_id])
+
+      subscriber = insert(:subscriber, type: "role", identifier: role)
+
+      subscription =
+        insert(:subscription,
+          subscriber: subscriber,
+          scope: %{
+            events: ["grant_request_group_creation"],
+            resource_id: domain_id,
+            resource_type: "domain"
+          }
+        )
+
+      %{id: event_id} =
+        event =
+        insert(:event,
+          event: "grant_request_group_creation",
+          payload: %{
+            "requests" => [
+              %{"grant_id" => 3, "id" => 1}
+            ],
+            "domain_ids" => [[domain_id]]
+          }
+        )
+
+      assert %{^event_id => recipient_ids} =
+               Subscriptions.list_recipient_ids(subscription, [event])
+
+      assert Enum.member?(recipient_ids, user_id)
+    end
+
+    test "grant_request_group_creation handles mixed requests with and without data_structure" do
+      domain_id = System.unique_integer([:positive])
+      structure_id = System.unique_integer([:positive])
+      role = "role"
+
+      %{id: user_in_domain_id} = CacheHelpers.put_user()
+      %{id: user_in_structure_id} = CacheHelpers.put_user()
+
+      CacheHelpers.put_acl_role_users("domain", domain_id, role, [user_in_domain_id])
+      CacheHelpers.put_acl_role_users("structure", structure_id, role, [user_in_structure_id])
+
+      subscriber = insert(:subscriber, type: "role", identifier: role)
+
+      subscription =
+        insert(:subscription,
+          subscriber: subscriber,
+          scope: %{
+            events: ["grant_request_group_creation"],
+            resource_id: domain_id,
+            resource_type: "domain"
+          }
+        )
+
+      %{id: event_id} =
+        event =
+        insert(:event,
+          event: "grant_request_group_creation",
+          payload: %{
+            "requests" => [
+              %{"data_structure" => %{"id" => structure_id}},
+              %{"grant_id" => 3, "id" => 1}
+            ],
+            "domain_ids" => [
+              [domain_id],
+              [domain_id]
+            ]
+          }
+        )
+
+      assert %{^event_id => recipient_ids} =
+               Subscriptions.list_recipient_ids(subscription, [event])
+
+      assert Enum.member?(recipient_ids, user_in_domain_id)
+      assert Enum.member?(recipient_ids, user_in_structure_id)
     end
 
     test "grant_request_group_creation events considers child domains" do

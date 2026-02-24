@@ -1,5 +1,20 @@
 # Changelog
 
+## [8.2.0] 2026-02-24
+
+### Added
+
+- [TD-7826] Support for domain resource in quality control and score events
+
+### Changed
+
+- [TD-7854] Allow SMTP configuration without username and password
+- [TD-7826] Status report for score events
+
+### Fixed
+
+- [TD-7023] grant_request_group_creation handling 
+
 ## [8.1.0] 2026-02-10
 
 ### Added
